@@ -1,0 +1,31 @@
+
+services:
+  # postgres_db:
+  #   image: postgres:16.1-bookworm
+  #   ports:
+  #       - "5433:5432"
+  #   volumes:
+  #       - awards_local_pgdata:/var/lib/postgresql/data
+  #   env_file: .env
+  #   logging:
+  #       driver: json-file
+  #       options:
+  #           max-file: "3"
+  #           max-size: 15m
+        
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    # depends_on:
+    #   - postgres_db
+    volumes:
+      - ./backend:/usr/src/app
+      - ./backend/collectstatic:/usr/src/app/collectstatic
+      - ./backend/log:/usr/src/app/log
+      - ./backend/media:/usr/src/app/media
+      - ./.env:/usr/src/app/.env:ro
+    env_file: .env
+    command: python manage.py runserver 0.0.0.0:8000
