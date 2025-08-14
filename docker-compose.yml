@@ -1,26 +1,28 @@
 
 services:
-  # postgres_db:
-  #   image: postgres:16.1-bookworm
-  #   ports:
-  #       - "5433:5432"
-  #   volumes:
-  #       - awards_local_pgdata:/var/lib/postgresql/data
-  #   env_file: .env
-  #   logging:
-  #       driver: json-file
-  #       options:
-  #           max-file: "3"
-  #           max-size: 15m
-        
+  postgres_db:
+    image: postgres:16.1-bookworm
+    ports:
+        - "5434:5432"
+    volumes:
+        - awards_local_pgdata:/var/lib/postgresql/data
+    env_file: .env
+    logging:
+        driver: json-file
+        options:
+            max-file: "3"
+            max-size: 15m
+    networks:
+          - awards-bridge
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    # depends_on:
-    #   - postgres_db
+    depends_on:
+      - postgres_db
     volumes:
       - ./backend:/usr/src/app
       - ./backend/collectstatic:/usr/src/app/collectstatic
@@ -29,3 +31,12 @@ services:
       - ./.env:/usr/src/app/.env:ro
     env_file: .env
     command: python manage.py runserver 0.0.0.0:8000
+    networks:
+        - awards-bridge
+
+networks:
+    awards-bridge:
+        driver: bridge
+
+volumes:
+    awards_local_pgdata: {}
