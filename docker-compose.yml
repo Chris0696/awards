@@ -1,19 +1,18 @@
-
 services:
   postgres_db:
     image: postgres:16.1-bookworm
     ports:
-        - "5434:5432"
+      - "5434:5432"
     volumes:
-        - awards_local_pgdata:/var/lib/postgresql/data
+      - awards_local_pgdata:/var/lib/postgresql/data
     env_file: .env
     logging:
-        driver: json-file
-        options:
-            max-file: "3"
-            max-size: 15m
+      driver: json-file
+      options:
+        max-file: "3"
+        max-size: 15m
     networks:
-          - awards-bridge
+      - awards-bridge
 
   backend:
     build:
@@ -32,11 +31,27 @@ services:
     env_file: .env
     command: python manage.py runserver 0.0.0.0:8000
     networks:
-        - awards-bridge
+      - awards-bridge
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    env_file:
+      - .env
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
 
 networks:
-    awards-bridge:
-        driver: bridge
+  awards-bridge:
+    driver: bridge
 
 volumes:
-    awards_local_pgdata: {}
+  awards_local_pgdata: {}
