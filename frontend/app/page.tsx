@@ -1,3 +1,4 @@
+import DiscoverProjects from "@/components/DiscoverProjects";
 import Header from "@/components/Header";
 import HomePageHero from "@/components/HomepageHero";
 import HowItWorksSection from "@/components/HowItWorksSection";
@@ -10,6 +11,7 @@ export default function Home() {
       <HomePageHero />
       <SubheroSection />
       <HowItWorksSection />
+      <DiscoverProjects />
     </section>
   );
 }
