@@ -4,7 +4,7 @@ import CurveImg from "@/assets/howitworkscurve.png";
 
 export default function HowItWorksSection() {
   return (
-    <section className="flex justify-center ">
+    <section className="flex justify-center h-[700px] ">
       <div className="w-5/6">
         <h2 className="text-primary font-bold text-4xl">Comment ça marche ?</h2>
         <div className="mt-10 relative">
