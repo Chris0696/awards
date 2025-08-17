@@ -19,8 +19,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${outfit.variable}`}>
-      <body className="font-outfit">
-        <main>{children}</main>
+      <body className="font-outfit ">
+        <main className=" ">{children}</main>
       </body>
     </html>
   );
