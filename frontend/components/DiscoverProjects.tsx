@@ -3,7 +3,7 @@ import ProjectCard from "./ProjectCard";
 
 export default function DiscoverProjects() {
   return (
-    <section className="my-20 bg-gray-50">
+    <section className="my-16 md:my-20 bg-gray-50">
       <div className="w-4/5 md:w-2/5 mx-auto text-center py-12">
         {" "}
         <h4 className="text-lg text-gray-500 font-medium">
@@ -28,7 +28,7 @@ export default function DiscoverProjects() {
         </div>
       </div>
 
-      <div className="flex justify-center pt-24 pb-20">
+      <div className="flex justify-center py-12 md:pt-24  md:pb-20">
         <Link
           href={""}
           className="bg-secondary hover:bg-gray-100 hover:text-secondary text-gray-100 px-8 py-3 rounded-md  cursor-pointer  transition-colors"
