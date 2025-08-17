@@ -1,4 +1,5 @@
 import DiscoverProjects from "@/components/DiscoverProjects";
+import FaqSection from "@/components/FaqSection";
 import Header from "@/components/Header";
 import HomePageHero from "@/components/HomepageHero";
 import HowItWorksSection from "@/components/HowItWorksSection";
@@ -14,6 +15,7 @@ export default function Home() {
       <HowItWorksSection />
       <DiscoverProjects />
       <TestimonialsSection />
+      <FaqSection />
     </section>
   );
 }
