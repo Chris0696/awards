@@ -24,23 +24,23 @@ def send_otp_email(user, otp_type, template_name, subject):
 
     # Génère le lien avec le type d'action
     link = f"{settings.FRONTEND_SITE_URL}/{otp_type}/?otp={user.otp}&uuidb64={user.pk}&refresh_token={refresh_token}"
-    print("link======", link)
+    
     # # Prépare le contexte de l'email
-    # context = {
-    #     "link": link,
-    #     "username": user.username,
-    # }
+    context = {
+        "link": link,
+        "username": user.username,
+    }
 
-    # text_body = render_to_string(f"email/{template_name}.txt", context)
-    # html_body = render_to_string(f"email/{template_name}.html", context)
+    text_body = render_to_string(f"email/{template_name}.txt", context)
+    html_body = render_to_string(f"email/{template_name}.html", context)
 
-    # msg = EmailMultiAlternatives(
-    #     subject=subject,
-    #     from_email=settings.DEFAULT_FROM_EMAIL,
-    #     to=[user.email],
-    #     body=text_body,
-    # )
-    # msg.attach_alternative(html_body, "text/html")
-    # msg.send()
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user.email],
+        body=text_body,
+    )
+    msg.attach_alternative(html_body, "text/html")
+    msg.send()
 
     return link  # Pour vérification en mode debug
