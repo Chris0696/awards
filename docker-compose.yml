@@ -24,7 +24,7 @@ services:
       - postgres_db
     volumes:
       - ./backend:/usr/src/app
-      -  awards_collectstatic:/usr/src/app/collectstatic  
+      - awards_collectstatic:/usr/src/app/collectstatic
       - ./backend/log:/usr/src/app/log
       - ./backend/media:/usr/src/app/media
       - ./.env:/usr/src/app/.env:ro
@@ -44,15 +44,18 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - /app/.next
     env_file:
       - .env
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:8000
+    networks:  # Ajouté le réseau manquant
+      - awards-bridge
 
 networks:
   awards-bridge:
     driver: bridge
 
 volumes:
-    awards_local_pgdata: {}
-    awards_collectstatic:
+  awards_local_pgdata: {}
+  awards_collectstatic: {}
