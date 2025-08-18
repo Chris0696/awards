@@ -1,6 +1,8 @@
 import Link from "next/link";
 import HeroImg from "@/assets/heroImage.png";
 import Image from "next/image";
+import ColoredLink from "./ColoredLink";
+import WhiteOutlineLink from "./WhiteOutlineLink";
 
 export default function HomePageHero() {
   return (
@@ -19,18 +21,9 @@ export default function HomePageHero() {
             inspirants
           </p>
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 text-center">
-            <Link
-              href={""}
-              className="bg-secondary hover:bg-gray-100 hover:text-secondary text-gray-100 px-8 py-3 rounded-md  cursor-pointer  transition-colors"
-            >
-              Soumettre mon projet
-            </Link>
-            <Link
-              href={""}
-              className="border border-gray-100 hover:bg-gray-100 text-gray-100 hover:text-secondary px-8 py-3 rounded-md  cursor-pointer  transition-colors"
-            >
-              Découvrir les projet
-            </Link>
+            <ColoredLink text="Soumettre mon projet" url="" />
+
+            <WhiteOutlineLink text="Découvrir les projets" url="" />
           </div>
         </div>
       </div>
