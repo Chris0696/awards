@@ -4,7 +4,8 @@ services:
     ports:
       - "5434:5432"
     volumes:
-      - awards_local_pgdata:/var/lib/postgresql/data
+        - awards_local_pgdata:/var/lib/postgresql/data
+        
     env_file: .env
     logging:
       driver: json-file
@@ -24,7 +25,7 @@ services:
       - postgres_db
     volumes:
       - ./backend:/usr/src/app
-      - ./backend/collectstatic:/usr/src/app/collectstatic
+      -  awards_collectstatic:/usr/src/app/collectstatic  
       - ./backend/log:/usr/src/app/log
       - ./backend/media:/usr/src/app/media
       - ./.env:/usr/src/app/.env:ro
@@ -54,4 +55,5 @@ networks:
     driver: bridge
 
 volumes:
-  awards_local_pgdata: {}
+    awards_local_pgdata: {}
+    awards_collectstatic:
