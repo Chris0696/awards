@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AccordionItem from "./Accordion";
 import Accordion from "./Accordion";
+import ColoredOutlineLink from "./ColoredOutlineLink";
 
 export default function FaqSection() {
   return (
@@ -33,12 +34,7 @@ export default function FaqSection() {
           />
         </div>
         <div className="flex justify-center mt-16">
-          <Link
-            href={""}
-            className="border border-secondary px-6 py-2.5 rounded-md text-secondary hover:bg-secondary hover:text-gray-100 transition-colors"
-          >
-            Contactez notre équipe
-          </Link>
+          <ColoredOutlineLink text="Contactez notre équipe" url="" />
         </div>
       </div>
     </section>

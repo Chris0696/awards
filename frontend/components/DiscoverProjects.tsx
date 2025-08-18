@@ -1,5 +1,5 @@
-import Link from "next/link";
 import ProjectCard from "./ProjectCard";
+import ColoredLink from "./ColoredLink";
 
 export default function DiscoverProjects() {
   return (
@@ -29,12 +29,7 @@ export default function DiscoverProjects() {
       </div>
 
       <div className="flex justify-center py-12 md:pt-24  md:pb-20">
-        <Link
-          href={""}
-          className="bg-secondary hover:bg-gray-100 hover:text-secondary text-gray-100 px-8 py-3 rounded-md  cursor-pointer  transition-colors"
-        >
-          Voir tous les projets en cours{" "}
-        </Link>
+        <ColoredLink text="Voir tous les projets en cours" url="" />
       </div>
     </section>
   );

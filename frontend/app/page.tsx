@@ -1,7 +1,5 @@
 import DiscoverProjects from "@/components/DiscoverProjects";
 import FaqSection from "@/components/FaqSection";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
 import HomePageHero from "@/components/HomepageHero";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import PartnersSection from "@/components/PartnersSection";
@@ -11,7 +9,6 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 export default function Home() {
   return (
     <section className="">
-      <Header />
       <HomePageHero />
       <SubheroSection />
       <HowItWorksSection />
@@ -19,7 +16,6 @@ export default function Home() {
       <TestimonialsSection />
       <FaqSection />
       <PartnersSection />
-      <Footer />
     </section>
   );
 }
