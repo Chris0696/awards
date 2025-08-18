@@ -20,7 +20,7 @@ export default function ProjectCard() {
       </div>
       <div className="mt-8 mb-8 md:mb-16 space-y-3">
         <h2 className="font-semibold text-primary text-xl">Titre du projet</h2>
-        <p className="text-gray-800">
+        <p className="text-gray-800 ">
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo, earum
           vitae, inventore saepe temporibus quod exercitationem quibusdam ipsa
           accusantium aliquam dolorem dolorum tempore aspernatur sint

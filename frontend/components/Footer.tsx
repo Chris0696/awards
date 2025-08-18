@@ -6,6 +6,7 @@ import LinkedinIcon from "@/assets/linkedin.svg";
 import TwitterIcon from "@/assets/twitter.svg";
 import WhatsappIcon from "@/assets/whatsapp.svg";
 import ArrowRight from "@/assets/arrowRight.svg";
+import WhiteOutlineLink from "./WhiteOutlineLink";
 
 export default function Footer() {
   return (
@@ -20,12 +21,8 @@ export default function Footer() {
             </span>{" "}
             Ne laissez pas vos idées dormir dans un cannet.
           </p>
-          <Link
-            href={""}
-            className="border border-gray-50 px-6 py-3 rounded-md hover:bg-gray-50 hover:text-secondary transition-colors"
-          >
-            Soumettre mon projet maintenant
-          </Link>
+
+          <WhiteOutlineLink text="Soumettre mon projet maintenant" url="" />
         </div>
       </div>
       <div className="flex flex-col md:flex-row md:justify-around items-center py-16  border-t border-b border-gray-50/35 md:px-56">
@@ -103,7 +100,7 @@ export default function Footer() {
             placeholder="Entrez votre adresse email"
             className="bg-white text-primary border-none outline-none py-3 px-2 rounded-md md:w-72"
           />
-          <button className="flex items-center bg-secondary rounded-md px-5 py-3">
+          <button className="flex items-center bg-secondary rounded-md px-5 py-3 hover:bg-white hover:text-secondary transition-colors">
             <span>Je m'abonne</span> <ChevronRight />
           </button>
         </form>

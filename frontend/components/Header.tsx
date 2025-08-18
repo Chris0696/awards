@@ -1,8 +1,11 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import Button from "./Button";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
+  const pathname = usePathname();
   return (
     <header className="bg-primary py-5 px-10">
       <nav className="flex justify-between">
@@ -17,13 +20,17 @@ export default function Header() {
         <div className=" hidden md:flex space-x-6 items-center text-white  ">
           <Link
             href={"/"}
-            className="rounded-md hover:bg-white/10 transition-colors px-3 py-2"
+            className={`${
+              pathname === "/" ? "bg-white/10" : ""
+            } rounded-md hover:bg-white/10 transition-colors px-3 py-2`}
           >
             Accueil
           </Link>
           <Link
-            href={"#"}
-            className="rounded-md hover:bg-white/10 transition-colors px-3 py-2"
+            href={"/projects"}
+            className={`${
+              pathname === "/projects" ? "bg-white/10" : ""
+            } rounded-md hover:bg-white/10 transition-colors px-3 py-2`}
           >
             Découvrir les projets
           </Link>
