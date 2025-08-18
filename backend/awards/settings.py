@@ -69,6 +69,8 @@ INSTALLED_APPS = [
     # 'core',
     'userauths',
     'api',
+    'projectowner',
+    'project',
     
     # Third Party Apps
     'rest_framework',
