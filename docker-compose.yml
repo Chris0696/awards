@@ -4,6 +4,7 @@ services:
     ports:
       - "5434:5432"
     volumes:
+      - awards_local_pgdata:/var/lib/postgresql/data
         - awards_local_pgdata:/var/lib/postgresql/data
         
     env_file: .env
