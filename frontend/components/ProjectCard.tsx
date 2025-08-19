@@ -20,7 +20,7 @@ export default function ProjectCard() {
       </div>
       <div className="mt-8 mb-8 md:mb-16 space-y-3">
         <h2 className="font-semibold text-primary text-xl">Titre du projet</h2>
-        <p className="text-gray-800">
+        <p className="text-gray-800 ">
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo, earum
           vitae, inventore saepe temporibus quod exercitationem quibusdam ipsa
           accusantium aliquam dolorem dolorum tempore aspernatur sint
@@ -38,7 +38,10 @@ export default function ProjectCard() {
         <button className="px-8 py-3 border border-secondary rounded-md cursor-pointer text-secondary hover:bg-secondary hover:text-gray-100 transition-colors">
           Je vote pour ce projet
         </button>
-        <Link href={""} className="flex items-center space-x-3 text-lg">
+        <Link
+          href={"/projects/1"}
+          className="flex items-center space-x-3 text-lg"
+        >
           <span className="underline">En savoir plus</span>
           <Image src={ArrowRightIcon} alt="Arrow Right" />
         </Link>
