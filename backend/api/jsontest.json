@@ -1,0 +1,20 @@
+{
+    "email": "chrisoswolf@gmail.com",
+    "username": "chrisoswolf",
+    "password": "Chris@@//2025",
+    "password2": "Chris@@//2025"
+}
+
+{
+  "category_id": 1,
+  "commercial_id": 2,
+  "project_title": "Projet Awards",
+  "local_area_impact": "Cocotomey",
+  "main_objective": "Permettre de soumettre son projet",
+  "solution": "FAciliter la vie",
+  "description": "Cela vise à faire des votes facilement",
+  "estimated_budget": "50000",
+  "owner_project_status": "Publié",
+  "featured": true,
+  "admin_comment": "good"
+}

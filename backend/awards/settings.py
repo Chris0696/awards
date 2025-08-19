@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'api',
     'projectowner',
     'project',
+    'commercial',
     
     # Third Party Apps
     'rest_framework',

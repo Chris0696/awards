@@ -4,12 +4,11 @@ from userauths.utils import send_otp_email
 from .models import User
 from userauths import serializers as api_serializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import generics, status
-
 from django.contrib.auth.hashers import check_password
 from rest_framework.response import Response
-
+from .serializers import AdminRegisterSerializer
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -20,6 +19,12 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     serializer_class = api_serializer.RegisterSerializer
+    
+
+class AdminRegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    serializer_class = AdminRegisterSerializer
     
 
 class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
