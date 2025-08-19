@@ -38,7 +38,10 @@ export default function ProjectCard() {
         <button className="px-8 py-3 border border-secondary rounded-md cursor-pointer text-secondary hover:bg-secondary hover:text-gray-100 transition-colors">
           Je vote pour ce projet
         </button>
-        <Link href={""} className="flex items-center space-x-3 text-lg">
+        <Link
+          href={"/projects/1"}
+          className="flex items-center space-x-3 text-lg"
+        >
           <span className="underline">En savoir plus</span>
           <Image src={ArrowRightIcon} alt="Arrow Right" />
         </Link>
