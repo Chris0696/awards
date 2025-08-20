@@ -20,4 +20,10 @@ urlpatterns = [
     path('user/commercials/', ProjectViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
     path('user/commercials/<int:pk>/', ProjectViews.CommercialDetailView.as_view(), name='commercial_detail'),
     
+    path('vote-prices/', ProjectViews.VotePriceListCreateView.as_view(), name='vote_price_list_create'),
+    path('vote-prices/<int:pk>/', ProjectViews.VotePriceDetailView.as_view(), name='vote_price_detail'),
+    path('vote-payments/', ProjectViews.VotePaymentListView.as_view(), name='vote_payment_list'),
+
+
+
 ]

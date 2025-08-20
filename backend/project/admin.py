@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project, Vote, Category, Commercial
+from .models import Project, Vote, Category, Commercial, VotePayment, VotePrice
 
 
 class ProjectAdmin(admin.ModelAdmin):
@@ -21,7 +21,19 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class VoteAdmin(admin.ModelAdmin):
-    list_display = ('user', 'project', 'vote', 'active', 'created_at')
+    list_display = ('user', 'project', 'vote_count', 'vote', 'active', 'created_at')
+
+
+class VotePriceAdmin(admin.ModelAdmin):
+    list_display = ('vote_count', 'price', 'active', 'created_at')
+    search_fields = ('vote_count',)
+    list_filter = ('vote_count',)
+    
+
+class VotePaymentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'amount', 'vote', 'status', 'payment_method', 'transaction_id', 'paid_at', )
+    search_fields = ('user',)
+    list_filter = ('user',)
 
 
 # class NotificationAdmin(admin.ModelAdmin):
@@ -40,4 +52,6 @@ admin.site.register(Vote, VoteAdmin)
 
 admin.site.register(Commercial, CommercialAdmin)
 
-# admin.site.register(WishList, WishListAdmin)
+admin.site.register(VotePrice, VotePriceAdmin)
+
+admin.site.register(VotePayment, VotePaymentAdmin)

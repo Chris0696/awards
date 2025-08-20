@@ -22,7 +22,6 @@ OWNER_STATUS = (
 )
 
 PLATFORM_STATUS = (
-    ("vote", _("Vote")),
     ("brouillon", _("Brouillon")),
     ("desactive", _("Désactivé")),
     ("rejete", _("Rejeté")),
@@ -124,7 +123,7 @@ class Project(models.Model):
             self.slug = slugify(f"{self.project_title}-{self.project_id}")
         
         # Mettre à jour validated_at si le statut change vers validé
-        if self.platform_status == 'valide' and not self.validated_at:
+        if self.platform_status == 'publie' and not self.validated_at:
             self.validated_at = timezone.now()
             
         super().save(*args, **kwargs)
@@ -195,9 +194,11 @@ class Commercial(models.Model):
 class Vote(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Projet"))
-    vote = models.IntegerField(choices=VOTE_CHOICES, verbose_name=_("Note"))
+    vote = models.IntegerField(choices=VOTE_CHOICES, verbose_name=_("Nombre de vote"))
+    country_code = models.CharField(max_length=5, blank=True, null=True, verbose_name=_("Code pays")) 
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
     active = models.BooleanField(default=False)  # Activé après paiement
-    vote_count = models.IntegerField(default=1, verbose_name=_("Nombre de points"))  # Nouveau champ
+    vote_count = models.IntegerField(default=1, verbose_name=_("Nombre de points"))  # Nombre de votes achetés
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -205,10 +206,17 @@ class Vote(models.Model):
         ordering = ['-created_at']
         
     def __str__(self):
-        return f"Vote de {self.user} pour {self.project.project_title} ({self.vote_count} points)"
+        return f"Vote de {self.user or self.phone} pour {self.project.project_title} ({self.vote_count} votes, note: {self.vote})"
+
+    def clean(self):
+        import re
+        if self.phone and not re.match(r'^\d{7,15}$', self.phone):
+            raise models.ValidationError({"phone": _("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")})
+        if self.country_code and not re.match(r'^\+\d{1,3}$', self.country_code):
+            raise models.ValidationError({"country_code": _("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33).")})
 
     def profile(self):
-        return Profile.objects.get(user=self.user)
+        return Profile.objects.get(user=self.user) if self.user else None
     
 
 class VotePrice(models.Model):
