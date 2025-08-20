@@ -3,12 +3,12 @@ import AccordionItem from "./Accordion";
 import Accordion from "./Accordion";
 import ColoredOutlineLink from "./ColoredOutlineLink";
 
-export default function FaqSection() {
+export default function FaqSection({ title }: { title: string }) {
   return (
     <section className="py-16 bg-gray-100">
       <div className="md:w-2/5 mx-auto">
         <div className="text-center space-y-4">
-          <h2 className="font-bold text-primary text-4xl">Faq</h2>
+          <h2 className="font-bold text-primary text-4xl">{title} </h2>
           <p className="text-gray-600 text-lg">Vos questions, nos réponses</p>
         </div>
         <div className="max-w-2xl mx-auto mt-10 space-y-4 px-4">
