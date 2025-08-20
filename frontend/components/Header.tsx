@@ -43,8 +43,10 @@ export default function Header() {
             Soumettre un projet
           </Link>
           <Link
-            href={"#"}
-            className="rounded-md hover:bg-white/10 transition-colors px-3 py-2"
+            href={"/how-it-works"}
+            className={`${
+              pathname === "/how-it-works" ? "bg-white/10" : ""
+            } rounded-md hover:bg-white/10 transition-colors px-3 py-2`}
           >
             Comment ça marche
           </Link>
