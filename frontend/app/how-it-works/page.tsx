@@ -168,6 +168,7 @@ export default function page() {
         </div>
       </div>
       <FaqSection title="Questions fréquentes" />
+      {/* A Comment to see */}
     </section>
   );
 }
