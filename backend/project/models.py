@@ -93,6 +93,10 @@ class Project(models.Model):
                                  verbose_name=_("Description"))
     estimated_budget = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, 
                                          verbose_name=_("Budget estimé"))
+    target_audience = models.TextField(max_length=500, null=True, blank=True, 
+                                 verbose_name=_("Public cible"))
+    progress_report = models.TextField(max_length=500, null=True, blank=True, 
+                                 verbose_name=_("Etat d'avancement"))
     
     # Status et paramètres
     platform_status = models.CharField(choices=PLATFORM_STATUS, default="brouillon", max_length=100)

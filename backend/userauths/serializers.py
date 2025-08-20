@@ -5,6 +5,7 @@ from rest_framework import serializers
 from .models import Profile, User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.utils.translation import gettext_lazy as _
+import re
 
 
 USER_TYPES = (
@@ -40,20 +41,32 @@ class RegisterSerializer(serializers.ModelSerializer):
         validators=[validate_password],
         style={'input_type': 'password'}
     )
-    password2 = serializers.CharField(
-        write_only=True,
-        required=True,
-        style={'input_type': 'password'}
-    )
-    username = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    full_name = serializers.CharField(max_length=100, required=True)
+    phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    country_code = serializers.CharField(max_length=5, required=False, allow_blank=True)
+    profession = serializers.CharField(required=False, allow_blank=True)
+    age = serializers.IntegerField(required=False, allow_null=True)
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'password2')
+        fields = ('full_name', 'email', 'country_code', 'phone', 'profession', 'password', 'age')
 
     def validate(self, attrs):
-        if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": _("Les mots de passe ne correspondent pas.")})
+        # Valider le code pays
+        country_code = attrs.get('country_code')
+        if country_code and not re.match(r'^\+\d{1,3}$', country_code):
+            raise serializers.ValidationError({"country_code": _("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33).")})
+
+        # Valider le numéro de téléphone
+        phone = attrs.get('phone')
+        if phone and not re.match(r'^\d{7,15}$', phone):
+            raise serializers.ValidationError({"phone": _("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")})
+
+        # Valider l'âge
+        age = attrs.get('age')
+        if age and (age < 18 or age > 120):
+            raise serializers.ValidationError({"age": _("L'âge doit être compris entre 18 et 120 ans.")})
+
         return attrs
 
     def validate_email(self, value):
@@ -61,29 +74,95 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_("Cet email est déjà utilisé."))
         return value
 
-    def validate_username(self, value):
-        if value and User.objects.filter(username=value).exists():
-            raise serializers.ValidationError(_("Ce nom d'utilisateur existe déjà, veuillez en choisir un autre."))
-        return value
-
     def create(self, validated_data):
-        validated_data.pop('password2')
+        # Extraire les champs pour le modèle Owner
+        phone = validated_data.pop('phone', None)
+        country_code = validated_data.pop('country_code', None)
+        profession = validated_data.pop('profession', None)
+        age = validated_data.pop('age', None)
         
-        # Définir automatiquement user_type comme 'owner'
+        # Générer un username basé sur l'email si nécessaire
+        email = validated_data['email']
+        base_username = email.split('@')[0]
+        username = base_username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}{counter}"
+            counter += 1
+
+        # Créer l'utilisateur avec user_type='owner'
         user = User.objects.create_user(
             email=validated_data['email'],
-            username=validated_data.get('username', ''),
+            username=username,
+            full_name=validated_data['full_name'],
             password=validated_data['password'],
-            user_type='owner'  # Automatiquement défini comme auteur de projet
+            user_type='owner'
         )
-        
-        # Créer automatiquement le profil Owner
+
+        # Créer le profil Owner
         Owner.objects.create(
             user=user,
-            full_name=user.username or user.email.split('@')[0]
+            full_name=user.full_name,
+            phone=phone,
+            country_code=country_code,
+            profession=profession,
+            age=age
         )
-        
+
         return user
+
+# class RegisterSerializer(serializers.ModelSerializer):
+#     password = serializers.CharField(
+#         write_only=True,
+#         required=True,
+#         min_length=8,
+#         validators=[validate_password],
+#         style={'input_type': 'password'}
+#     )
+#     password2 = serializers.CharField(
+#         write_only=True,
+#         required=True,
+#         style={'input_type': 'password'}
+#     )
+#     username = serializers.CharField(required=False, allow_blank=True, max_length=100)
+
+#     class Meta:
+#         model = User
+#         fields = ('username', 'email', 'password', 'password2')
+
+#     def validate(self, attrs):
+#         if attrs['password'] != attrs['password2']:
+#             raise serializers.ValidationError({"password": _("Les mots de passe ne correspondent pas.")})
+#         return attrs
+
+#     def validate_email(self, value):
+#         if User.objects.filter(email=value).exists():
+#             raise serializers.ValidationError(_("Cet email est déjà utilisé."))
+#         return value
+
+#     def validate_username(self, value):
+#         if value and User.objects.filter(username=value).exists():
+#             raise serializers.ValidationError(_("Ce nom d'utilisateur existe déjà, veuillez en choisir un autre."))
+#         return value
+
+#     def create(self, validated_data):
+#         validated_data.pop('password2')
+        
+#         # Définir automatiquement user_type comme 'owner'
+#         user = User.objects.create_user(
+#             email=validated_data['email'],
+#             username=validated_data.get('username', ''),
+#             password=validated_data['password'],
+#             user_type='owner'  # Automatiquement défini comme auteur de projet
+#         )
+        
+#         # Créer automatiquement le profil Owner
+#         Owner.objects.create(
+#             user=user,
+#             full_name=user.username or user.email.split('@')[0]
+#         )
+        
+#         return user
     
 
 class AdminRegisterSerializer(serializers.ModelSerializer):

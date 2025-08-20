@@ -31,7 +31,14 @@ class User(AbstractUser):
             email_username = self.email.split("@")[0]
             self.full_name = email_username
         if not self.username:
-            self.username = self.email.split("@")[0]
+            # Générer un username unique basé sur l'email
+            base_username = self.email.split("@")[0]
+            username = base_username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+            self.username = username
         super(User, self).save(*args, **kwargs)
 
 
@@ -48,7 +55,7 @@ class Profile(models.Model):
         
     def save(self, *args, **kwargs):
         if not self.full_name:
-            self.full_name = self.user.username
+            self.full_name = self.user.full_name
         super(Profile, self).save(*args, **kwargs)
 
 
