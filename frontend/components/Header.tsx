@@ -1,11 +1,13 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import Button from "./Button";
+
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 export default function Header() {
   const pathname = usePathname();
+  const [showModal, setShowModal] = useState(false);
   return (
     <header className="bg-primary py-5 px-10">
       <nav className="flex justify-between">
@@ -51,7 +53,7 @@ export default function Header() {
             Comment ça marche
           </Link>
         </div>
-        <Button variant="filled">Se connecter</Button>
+        <button onClick={() => setShowModal(true)}>Se connecter</button>
       </nav>
     </header>
   );
