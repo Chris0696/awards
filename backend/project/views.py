@@ -3,9 +3,9 @@ from django.shortcuts import render
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-
-from .models import Project, Vote, VotePayment
-from .serializers import ProjectSerializer, VoteSerializer, VotePaymentSerializer
+from django.utils.translation import gettext_lazy as _
+from .models import Commercial, Project, Vote, VotePayment
+from .serializers import CommercialSerializer, ProjectSerializer, VoteSerializer, VotePaymentSerializer
 
 
 class ProjectCreateView(generics.CreateAPIView):
@@ -43,3 +43,15 @@ class VoteCreateView(generics.CreateAPIView):
             'payment': payment_serializer.data,
             'message': _("Vote créé, en attente de paiement.")
         }, status=status.HTTP_201_CREATED)
+        
+
+class CommercialListCreateView(generics.ListCreateAPIView):
+    queryset = Commercial.objects.all()
+    serializer_class = CommercialSerializer
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+
+
+class CommercialDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Commercial.objects.all()
+    serializer_class = CommercialSerializer
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]

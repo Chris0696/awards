@@ -66,6 +66,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         age = attrs.get('age')
         if age and (age < 18 or age > 120):
             raise serializers.ValidationError({"age": _("L'âge doit être compris entre 18 et 120 ans.")})
+        
+        # Valider le paramètre d'affiliation
+        affiliate = attrs.get('affiliate')
+        if affiliate:
+            if not Commercial.objects.filter(affiliate_link__contains=affiliate).exists():
+                raise serializers.ValidationError({"affiliate": _("Lien d'affiliation invalide.")})
 
         return attrs
 
@@ -80,6 +86,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         country_code = validated_data.pop('country_code', None)
         profession = validated_data.pop('profession', None)
         age = validated_data.pop('age', None)
+        affiliate = validated_data.pop('affiliate', None)
         
         # Générer un username basé sur l'email si nécessaire
         email = validated_data['email']
@@ -98,6 +105,14 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             user_type='owner'
         )
+        
+        # Trouver le commercial associé au lien d'affiliation
+        commercial = None
+        if affiliate:
+            try:
+                commercial = Commercial.objects.get(affiliate_link__contains=affiliate)
+            except Commercial.DoesNotExist:
+                pass  # Si le lien est invalide, on ignore (déjà validé)
 
         # Créer le profil Owner
         Owner.objects.create(
@@ -106,7 +121,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             phone=phone,
             country_code=country_code,
             profession=profession,
-            age=age
+            age=age,
+            commercial=commercial
         )
 
         return user
@@ -173,22 +189,15 @@ class AdminRegisterSerializer(serializers.ModelSerializer):
         validators=[validate_password],
         style={'input_type': 'password'}
     )
-    password2 = serializers.CharField(
-        write_only=True,
-        required=True,
-        style={'input_type': 'password'}
-    )
+    
     username = serializers.CharField(required=False, allow_blank=True, max_length=100)
     user_type = serializers.ChoiceField(choices=[('admin', 'Administrateur'), ('commercial', 'Commercial')])
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'password2', 'user_type')
+        fields = ('username', 'email', 'password', 'user_type')
 
     def validate(self, attrs):
-        if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": _("Les mots de passe ne correspondent pas.")})
-        
         # Autoriser les superusers ou les utilisateurs avec user_type='admin'
         request = self.context.get('request')
         if not request.user.is_authenticated or (request.user.user_type != 'admin' and not request.user.is_superuser):
@@ -207,7 +216,6 @@ class AdminRegisterSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        validated_data.pop('password2')
         user_type = validated_data.pop('user_type')
         
         user = User.objects.create_user(

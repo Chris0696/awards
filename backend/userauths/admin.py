@@ -8,10 +8,10 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 class CustomUserAdmin(UserAdmin):
-    list_display = ('full_name', 'username', 'email')
+    list_display = ('username', 'user_type', 'email', 'is_active')
     ordering = ('date_joined',)
     filter_horizontal = ()
-    list_filter = ()
+    list_filter = ('username', 'user_type',)
     fieldsets = ()
 
 

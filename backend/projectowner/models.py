@@ -1,5 +1,5 @@
 from django.db import models
-from project.models import Vote
+from project.models import Commercial, Vote
 from userauths.models import User
 from django.utils.translation import gettext_lazy as _
 import re
@@ -10,9 +10,10 @@ class Owner(models.Model):
     image = models.FileField(upload_to="owner-files", blank=True, null=True, default="default.jpg")
     full_name = models.CharField(max_length=100, verbose_name=_("Nom complet"))
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
-    country_code = models.CharField(max_length=5, blank=True, null=True, verbose_name=_("Code pays"))  # Ex. +33
+    country_code = models.CharField(max_length=5, blank=True, null=True, verbose_name=_("Code pays"))
     profession = models.TextField(null=True, blank=True, verbose_name=_("Profession"))
-    age = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Âge"))  # Nouveau champ
+    age = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Âge"))
+    commercial = models.ForeignKey(Commercial, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Commercial affilié"))
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

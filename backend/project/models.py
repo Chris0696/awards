@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
+
 from django.utils import timezone
 from userauths.models import Profile, User
 import uuid
@@ -24,7 +26,6 @@ PLATFORM_STATUS = (
     ("brouillon", _("Brouillon")),
     ("desactive", _("Désactivé")),
     ("rejete", _("Rejeté")),
-    ("valide", _("Validé")),
     ("publie", _("Publié")),
 )
 
@@ -99,8 +100,8 @@ class Project(models.Model):
                                  verbose_name=_("Etat d'avancement"))
     
     # Status et paramètres
-    platform_status = models.CharField(choices=PLATFORM_STATUS, default="brouillon", max_length=100)
-    owner_project_status = models.CharField(choices=OWNER_STATUS, default="brouillon", max_length=100, verbose_name=_("Statut de l'auteur"))
+    platform_status = models.CharField(choices=PLATFORM_STATUS, default="brouillon", max_length=100, verbose_name=_("L'admin défini sur :"))
+    owner_project_status = models.CharField(choices=OWNER_STATUS, default="brouillon", max_length=100, verbose_name=_("L'auteur défini sur :"))
     featured = models.BooleanField(default=False, verbose_name=_("Projet en vedette"))
     
     # Identifiants et dates
@@ -143,28 +144,32 @@ class Project(models.Model):
 
 class Commercial(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=20, blank=True, null=True)
+    full_name = models.CharField(max_length=100, verbose_name=_("Nom et prénom"))
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
     commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=10.00, verbose_name=_("Taux de commission (%)"))
-    affiliate_code = models.CharField(max_length=20, unique=True, blank=True)
-    is_active = models.BooleanField(default=True)
+    affiliate_link = models.CharField(max_length=200, unique=True, blank=True, verbose_name=_("Lien d'affiliation"))
+    is_active = models.BooleanField(default=True, verbose_name=_("Est actif"))
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"Commercial: {self.full_name}"
     
     def save(self, *args, **kwargs):
-        if not self.affiliate_code:
-            self.affiliate_code = f"COM_{uuid.uuid4().hex[:8].upper()}"
+        if not self.affiliate_link:
+            # Générer un identifiant unique pour le lien
+            affiliate_id = f"COM_{uuid.uuid4().hex[:8].upper()}"
+            # Construire le lien d'affiliation avec l'URL de base du site
+            base_url = getattr(settings, 'BASE_URL', settings.BASE_URL)
+            self.affiliate_link = f"{base_url}/api/v1/user/register/?affiliate={affiliate_id}"
         super().save(*args, **kwargs)
     
     def total_projects_brought(self):
         """Nombre total de projets amenés par ce commercial"""
         return Project.objects.filter(commercial=self).count()
     
-    def total_validated_projects(self):
+    def total_published_projects(self):
         """Projets validés amenés par ce commercial"""
-        return Project.objects.filter(commercial=self, platform_status='valide').count()
+        return Project.objects.filter(commercial=self, platform_status='publie').count()
     
     def total_rejected_projects(self):
         """Projets rejetés amenés par ce commercial"""

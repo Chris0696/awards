@@ -17,4 +17,7 @@ urlpatterns = [
     path('project/create/', ProjectViews.ProjectCreateView.as_view(), name='project_create'),
     path('vote/create/', ProjectViews.VoteCreateView.as_view(), name='vote_create'),
     
+    path('user/commercials/', ProjectViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
+    path('user/commercials/<int:pk>/', ProjectViews.CommercialDetailView.as_view(), name='commercial_detail'),
+    
 ]
