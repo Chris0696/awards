@@ -14,7 +14,7 @@ export default function Home() {
       <HowItWorksSection />
       <DiscoverProjects />
       <TestimonialsSection />
-      <FaqSection />
+      <FaqSection title="Faq" />
       <PartnersSection />
     </section>
   );
