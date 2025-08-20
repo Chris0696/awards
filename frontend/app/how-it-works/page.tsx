@@ -25,17 +25,10 @@ export default function page() {
                   <span className="block bg-orange-500 w-4 h-4 rounded-full"></span>
                 </div>
               </div>
-<<<<<<< HEAD
               <p className="pt-3 text-center">Soumission </p>
             </div>
 
             <div className="hidden md:flex flex-col items-center">
-=======
-              <p className="pt-3 text-center">Soumettre votre projet</p>
-            </div>
-
-            <div className="flex flex-col items-center">
->>>>>>> 9655832 (HowItWorks page set up but not responsive yet)
               <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center z-10">
                 <div className="w-1/2 h-1/2 rounded-full border border-orange-500 flex items-center justify-center">
                   <span className="block bg-orange-500 w-4 h-4 rounded-full"></span>
@@ -64,7 +57,6 @@ export default function page() {
           </div>
         </div>
 
-<<<<<<< HEAD
         <div className="mt-48 space-y-12 px-10 md:px-20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-items-center">
             <div>
@@ -75,18 +67,6 @@ export default function page() {
                 1. Soumettez votre projet
               </h3>
               <p className="md:w-96">
-=======
-        <div className="mt-48 space-y-12">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Image src={Hiw1Img} alt="Étape 1" />
-            </div>
-            <div>
-              <h3 className="text-[#134F9D] font-bold text-xl mb-5">
-                1. Soumettez votre projet
-              </h3>
-              <p className="w-96">
->>>>>>> 9655832 (HowItWorks page set up but not responsive yet)
                 Vous avez un projet qui mérite d’être soutenu ? Dites-nous tout
                 ! Sur Project Awards, vous pouvez partager votre idée même si
                 elle n’est pas encore parfaitement rédigée. Notre équipe
@@ -96,11 +76,7 @@ export default function page() {
               <h4 className="mt-5 font-medium text-lg">
                 Ce que vous devez faire :
               </h4>
-<<<<<<< HEAD
               <ul className="list-disc pl-8 md:w-96">
-=======
-              <ul className="list-disc pl-8 w-96">
->>>>>>> 9655832 (HowItWorks page set up but not responsive yet)
                 <li>
                   Remplir le formulaire de soumission (titre, description,
                   objectifs, impact...)
@@ -110,13 +86,8 @@ export default function page() {
               </ul>
             </div>
           </div>
-<<<<<<< HEAD
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-items-center">
             <div className="md:w-[420px] ">
-=======
-          <div className="grid grid-cols-2 gap-4">
-            <div className="w-[420px]">
->>>>>>> 9655832 (HowItWorks page set up but not responsive yet)
               <h3 className="text-[#134F9D] font-bold text-xl mb-5">
                 2. Mise en ligne
               </h3>
@@ -136,11 +107,7 @@ export default function page() {
               <Image src={Hiw2Img} alt="Étape 2" />
             </div>
           </div>
-<<<<<<< HEAD
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-items-center">
-=======
-          <div className="grid grid-cols-2 gap-4 pt-32">
->>>>>>> 9655832 (HowItWorks page set up but not responsive yet)
             <div>
               <Image src={Hiw3Img} alt="Étape 3" />
             </div>
@@ -148,11 +115,7 @@ export default function page() {
               <h3 className="text-[#134F9D] font-bold text-xl mb-5">
                 3. Votes
               </h3>
-<<<<<<< HEAD
               <div className="space-y-5  md:w-[420px] ">
-=======
-              <div className="space-y-5 w-[420px] ">
->>>>>>> 9655832 (HowItWorks page set up but not responsive yet)
                 <p>
                   Une fois en ligne, votre projet entre en compétition avec
                   d’autres idées. Ce sont les utilisateurs qui votent pour leurs
@@ -179,21 +142,12 @@ export default function page() {
               </div>
             </div>
           </div>
-<<<<<<< HEAD
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-items-center">
             <div className="">
               <h3 className="text-[#134F9D] font-bold text-xl mb-5">
                 4. Financement
               </h3>
               <div className="space-y-5 md:w-96">
-=======
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-[#134F9D] font-bold text-xl mb-5">
-                4. Financement
-              </h3>
-              <div className="space-y-5 w-96">
->>>>>>> 9655832 (HowItWorks page set up but not responsive yet)
                 <p>
                   {" "}
                   À la fin d’une période de vote, les projets qui ont récolté le
@@ -213,11 +167,7 @@ export default function page() {
           </div>
         </div>
       </div>
-<<<<<<< HEAD
       <FaqSection title="Questions fréquentes" />
-=======
-      <FaqSection />
->>>>>>> 9655832 (HowItWorks page set up but not responsive yet)
     </section>
   );
 }
