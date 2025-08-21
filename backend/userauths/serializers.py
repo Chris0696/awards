@@ -125,59 +125,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return user
 
-# class RegisterSerializer(serializers.ModelSerializer):
-#     password = serializers.CharField(
-#         write_only=True,
-#         required=True,
-#         min_length=8,
-#         validators=[validate_password],
-#         style={'input_type': 'password'}
-#     )
-#     password2 = serializers.CharField(
-#         write_only=True,
-#         required=True,
-#         style={'input_type': 'password'}
-#     )
-#     username = serializers.CharField(required=False, allow_blank=True, max_length=100)
-
-#     class Meta:
-#         model = User
-#         fields = ('username', 'email', 'password', 'password2')
-
-#     def validate(self, attrs):
-#         if attrs['password'] != attrs['password2']:
-#             raise serializers.ValidationError({"password": _("Les mots de passe ne correspondent pas.")})
-#         return attrs
-
-#     def validate_email(self, value):
-#         if User.objects.filter(email=value).exists():
-#             raise serializers.ValidationError(_("Cet email est déjà utilisé."))
-#         return value
-
-#     def validate_username(self, value):
-#         if value and User.objects.filter(username=value).exists():
-#             raise serializers.ValidationError(_("Ce nom d'utilisateur existe déjà, veuillez en choisir un autre."))
-#         return value
-
-#     def create(self, validated_data):
-#         validated_data.pop('password2')
-        
-#         # Définir automatiquement user_type comme 'owner'
-#         user = User.objects.create_user(
-#             email=validated_data['email'],
-#             username=validated_data.get('username', ''),
-#             password=validated_data['password'],
-#             user_type='owner'  # Automatiquement défini comme auteur de projet
-#         )
-        
-#         # Créer automatiquement le profil Owner
-#         Owner.objects.create(
-#             user=user,
-#             full_name=user.username or user.email.split('@')[0]
-#         )
-        
-#         return user
-    
 
 class AdminRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -241,4 +188,18 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = "__all__"
+    
+
+# === SERIALIZERS STATISTIQUES ===
+class DashboardStatsSerializer(serializers.Serializer):
+    """Serializer pour les statistiques générales du dashboard"""
+    total_projects = serializers.IntegerField()
+    validated_projects = serializers.IntegerField()
+    rejected_projects = serializers.IntegerField()
+    pending_projects = serializers.IntegerField()
+    total_votes = serializers.IntegerField()
+    total_users = serializers.IntegerField()
+    total_revenue = serializers.DecimalField(max_digits=12, decimal_places=2)
+    validation_rate = serializers.DecimalField(max_digits=5, decimal_places=2)
+
 

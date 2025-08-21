@@ -170,7 +170,7 @@ class ProjectStatusUpdateSerializer(serializers.ModelSerializer):
         return value
     
 
-    
+
 # class ProjectListSerializer(serializers.ModelSerializer):
 #     category = CategorySerializer(read_only=True)
 #     owner = OwnerSerializer(read_only=True)
@@ -470,6 +470,25 @@ class VoteSerializer(serializers.ModelSerializer):
 #         return payment
 
 
+class VotePriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VotePrice
+        fields = ['id', 'vote_count', 'price', 'active', 'created_at']
+        read_only_fields = ['created_at']
+
+    def validate_vote_count(self, value):
+        if value < 1:
+            raise serializers.ValidationError(_("Le nombre de votes doit être supérieur ou égal à 1."))
+        if self.instance is None and VotePrice.objects.filter(vote_count=value, active=True).exists():
+            raise serializers.ValidationError(_("Un prix est déjà défini pour ce nombre de votes."))
+        return value
+
+    def validate_price(self, value):
+        if value <= 0:
+            raise serializers.ValidationError(_("Le prix doit être supérieur à 0."))
+        return value
+    
+    
 class VotePaymentSerializer(serializers.ModelSerializer):
     vote_id = serializers.PrimaryKeyRelatedField(queryset=Vote.objects.all(), source='vote')
     payment_method_id = serializers.CharField(write_only=True, required=True)
@@ -525,21 +544,3 @@ class VotePaymentSerializer(serializers.ModelSerializer):
 
         return payment
     
-
-class VotePriceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VotePrice
-        fields = ['id', 'vote_count', 'price', 'active', 'created_at']
-        read_only_fields = ['created_at']
-
-    def validate_vote_count(self, value):
-        if value < 1:
-            raise serializers.ValidationError(_("Le nombre de votes doit être supérieur ou égal à 1."))
-        if self.instance is None and VotePrice.objects.filter(vote_count=value, active=True).exists():
-            raise serializers.ValidationError(_("Un prix est déjà défini pour ce nombre de votes."))
-        return value
-
-    def validate_price(self, value):
-        if value <= 0:
-            raise serializers.ValidationError(_("Le prix doit être supérieur à 0."))
-        return value

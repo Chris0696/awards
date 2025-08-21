@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+from userauths.permissions import IsAdminOrReadOnly
 from commercial.serializers import CommercialSerializer
 from projectowner.models import Owner
 from rest_framework import generics, permissions, status
@@ -139,67 +140,84 @@ class ProjectDeleteAPIView(generics.DestroyAPIView):
             return Project.objects.none()
         
 
-class VoteCreateView(generics.CreateAPIView):
+# === VUES SPÉCIFIQUES POUR GESTION ADMIN ===
+class AdminProjectsManagementAPIView(generics.ListAPIView):
+    """Vue spéciale pour l'admin - gestion des projets en attente"""
+    serializer_class = ProjectListSerializer
+    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
+    # filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    # search_fields = ['project_title', 'owner__full_name']
+    ordering = ['-created_at']
+    pagination_class = StandardResultsSetPagination
+    
+    def get_queryset(self):
+        # Par défaut, afficher les projets en attente de validation
+        status_filter = self.request.query_params.get('status', 'vote')
+        return Project.objects.filter(platform_status=status_filter).select_related(
+            'category', 'owner', 'commercial'
+        )
+        
+# === VUES VOTE ===
+        
+class VoteCreateAPIView(generics.CreateAPIView):
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
     permission_classes = [permissions.AllowAny]
 
 
-class VoteListCreateAPIView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
-    ordering = ['-created_at']
-    pagination_class = StandardResultsSetPagination
-    
-    def get_serializer_class(self):
-        if self.request.method == 'POST':
-            return VoteSerializer
-        return VoteSerializer
-    
+class VoteListAPIView(generics.ListAPIView):
+    serializer_class = VoteSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    # filter_backends = [DjangoFilterBackend, OrderingFilter]
+    # ordering_fields = ['created_at', 'vote', 'vote_count']
+    # ordering = ['-created_at']
+    # pagination_class = StandardResultsSetPagination
+
     def get_queryset(self):
         user = self.request.user
-        
         if user.is_staff or user.user_type == 'admin':
             return Vote.objects.all().select_related('user', 'project')
         elif user.user_type == 'owner':
-            # Owner voit les votes sur ses projets
             try:
                 owner = Owner.objects.get(user=user)
                 return Vote.objects.filter(project__owner=owner).select_related('user', 'project')
             except Owner.DoesNotExist:
                 return Vote.objects.none()
-        else:
-            # Utilisateurs voient leurs propres votes
-            return Vote.objects.filter(user=user).select_related('project')
-
-
-class VoteDetailAPIView(generics.RetrieveUpdateAPIView):
+        return Vote.objects.none()  # Aucun vote visible pour les utilisateurs lambda
+    
+    
+class VoteDetailAPIView(generics.RetrieveAPIView):  # Remplacer RetrieveUpdateAPIView par RetrieveAPIView
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
-    permission_classes = [IsAuthenticated]
-    
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
+    lookup_field = 'id'
+
     def get_queryset(self):
         user = self.request.user
-        
         if user.is_staff or user.user_type == 'admin':
-            return Vote.objects.all()
-        else:
-            # Utilisateurs ne peuvent voir que leurs votes
-            return Vote.objects.filter(user=user)
+            return Vote.objects.all().select_related('user', 'project')
+        elif user.user_type == 'owner':
+            try:
+                owner = Owner.objects.get(user=user)
+                return Vote.objects.filter(project__owner=owner).select_related('user', 'project')
+            except Owner.DoesNotExist:
+                return Vote.objects.none()
+        return Vote.objects.none()  # Aucun vote visible pour les utilisateurs lambda
         
 
-class VotePriceListCreateView(generics.ListCreateAPIView):
+class VotePriceListAPIView(generics.ListCreateAPIView):
     queryset = VotePrice.objects.all()
     serializer_class = VotePriceSerializer
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
 
 
-class VotePriceDetailView(generics.RetrieveUpdateDestroyAPIView):
+class VotePriceDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = VotePrice.objects.all()
     serializer_class = VotePriceSerializer
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
 
 
-class VotePaymentListView(generics.ListAPIView):
+class VotePaymentListAPIView(generics.ListAPIView):
     queryset = VotePayment.objects.all()
     serializer_class = VotePaymentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -211,7 +229,7 @@ class VotePaymentListView(generics.ListAPIView):
         return VotePayment.objects.filter(user=user)
 
 
-class VotePaymentCreateView(generics.CreateAPIView):
+class VotePaymentCreateAPIView(generics.CreateAPIView):
     queryset = VotePayment.objects.all()
     serializer_class = VotePaymentSerializer
     permission_classes = [permissions.AllowAny]  # Peut être restreint à IsAuthenticated si nécessaire

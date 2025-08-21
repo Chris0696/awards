@@ -15,13 +15,13 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = api_serializer.MyTokenObtainPairSerializer
     
 
-class RegisterView(generics.CreateAPIView):
+class RegisterViewAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     serializer_class = api_serializer.RegisterSerializer
     
 
-class AdminRegisterView(generics.CreateAPIView):
+class AdminRegisterViewAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     serializer_class = AdminRegisterSerializer

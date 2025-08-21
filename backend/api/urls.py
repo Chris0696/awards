@@ -9,8 +9,8 @@ urlpatterns = [
     path("user/token/refresh/", TokenRefreshView.as_view()),
     
     # Register Endpoints
-    path("user/register/", UserViews.RegisterView.as_view(), name='register'),
-    path('admin/register/', UserViews.AdminRegisterView.as_view(), name='admin_register'),
+    path("user/register/", UserViews.RegisterViewAPIView.as_view(), name='register'),
+    path('admin/register/', UserViews.AdminRegisterViewAPIView.as_view(), name='admin_register'),
     
     path("user/password-reset/<email>/", UserViews.PasswordResetEmailVerifyAPIView.as_view(), name='password_reset_email'),
     path("user/password-change/", UserViews.PasswordChangeAPIView.as_view(), name='password_change'),
@@ -26,12 +26,15 @@ urlpatterns = [
     path('user/commercials/<int:pk>/', ProjectViews.CommercialDetailView.as_view(), name='commercial_detail'),
     
     # Vote Endpoints
-    path('vote/create/', ProjectViews.VoteCreateView.as_view(), name='vote_create'),
-    path('vote-prices/', ProjectViews.VotePriceListCreateView.as_view(), name='vote_price_list_create'),
-    path('vote-prices/<int:pk>/', ProjectViews.VotePriceDetailView.as_view(), name='vote_price_detail'),
+    path('votes/create/', ProjectViews.VoteCreateAPIView.as_view(), name='vote_create'),
+    path('votes/', ProjectViews.VoteListAPIView.as_view(), name='vote_list'),
+    path('votes/<int:id>/', ProjectViews.VoteDetailAPIView.as_view(), name='vote_detail'),
+    
+    path('vote-prices/', ProjectViews.VotePriceListAPIView.as_view(), name='vote_price_list_create'),
+    path('vote-prices/<int:pk>/', ProjectViews.VotePriceDetailAPIView.as_view(), name='vote_price_detail'),
     
     # Payments Endpoints
-    path('vote-payments/', ProjectViews.VotePaymentListView.as_view(), name='vote_payment_list'),
-    path('vote-payments/create/', ProjectViews.VotePaymentCreateView.as_view(), name='vote_payment_create'),
+    path('vote-payments/', ProjectViews.VotePaymentListAPIView.as_view(), name='vote_payment_list'),
+    path('vote-payments/create/', ProjectViews.VotePaymentCreateAPIView.as_view(), name='vote_payment_create'),
 
 ]

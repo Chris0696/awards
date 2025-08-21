@@ -18,3 +18,19 @@
   "featured": true,
   "admin_comment": "good"
 }
+
+
+{
+  "category_id": 1,
+  "project_title": "Nouveau Projet",
+  "local_area_impact": "Région de Cotonou",
+  "main_objective": "Améliorer l'accès à l'eau",
+  "solution": "Construction de puits",
+  "description": "Description détaillée",
+  "estimated_budget": "500000.00",
+  "target_audience": "Communautés rurales",
+  "progress_report": "En cours de planification",
+  "owner_project_status": "brouillon",
+  "file": "file.pdf",
+  "image": "image.jpg"
+}
