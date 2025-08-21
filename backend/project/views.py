@@ -16,33 +16,11 @@ class ProjectCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save()
         
-        
+
 class VoteCreateView(generics.CreateAPIView):
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
     permission_classes = [permissions.AllowAny]
-
-    def create(self, request, *args, **kwargs):
-        # Créer le vote
-        vote_serializer = self.get_serializer(data=request.data)
-        vote_serializer.is_valid(raise_exception=True)
-        vote = vote_serializer.save()
-
-        # Créer le paiement associé
-        payment_data = {
-            'vote_id': vote.id,
-            'payment_method': request.data.get('payment_method', 'unknown')
-        }
-        payment_serializer = VotePaymentSerializer(data=payment_data, context={'request': request})
-        payment_serializer.is_valid(raise_exception=True)
-        payment = payment_serializer.save()
-
-        # Retourner les détails du vote et du paiement
-        return Response({
-            'vote': vote_serializer.data,
-            'payment': payment_serializer.data,
-            'message': _("Vote créé, en attente de paiement.")
-        }, status=status.HTTP_201_CREATED)
 
 
 class VotePriceListCreateView(generics.ListCreateAPIView):
@@ -67,6 +45,12 @@ class VotePaymentListView(generics.ListAPIView):
         if user.is_superuser or user.user_type == 'admin':
             return VotePayment.objects.all()
         return VotePayment.objects.filter(user=user)
+
+
+class VotePaymentCreateView(generics.CreateAPIView):
+    queryset = VotePayment.objects.all()
+    serializer_class = VotePaymentSerializer
+    permission_classes = [permissions.AllowAny]  # Peut être restreint à IsAuthenticated si nécessaire
     
 
 class CommercialListCreateView(generics.ListCreateAPIView):

@@ -36,11 +36,11 @@ PAYMENT_STATUS = (
 )
 
 VOTE_CHOICES = (
-    (1, "1 Vote"),
-    (2, "2 Votes"),
-    (3, "3 Votes"),
-    (4, "4 Votes"),
-    (5, "5 Votes"),
+    (1, _("1 Etoile")),
+    (2, _("2 Etoiles")),
+    (3, _("3 Etoiles")),
+    (4, _("4 Etoiles")),
+    (5, _("5 Etoiles")),
 )
 
 
@@ -194,11 +194,11 @@ class Commercial(models.Model):
 class Vote(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Projet"))
-    vote = models.IntegerField(choices=VOTE_CHOICES, verbose_name=_("Nombre de vote"))
+    vote = models.IntegerField(choices=VOTE_CHOICES, verbose_name=_("Nombre d'étoile"))
     country_code = models.CharField(max_length=5, blank=True, null=True, verbose_name=_("Code pays")) 
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
     active = models.BooleanField(default=False)  # Activé après paiement
-    vote_count = models.IntegerField(default=1, verbose_name=_("Nombre de points"))  # Nombre de votes achetés
+    vote_count = models.IntegerField(default=1, verbose_name=_("Nombre de votes achetés"))
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     
