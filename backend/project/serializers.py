@@ -1,5 +1,8 @@
+from commercial.serializers import CommercialSerializer
+from projectowner.serializers import OwnerSerializer
 from rest_framework import serializers
-from .models import Project, Category, Commercial, User, Vote, VotePayment, VotePrice
+from .models import Project, Category, User, Vote, VotePayment, VotePrice
+
 from projectowner.models import Owner
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
@@ -9,86 +12,237 @@ import uuid
 import re
 from django.core.validators import RegexValidator
 
-
+    
 class CategorySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['category_name', 'image', 'active', 'slug', 'project_count']
+    
+    def get_project_count(self, obj):
+        return obj.project_count()
 
 
-class ProjectSerializer(serializers.ModelSerializer):
-    category_id = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), source='category')
+# class ProjectSerializer(serializers.ModelSerializer):
+#     category_id = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), source='category')
+#     owner_id = serializers.PrimaryKeyRelatedField(read_only=True, source='owner')
+#     commercial_id = serializers.PrimaryKeyRelatedField(queryset=Commercial.objects.all(), source='commercial', required=False, allow_null=True)
+
+#     class Meta:
+#         model = Project
+#         fields = [
+#             'id', 'category_id', 'owner_id', 'commercial_id', 'file', 'image', 'project_title',
+#             'local_area_impact', 'main_objective', 'solution', 'description', 'estimated_budget', 'target_audience',
+#             'progress_report', 'platform_status', 'owner_project_status', 'featured', 'project_id', 'created_at',
+#             'updated_at', 'admin_comment', 'slug'
+#         ]
+#         read_only_fields = ['owner_id', 'project_id', 'created_at', 'updated_at', 'slug', 'platform_status', 'validated_at']
+
+#     def validate(self, attrs):
+#         request = self.context.get('request')
+#         user = request.user
+
+#         # Vérifier que l'utilisateur est authentifié et de type 'owner'
+#         if not user.is_authenticated or user.user_type != 'owner':
+#             raise serializers.ValidationError({"error": _("Seul un utilisateur de type 'owner' peut soumettre un projet.")})
+
+#         # Assigner automatiquement l'owner à l'utilisateur authentifié
+#         try:
+#             owner = Owner.objects.get(user=user)
+#             attrs['owner'] = Owner.objects.get(user=user)
+#         except Owner.DoesNotExist:
+#             raise serializers.ValidationError({"error": _("Aucun profil Owner associé à cet utilisateur.")})
+        
+#         # Si aucun commercial n'est spécifié, utiliser le commercial associé à l'owner
+#         if not attrs.get('commercial') and owner.commercial:
+#             attrs['commercial'] = owner.commercial
+
+#         return attrs
+
+#     def create(self, validated_data):
+#         # Générer le slug si non fourni
+#         project = Project.objects.create(**validated_data)
+#         if not project.slug:
+#             project.slug = slugify(f"{project.project_title}-{project.project_id}")
+#         project.save()
+#         return project
+
+
+class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
+    category_id = serializers.PrimaryKeyRelatedField(queryset=Category.objects.filter(active=True), source='category', write_only=True)
     owner_id = serializers.PrimaryKeyRelatedField(read_only=True, source='owner')
-    commercial_id = serializers.PrimaryKeyRelatedField(queryset=Commercial.objects.all(), source='commercial', required=False, allow_null=True)
 
     class Meta:
         model = Project
         fields = [
-            'id', 'category_id', 'owner_id', 'commercial_id', 'file', 'image', 'project_title',
-            'local_area_impact', 'main_objective', 'solution', 'description', 'estimated_budget', 'target_audience',
-            'progress_report', 'platform_status', 'owner_project_status', 'featured', 'project_id', 'created_at',
-            'updated_at', 'admin_comment', 'slug'
+            'project_id', 'category_id', 'owner_id', 'file', 'image', 'project_title',
+            'local_area_impact', 'main_objective', 'solution', 'description',
+            'estimated_budget', 'target_audience', 'progress_report', 'owner_project_status'
         ]
-        read_only_fields = ['owner_id', 'project_id', 'created_at', 'updated_at', 'slug', 'platform_status', 'validated_at']
+        read_only_fields = ['project_id', 'owner_id']
 
     def validate(self, attrs):
         request = self.context.get('request')
         user = request.user
 
-        # Vérifier que l'utilisateur est authentifié et de type 'owner'
+        # Vérifier que l'utilisateur est de type 'owner'
         if not user.is_authenticated or user.user_type != 'owner':
-            raise serializers.ValidationError({"error": _("Seul un utilisateur de type 'owner' peut soumettre un projet.")})
+            raise serializers.ValidationError({"error": _("Seul un utilisateur de type 'owner' peut créer ou modifier un projet.")})
 
-        # Assigner automatiquement l'owner à l'utilisateur authentifié
+        # Assigner automatiquement l'owner
         try:
             owner = Owner.objects.get(user=user)
-            attrs['owner'] = Owner.objects.get(user=user)
+            attrs['owner'] = owner
         except Owner.DoesNotExist:
             raise serializers.ValidationError({"error": _("Aucun profil Owner associé à cet utilisateur.")})
-        
-        # Si aucun commercial n'est spécifié, utiliser le commercial associé à l'owner
-        if not attrs.get('commercial') and owner.commercial:
+
+        # Assigner automatiquement le commercial associé à l'owner (si disponible)
+        if owner.commercial:
             attrs['commercial'] = owner.commercial
+
+        # Vérifier que owner_project_status est valide
+        # valid_owner_statuses = [choice[0] for choice in Project.OWNER_STATUS]
+        # if 'owner_project_status' in attrs and attrs['owner_project_status'] not in valid_owner_statuses:
+        #     raise serializers.ValidationError({"owner_project_status": _("Statut invalide pour le projet.")})
 
         return attrs
 
     def create(self, validated_data):
-        # Générer le slug si non fourni
         project = Project.objects.create(**validated_data)
         if not project.slug:
             project.slug = slugify(f"{project.project_title}-{project.project_id}")
         project.save()
         return project
+
+    def update(self, instance, validated_data):
+        # Empêcher la modification de platform_status ou admin_comment
+        validated_data.pop('platform_status', None)
+        validated_data.pop('admin_comment', None)
+        return super().update(instance, validated_data)
     
 
-class CommercialSerializer(serializers.ModelSerializer):
-    user_email = serializers.EmailField(source='user.email', read_only=True)
-    total_projects = serializers.IntegerField(source='total_projects_brought', read_only=True)
-    total_published_projects = serializers.IntegerField(read_only=True)
-    total_rejected_projects = serializers.IntegerField(read_only=True)
-    total_votes = serializers.IntegerField(source='total_votes_generated', read_only=True)
-    total_revenue = serializers.DecimalField(max_digits=10, decimal_places=2, source='total_revenue_generated', read_only=True)
-    commission_earned = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+class ProjectListSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    owner = OwnerSerializer(read_only=True)
+    commercial = CommercialSerializer(read_only=True)
+    average_rating = serializers.SerializerMethodField()
+    vote_count = serializers.SerializerMethodField()
+    total_revenue = serializers.SerializerMethodField()
 
     class Meta:
-        model = Commercial
+        model = Project
         fields = [
-            'id', 'user_email', 'full_name', 'phone', 'commission_rate', 'affiliate_link',
-            'is_active', 'created_at', 'total_projects', 'total_published_projects',
-            'total_rejected_projects', 'total_votes', 'total_revenue', 'commission_earned'
+            'project_id', 'project_title', 'slug', 'description', 'image',
+            'estimated_budget', 'platform_status', 'owner_project_status',
+            'featured', 'created_at', 'updated_at', 'validated_at',
+            'category', 'owner', 'commercial', 'average_rating', 
+            'vote_count', 'total_revenue'
         ]
-        read_only_fields = ['affiliate_link', 'created_at']
 
-    def validate_phone(self, value):
-        if value and not re.match(r'^\d{7,15}$', value):
-            raise serializers.ValidationError(_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres."))
-        return value
+    def get_average_rating(self, obj):
+        return obj.average_rating()
+    
+    def get_vote_count(self, obj):
+        return obj.vote_count()
+    
+    def get_total_revenue(self, obj):
+        return obj.total_votes_revenue()
 
-    def validate_commission_rate(self, value):
-        if value < 0 or value > 100:
-            raise serializers.ValidationError(_("Le taux de commission doit être compris entre 0 et 100%."))
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        user = self.context['request'].user
+        if user.user_type == 'owner':
+            representation.pop('commercial', None)
+        if not (user.is_staff or user.user_type == 'admin'):
+            representation.pop('admin_comment', None)
+        return representation
+
+
+class ProjectStatusUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['platform_status', 'admin_comment']
+
+    def validate_platform_status(self, value):
+        valid_statuses = ['brouillon', 'desactive', 'rejete', 'publie']
+        if value not in valid_statuses:
+            raise serializers.ValidationError(_("Statut invalide. Les statuts valides sont : brouillon, désactivé, rejeté, publié."))
         return value
+    
+
+    
+# class ProjectListSerializer(serializers.ModelSerializer):
+#     category = CategorySerializer(read_only=True)
+#     owner = OwnerSerializer(read_only=True)
+#     commercial = CommercialSerializer(read_only=True)
+#     average_rating = serializers.SerializerMethodField()
+#     vote_count = serializers.SerializerMethodField()
+#     total_revenue = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Project
+#         fields = [
+#             'project_id', 'project_title', 'slug', 'description', 'image',
+#             'estimated_budget', 'platform_status', 'owner_project_status',
+#             'featured', 'created_at', 'updated_at', 'validated_at',
+#             'category', 'owner', 'commercial', 'average_rating', 
+#             'vote_count', 'total_revenue'
+#         ]
+
+#     def get_average_rating(self, obj):
+#         return obj.average_rating()
+    
+#     def get_vote_count(self, obj):
+#         return obj.vote_count()
+    
+#     def get_total_revenue(self, obj):
+#         return obj.total_votes_revenue()
+
+#     def to_representation(self, instance):
+#         representation = super().to_representation(instance)
+#         user = self.context['request'].user
+#         # Masquer le champ commercial pour les utilisateurs de type 'owner'
+#         if user.user_type == 'owner':
+#             representation.pop('commercial', None)
+#         return representation
+    
+
+class ProjectDetailSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    owner = OwnerSerializer(read_only=True)
+    commercial = CommercialSerializer(read_only=True)
+    votes = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    vote_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = [
+            'project_id', 'project_title', 'slug', 'description', 'image',
+            'local_area_impact', 'main_objective', 'solution', 'estimated_budget',
+            'target_audience', 'progress_report', 'platform_status', 'owner_project_status',
+            'featured', 'created_at', 'updated_at', 'validated_at', 'admin_comment',
+            'category', 'owner', 'commercial', 'votes', 'average_rating', 'vote_count'
+        ]
+
+    def get_votes(self, obj):
+        votes = obj.vote_set.filter(active=True).select_related('user')
+        return VoteSerializer(votes, many=True).data
+    
+    def get_average_rating(self, obj):
+        return obj.average_rating()
+    
+    def get_vote_count(self, obj):
+        return obj.vote_count()
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        user = self.context['request'].user
+        if user.user_type == 'owner':
+            representation.pop('commercial', None)
+        if not (user.is_staff or user.user_type == 'admin'):
+            representation.pop('admin_comment', None)
+        return representation
     
 
 # class VoteSerializer(serializers.ModelSerializer):

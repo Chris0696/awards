@@ -12,7 +12,7 @@ USER_TYPES = (
     ("admin", _("Administrateur")),
     ("owner", _("Auteur de projet")),
     ("commercial", _("Commercial")),
-    ("user", _("Utilisateur")),
+    ("user", _("Admin ou Utilisateur")),
 )
 
 
@@ -32,7 +32,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return token
 
-
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,
@@ -46,10 +45,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     country_code = serializers.CharField(max_length=5, required=False, allow_blank=True)
     profession = serializers.CharField(required=False, allow_blank=True)
     age = serializers.IntegerField(required=False, allow_null=True)
+    affiliate = serializers.CharField(required=False, allow_blank=True, write_only=True)  # Champ ajouté explicitement
 
     class Meta:
         model = User
-        fields = ('full_name', 'email', 'country_code', 'phone', 'profession', 'password', 'age')
+        fields = ('full_name', 'email', 'country_code', 'phone', 'profession', 'password', 'age', 'affiliate')
 
     def validate(self, attrs):
         # Valider le code pays
@@ -66,12 +66,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         age = attrs.get('age')
         if age and (age < 18 or age > 120):
             raise serializers.ValidationError({"age": _("L'âge doit être compris entre 18 et 120 ans.")})
-        
-        # Valider le paramètre d'affiliation
+
+        # Valider le lien d'affiliation
         affiliate = attrs.get('affiliate')
         if affiliate:
-            if not Commercial.objects.filter(affiliate_link__contains=affiliate).exists():
+            try:
+                # Recherche exacte ou partielle selon le format de affiliate_link
+                commercial = Commercial.objects.get(affiliate_link=affiliate)  # Recherche exacte
+                attrs['commercial'] = commercial  # Stocker le commercial pour la création
+            except Commercial.DoesNotExist:
                 raise serializers.ValidationError({"affiliate": _("Lien d'affiliation invalide.")})
+            except Commercial.MultipleObjectsReturned:
+                raise serializers.ValidationError({"affiliate": _("Plusieurs commerciaux correspondent à ce lien d'affiliation.")})
 
         return attrs
 
@@ -81,14 +87,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        # Extraire les champs pour le modèle Owner
+        # Extraire les champs
         phone = validated_data.pop('phone', None)
         country_code = validated_data.pop('country_code', None)
         profession = validated_data.pop('profession', None)
         age = validated_data.pop('age', None)
-        affiliate = validated_data.pop('affiliate', None)
-        
-        # Générer un username basé sur l'email si nécessaire
+        commercial = validated_data.pop('commercial', None)  # Récupérer le commercial validé
+
+        # Générer un username basé sur l'email
         email = validated_data['email']
         base_username = email.split('@')[0]
         username = base_username
@@ -105,17 +111,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             user_type='owner'
         )
-        
-        # Trouver le commercial associé au lien d'affiliation
-        commercial = None
-        if affiliate:
-            try:
-                commercial = Commercial.objects.get(affiliate_link__contains=affiliate)
-            except Commercial.DoesNotExist:
-                pass  # Si le lien est invalide, on ignore (déjà validé)
 
-        # Créer le profil Owner
-        Owner.objects.create(
+        # Créer le profil Owner avec le commercial
+        owner = Owner.objects.create(
             user=user,
             full_name=user.full_name,
             phone=phone,
@@ -243,3 +241,4 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = "__all__"
+

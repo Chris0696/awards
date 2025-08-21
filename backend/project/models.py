@@ -63,6 +63,10 @@ class Category(models.Model):
 
     def project_count(self):
         return self.project_set.count()
+    
+    # def course_count(self):
+    #     return Project.objects.filter(category=self).count()
+
 
     def save(self, *args, **kwargs):
         if not self.slug:

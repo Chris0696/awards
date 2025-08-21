@@ -16,7 +16,10 @@ urlpatterns = [
     path("user/password-change/", UserViews.PasswordChangeAPIView.as_view(), name='password_change'),
 
     # Project Endpoints
-    path('project/create/', ProjectViews.ProjectCreateView.as_view(), name='project_create'),
+    path('projects/', ProjectViews.ProjectListCreateAPIView.as_view(), name='project_list_create'),
+    path('projects/<str:project_id>/', ProjectViews.ProjectDetailAPIView.as_view(), name='project_detail'),
+    path('projects/<str:project_id>/update/', ProjectViews.ProjectUpdateAPIView.as_view(), name='project_update'),
+    path('projects/<str:project_id>/delete/', ProjectViews.ProjectDeleteAPIView.as_view(), name='project_delete'),
     
     # Commercials Endpoints
     path('user/commercials/', ProjectViews.CommercialListCreateView.as_view(), name='commercial_list_create'),

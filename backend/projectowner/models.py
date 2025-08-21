@@ -38,14 +38,14 @@ class Owner(models.Model):
     def total_projects(self):
         return self.project_set.count()
     
-    def validated_projects(self):
-        return self.project_set.filter(platform_status='valide').count()
+    def published_projects(self):
+        return self.project_set.filter(platform_status='publie').count()
     
     def rejected_projects(self):
         return self.project_set.filter(platform_status='rejete').count()
     
     def pending_projects(self):
-        return self.project_set.filter(platform_status__in=['vote', 'brouillon']).count()
+        return self.project_set.filter(platform_status__in=['brouillon']).count()
     
     def total_votes_received(self):
         return Vote.objects.filter(project__owner=self, active=True).count()
