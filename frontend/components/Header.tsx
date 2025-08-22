@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import LoginModal from "./LoginModal";
 
 export default function Header() {
   const pathname = usePathname();
@@ -53,8 +54,14 @@ export default function Header() {
             Comment ça marche
           </Link>
         </div>
-        <button onClick={() => setShowModal(true)}>Se connecter</button>
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-secondary px-8 cursor-pointer py-3 rounded-md text-white hover:bg-white hover:text-secondary transition-colors"
+        >
+          Se connecter
+        </button>
       </nav>
+      <LoginModal showModal={showModal} setShowModal={setShowModal} />
     </header>
   );
 }
