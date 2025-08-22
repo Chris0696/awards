@@ -35,10 +35,14 @@ export default function LoginModal({
           </div>
         </div>
         <div className="mt-10">
-          <button className="flex items-center justify-center space-x-2 bg-secondary text-white px-4 py-2 rounded-md w-full cursor-pointer">
+          <Link
+            href={"/admin"}
+            onClick={() => setShowModal(false)}
+            className="flex items-center justify-center space-x-2 bg-secondary text-white px-4 py-4 text-lg rounded-md w-full cursor-pointer"
+          >
             <span>Se connecter</span>
             <ChevronRightIcon />
-          </button>
+          </Link>
         </div>
       </div>
     </Popover>
