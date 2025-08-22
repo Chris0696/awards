@@ -10,8 +10,8 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 
 
 from django.utils.translation import gettext_lazy as _
-from .models import Commercial, Project, Vote, VotePayment, VotePrice
-from .serializers import ProjectCreateUpdateSerializer, ProjectDetailSerializer, ProjectListSerializer, VotePriceSerializer, VoteSerializer, VotePaymentSerializer
+from .models import Category, Commercial, Project, Vote, VotePayment, VotePrice
+from .serializers import CategorySerializer, ProjectCreateUpdateSerializer, ProjectDetailSerializer, ProjectListSerializer, VotePriceSerializer, VoteSerializer, VotePaymentSerializer
 
 from rest_framework.pagination import PageNumberPagination
 
@@ -43,6 +43,20 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
+
+# === VUES CATEGORIES ===
+class CategoryListAPIView(generics.ListAPIView):
+    queryset = Category.objects.filter(active=True)
+    serializer_class = CategorySerializer
+    permission_classes = [AllowAny]
+    ordering = ['category_name']
+
+
+class CategoryDetailAPIView(generics.RetrieveAPIView):
+    queryset = Category.objects.filter(active=True)
+    serializer_class = CategorySerializer
+    permission_classes = [AllowAny]
+    
 
 # === SERIALIZERS PROJECT ===
 
@@ -140,23 +154,6 @@ class ProjectDeleteAPIView(generics.DestroyAPIView):
             return Project.objects.none()
         
 
-# === VUES SPÉCIFIQUES POUR GESTION ADMIN ===
-class AdminProjectsManagementAPIView(generics.ListAPIView):
-    """Vue spéciale pour l'admin - gestion des projets en attente"""
-    serializer_class = ProjectListSerializer
-    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
-    # filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    # search_fields = ['project_title', 'owner__full_name']
-    ordering = ['-created_at']
-    pagination_class = StandardResultsSetPagination
-    
-    def get_queryset(self):
-        # Par défaut, afficher les projets en attente de validation
-        status_filter = self.request.query_params.get('status', 'vote')
-        return Project.objects.filter(platform_status=status_filter).select_related(
-            'category', 'owner', 'commercial'
-        )
-        
 # === VUES VOTE ===
         
 class VoteCreateAPIView(generics.CreateAPIView):
@@ -234,14 +231,3 @@ class VotePaymentCreateAPIView(generics.CreateAPIView):
     serializer_class = VotePaymentSerializer
     permission_classes = [permissions.AllowAny]  # Peut être restreint à IsAuthenticated si nécessaire
     
-
-class CommercialListCreateView(generics.ListCreateAPIView):
-    queryset = Commercial.objects.all()
-    serializer_class = CommercialSerializer
-    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
-
-
-class CommercialDetailView(generics.RetrieveUpdateAPIView):
-    queryset = Commercial.objects.all()
-    serializer_class = CommercialSerializer
-    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]

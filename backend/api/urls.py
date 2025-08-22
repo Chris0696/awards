@@ -2,18 +2,25 @@ from django.urls import path
 from userauths import views as UserViews
 from rest_framework_simplejwt.views import TokenRefreshView
 from project import views as ProjectViews
+from commercial import views as CommercialViews
+from api import views as ApiViews
+from projectowner import views as OwnerViews
 
 urlpatterns = [
     # Authentification Endpoints
-    path('user/login/', UserViews.MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path("user/token/refresh/", TokenRefreshView.as_view()),
+    path('auth/login/', UserViews.MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path("auth/token/refresh/", TokenRefreshView.as_view()),
     
     # Register Endpoints
-    path("user/register/", UserViews.RegisterViewAPIView.as_view(), name='register'),
-    path('admin/register/', UserViews.AdminRegisterViewAPIView.as_view(), name='admin_register'),
+    path("auth/register/", UserViews.RegisterViewAPIView.as_view(), name='register'),
+    path('auth/admin/register/commercial', UserViews.AdminRegisterViewAPIView.as_view(), name='admin_register'),
     
-    path("user/password-reset/<email>/", UserViews.PasswordResetEmailVerifyAPIView.as_view(), name='password_reset_email'),
-    path("user/password-change/", UserViews.PasswordChangeAPIView.as_view(), name='password_change'),
+    path("auth/password-reset/<email>/", UserViews.PasswordResetEmailVerifyAPIView.as_view(), name='password_reset_email'),
+    path("auth/password-change/", UserViews.PasswordChangeAPIView.as_view(), name='password_change'),
+    path('auth/globalprofile/<user_id>/', UserViews.ProfileAPIView.as_view(), name='profile'),
+
+    path('auth/profile/<int:user_id>/', ApiViews.UserProfileAPIView.as_view(), name='user_profile'),
+
 
     # Project Endpoints
     path('projects/', ProjectViews.ProjectListCreateAPIView.as_view(), name='project_list_create'),
@@ -21,13 +28,23 @@ urlpatterns = [
     path('projects/<str:project_id>/update/', ProjectViews.ProjectUpdateAPIView.as_view(), name='project_update'),
     path('projects/<str:project_id>/delete/', ProjectViews.ProjectDeleteAPIView.as_view(), name='project_delete'),
     
+    # CATEGORIES Endpoints
+    path('categories/', ProjectViews.CategoryListAPIView.as_view(), name='category_list'),
+    path('categories/<int:pk>/', ProjectViews.CategoryDetailAPIView.as_view(), name='category_detail'),
+    
+    
     # Commercials Endpoints
-    path('user/commercials/', ProjectViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
-    path('user/commercials/<int:pk>/', ProjectViews.CommercialDetailView.as_view(), name='commercial_detail'),
+    path('user/commercials/', CommercialViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
+    path('user/commercials/<int:pk>/', CommercialViews.CommercialDetailView.as_view(), name='commercial_detail'),
+    
+     # === STATISTIQUES ===
+    path('stats/general/', ApiViews.general_stats_api, name='general_stats'),
+    
     
     # Vote Endpoints
-    path('votes/create/', ProjectViews.VoteCreateAPIView.as_view(), name='vote_create'),
+    
     path('votes/', ProjectViews.VoteListAPIView.as_view(), name='vote_list'),
+    path('votes/create/', ProjectViews.VoteCreateAPIView.as_view(), name='vote_create'),
     path('votes/<int:id>/', ProjectViews.VoteDetailAPIView.as_view(), name='vote_detail'),
     
     path('vote-prices/', ProjectViews.VotePriceListAPIView.as_view(), name='vote_price_list_create'),

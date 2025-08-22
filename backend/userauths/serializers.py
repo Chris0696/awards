@@ -24,12 +24,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['full_name'] = user.full_name
         token['email'] = user.email
         token['username'] = user.username
-        try:
-            token['projectlead_id'] = user.projectlead.id
-        except:
-            token['projectlead_id'] = 0
-
-
+        token['user_type'] = user.user_type
+        
         return token
 
 class RegisterSerializer(serializers.ModelSerializer):

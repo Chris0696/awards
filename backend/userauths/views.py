@@ -1,14 +1,14 @@
 from django.shortcuts import render
 
 from userauths.utils import send_otp_email
-from .models import User
+from .models import Profile, User
 from userauths import serializers as api_serializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import generics, status
 from django.contrib.auth.hashers import check_password
 from rest_framework.response import Response
-from .serializers import AdminRegisterSerializer
+from .serializers import AdminRegisterSerializer, ProfileSerializer
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -74,3 +74,13 @@ class PasswordChangeAPIView(generics.CreateAPIView):
             return Response({"message": "Mot de passe modifié avec succès.", "icon": "success"}, status=status.HTTP_201_CREATED)
         except User.DoesNotExist:
             return Response({"message": "Reconnectez-vous pour changer votre mot de passe.", "icon": "error"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ProfileAPIView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        user_id = self.kwargs['user_id']
+        user = User.objects.get(id=user_id)
+        return Profile.objects.get(user=user)
