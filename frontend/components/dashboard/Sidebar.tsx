@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Sidebar() {
   return (
-    <aside className="bg-primary text-white  pt-24 h-full rounded-lg min-w-72 max-w-72 -translate-x-full md:translate-x-0">
+    <aside className="bg-primary text-white  pt-24 h-full rounded-lg min-w-72 max-w-72 ">
       <nav className="flex flex-col space-y-8 px-6">
         <Link href="/" className="p-3">
           <Image
@@ -27,7 +27,7 @@ export default function Sidebar() {
             Projets
           </Link>
           <Link
-            href={""}
+            href={"/admin/users"}
             className="w-full hover:bg-white/10 transition-colors px-3 py-2 rounded-md text-lg "
           >
             Utilisateurs
@@ -50,30 +50,24 @@ export default function Sidebar() {
           >
             Paramètres
           </Link>
-          <Link
+          {/*  <Link
             href={""}
             className="w-full hover:bg-white/10 transition-colors px-3 py-2 rounded-md text-lg "
           >
             Catégories & tags
-          </Link>
+          </Link> */}
           <Link
-            href={""}
+            href={"/admin/membership"}
             className="w-full hover:bg-white/10 transition-colors px-3 py-2 rounded-md text-lg "
           >
             Affiliation
           </Link>
-          <Link
+          {/* <Link
             href={""}
             className="w-full hover:bg-white/10 transition-colors px-3 py-2 rounded-md text-lg "
           >
             Pris/Récompenses
-          </Link>
-          <Link
-            href={""}
-            className="w-full hover:bg-white/10 transition-colors px-3 py-2 rounded-md text-lg "
-          >
-            Paramètres
-          </Link>
+          </Link> */}
         </div>
       </nav>
     </aside>

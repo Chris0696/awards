@@ -1,61 +1,23 @@
 import DashboardHeader from "@/components/dashboard/DasboardHeader";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import FilterBtn from "@/components/dashboard/FilterBtn";
+import Table from "@/components/dashboard/Table";
+import SwitchPageBtn from "@/components/SwitchPageBtn";
+import {
+  ArrowRight,
+  ChevronLeftIcon,
+  ChevronRight,
+  ChevronRightIcon,
+} from "lucide-react";
 
 export default function AdminProjectList() {
   const hasProjects = false;
-  return (
-    <div>
+  const isAdmin = true;
+  return !isAdmin ? (
+    <section>
       <DashboardHeader pageTitle="Mes projets" />
       {hasProjects ? (
         <div>
-          <div className="bg-gray-50 px-4 py-8 rounded-xl mt-24">
-            <table className="min-w-full">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Titre du projet
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Catégorie
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date de soumission
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Votes reçus
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Position actuelle
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="px-6 py-4 text-gray-00 whitespace-normal max-w-[100px] ">
-                    <p>Solar'Net - Réseau d'énergie solaire pour zone rurale</p>
-                  </td>
-                  <td className="px-6 py-4 text-gray-00 whitespace-nowrap">
-                    Énergie
-                  </td>
-                  <td className="px-6 py-4 text-gray-00 whitespace-nowrap">
-                    10/04/2025
-                  </td>
-                  <td className="px-6 py-4 text-gray-00 whitespace-nowrap">
-                    1200
-                  </td>
-                  <td className="px-6 py-4 text-gray-00 whitespace-nowrap">
-                    <span className="text-green-500">Validé</span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-00 whitespace-nowrap">
-                    1
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <Table />
           <div className="mt-2">
             <button className="bg-primary px-4 py-5 rounded-lg text-gray-50 flex items-center space-x-2 mt-6 text-lg cursor-pointer hover:border hover:border-primary hover:bg-white hover:text-primary transition-colors ml-auto">
               <span>Soumettre un nouveau projet</span> <ChevronRight />
@@ -78,6 +40,21 @@ export default function AdminProjectList() {
           </div>
         </div>
       )}
-    </div>
+    </section>
+  ) : (
+    <section>
+      <DashboardHeader pageTitle="Projets" />
+      <div>
+        <div className=" flex justify-end space-x-3  mb-5">
+          <FilterBtn text="Date" />
+          <FilterBtn text="Statut" />
+          <FilterBtn text="Catégorie" />
+        </div>
+        <div>
+          <Table />
+        </div>
+        <SwitchPageBtn />
+      </div>
+    </section>
   );
 }

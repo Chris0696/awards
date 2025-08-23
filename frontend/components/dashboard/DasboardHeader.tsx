@@ -7,7 +7,7 @@ export default function DashboardHeader({ pageTitle }: { pageTitle: string }) {
     <div className="mb-20">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">{pageTitle} </h2>
-        <div className="flex items-center space-x-6">
+        <div className="hidden md:flex items-center space-x-6">
           <div className="p-3 rounded-full bg-gray-100">
             <Image src={RingBellIcon} alt="Notifications" />
           </div>
