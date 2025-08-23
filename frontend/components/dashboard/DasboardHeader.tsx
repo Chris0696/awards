@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export default function DashboardHeader({ pageTitle }: { pageTitle: string }) {
   return (
-    <div>
+    <div className="mb-20">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">{pageTitle} </h2>
         <div className="flex items-center space-x-6">

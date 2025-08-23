@@ -14,9 +14,9 @@ export default function page() {
             <Image
               src={ProfilImg}
               alt="Photo de profil"
-              className="w-16 h-16 rounded-full"
+              className="w-20 h-20 rounded-full"
             />
-            <div>
+            <div className="space-y-1">
               <h4 className="text-xl text-gray-800">Mireille Assaba</h4>
               <label htmlFor="profil " className="underline">
                 <input
