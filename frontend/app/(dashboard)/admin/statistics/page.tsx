@@ -1,11 +1,15 @@
 import DashboardHeader from "@/components/dashboard/DasboardHeader";
+import FilterBtn from "@/components/dashboard/FilterBtn";
 import SynthesisCard from "@/components/dashboard/project-owner/SynthesisCard";
+import Table from "@/components/dashboard/Table";
+import SwitchPageBtn from "@/components/SwitchPageBtn";
 import Link from "next/link";
 import React from "react";
 
 export default function StatisticPage() {
-  return (
-    <div className="">
+  const isAdmin = true;
+  return !isAdmin ? (
+    <section className="">
       <DashboardHeader pageTitle="Statistiques" />
       <div className=" grid grid-cols-4 ">
         <div className=" col-span-3  ">
@@ -53,6 +57,17 @@ export default function StatisticPage() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
+  ) : (
+    <section>
+      <DashboardHeader pageTitle="Votes & Statistiques" />
+      <div className=" flex justify-end space-x-3  mb-5">
+        <FilterBtn text="Catégorie" />
+      </div>
+      <div>
+        <Table />
+      </div>
+      <SwitchPageBtn />
+    </section>
   );
 }
