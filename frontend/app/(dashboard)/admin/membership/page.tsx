@@ -44,7 +44,7 @@ export default function page() {
             </div>
             <h3 className="text-xl text-gray-800">Ines Totinon</h3>
           </div>
-          <div className="flex space-x-8">
+          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:space-x-8">
             <div>
               {" "}
               <label htmlFor="fullname" className="block">

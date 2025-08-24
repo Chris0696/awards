@@ -1,6 +1,6 @@
 export default function ProjectOverviewCard({ color }: { color: string }) {
   return (
-    <div className="bg-gray-200/50 p-4 rounded-xl space-y-8 w-full max-w-[220px] text-center">
+    <div className="bg-gray-200/50 p-4 rounded-xl space-y-8 w-full md:max-w-[220px] text-center">
       <h4 className="text-lg text-gray-600  ">
         Nombre total de projets validés
       </h4>

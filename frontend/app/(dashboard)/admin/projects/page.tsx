@@ -50,7 +50,7 @@ export default function AdminProjectList() {
           <FilterBtn text="Statut" />
           <FilterBtn text="Catégorie" />
         </div>
-        <div>
+        <div className="overflow-x-auto">
           <Table />
         </div>
         <SwitchPageBtn />
