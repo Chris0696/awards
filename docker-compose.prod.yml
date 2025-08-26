@@ -1,0 +1,60 @@
+services:
+  postgres_db:
+    image: postgres:16.1-bookworm
+    ports:
+      - "5432:5432"
+    volumes:
+      - awards_prod_pgdata:/var/lib/postgresql/data
+    env_file: .env
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: "3"
+        max-size: 15m
+    networks:
+      - awards-bridge
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres_db
+    volumes:
+      - awards_collectstatic:/usr/src/app/collectstatic
+      - awards_media:/usr/src/app/media
+      - awards_logs:/usr/src/app/log
+      - ./.env:/usr/src/app/.env:ro
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - awards-bridge
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    env_file: .env
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - awards-bridge
+
+networks:
+  awards-bridge:
+    driver: bridge
+
+volumes:
+  awards_prod_pgdata: {}
+  awards_collectstatic: {}
+  awards_media: {}
+  awards_logs: {}
