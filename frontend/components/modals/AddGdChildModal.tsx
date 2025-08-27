@@ -1,8 +1,8 @@
 import React from "react";
-import Popover from "./ui/Popover";
-import TextField from "./TextField";
-import EmailField from "./EmailField";
-import PhoneNumberField from "./PhoneNumberField";
+import Popover from "../ui/Popover";
+import TextField from "../../app/(landing)/submit/forms/TextField";
+import EmailField from "../../app/(landing)/submit/forms/EmailField";
+import PhoneNumberField from "../../app/(landing)/submit/forms/PhoneNumberField";
 
 type Props = {
   showModal: boolean;

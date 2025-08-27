@@ -1,8 +1,9 @@
 import Image from "next/image";
-import Popover from "./ui/Popover";
+
 import CheckIcon from "@/assets/check.svg";
 import ShootingStarIcon from "@/assets/shootstar.svg";
 import ShareNetworkIcon from "@/assets/sharenetwork.svg";
+import Popover from "../ui/Popover";
 
 type Props = {
   showModal: boolean;

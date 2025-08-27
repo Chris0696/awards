@@ -9,9 +9,9 @@ import Image from "next/image";
 import ArrowLeftIcon from "@/assets/arrowLeft.svg";
 import SecondaryArrowRightIcon from "@/assets/secondaryArrowRight.svg";
 import QuoteIcon from "@/assets/quote.svg";
-import TestimonialCard from "./TestimonialCard";
 
 import { useRef } from "react";
+import TestimonialCard from "./TestimonialCard";
 
 export default function TestimonialsSection() {
   const swiperRef = useRef<SwiperType | null>(null);

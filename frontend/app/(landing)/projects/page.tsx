@@ -1,8 +1,7 @@
-import ProjectsList from "@/components/ProjectsList";
-import ProjectsListCTAsection from "@/components/ProjectsListCTAsection";
-import ProjectsListPageHero from "@/components/ProjectsListPageHero";
-import { ChevronRight, Image } from "lucide-react";
-import Link from "next/link";
+import ProjectsList from "@/app/(landing)/projects/ProjectsList";
+import ProjectsListCTAsection from "@/app/(landing)/projects/ProjectsListCTAsection";
+
+import ProjectsListPageHero from "./ProjectsListPageHero";
 
 export default function page() {
   return (

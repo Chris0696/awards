@@ -1,10 +1,10 @@
-import HowItWorksHeroSection from "@/components/HowItWorksHeroSection";
 import Hiw1Img from "@/assets/hiw1.png";
 import Hiw2Img from "@/assets/hiw2.png";
 import Hiw3Img from "@/assets/hiw3.png";
 import Hiw4Img from "@/assets/hiw4.png";
 import Image from "next/image";
-import FaqSection from "@/components/FaqSection";
+import FaqSection from "@/app/(landing)/components/FaqSection";
+import HowItWorksHeroSection from "./HowItWorksHeroSection";
 
 export default function page() {
   return (

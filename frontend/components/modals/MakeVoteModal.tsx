@@ -1,9 +1,10 @@
 import Image from "next/image";
-import Popover from "./ui/Popover";
-import PhoneNumberField from "./PhoneNumberField";
-import NumberField from "./NumberField";
+
 import { ChevronRightIcon } from "lucide-react";
 import ArtworkImg from "@/assets/artworklight.jpg";
+import Popover from "../ui/Popover";
+import PhoneNumberField from "@/app/(landing)/submit/forms/PhoneNumberField";
+import NumberField from "@/app/(landing)/submit/forms/NumberField";
 
 type Props = {
   showModal: boolean;
@@ -16,7 +17,7 @@ export default function MakeVoteModal({ showModal, setShowModal }: Props) {
       visible={showModal}
       onClose={() => setShowModal(false)}
     >
-      <div className="w-4/5 mx-auto mt-10 mb-20  ">
+      <div className="w-4/5 h-96 overflow-y-auto py-5 md:h-auto md:py-0 mx-auto md:mt-10 md:mb-20  ">
         <div className="grid grid-cols-1 md:grid-cols-2 bg-gray-200 p-4 w-[85%] mx-auto rounded-lg">
           <div>
             <h4>

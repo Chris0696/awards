@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Sidebar from "@/components/dashboard/Sidebar";
+import Sidebar from "@/app/(dashboard)/Sidebar";
+import { MenuIcon } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -12,13 +13,12 @@ export default function AdminLayout({
 
   return (
     <section className="flex h-screen relative">
-      {/* Toggle button for mobile */}
-      {/*  <button
-        className="md:hidden fixed top-4 left-4 z-50 bg-primary text-white p-2 rounded"
+      <button
         onClick={() => setSidebarOpen(true)}
+        className="absolute right-5 top-6 md:hidden"
       >
-        ☰
-      </button> */}
+        <MenuIcon />
+      </button>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       {sidebarOpen && (
         <div

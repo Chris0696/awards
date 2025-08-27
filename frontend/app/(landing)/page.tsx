@@ -1,10 +1,12 @@
-import DiscoverProjects from "@/components/DiscoverProjects";
-import FaqSection from "@/components/FaqSection";
-import HomePageHero from "@/components/HomepageHero";
-import HowItWorksSection from "@/components/HowItWorksSection";
-import PartnersSection from "@/components/PartnersSection";
-import SubheroSection from "@/components/SubheroSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
+import DiscoverProjects from "@/app/(landing)/components/DiscoverProjects";
+import FaqSection from "@/app/(landing)/components/FaqSection";
+
+import PartnersSection from "@/app/(landing)/components/PartnersSection";
+import SubheroSection from "@/app/(landing)/components/subhero/SubheroSection";
+
+import HomePageHero from "./components/HomepageHero";
+import TestimonialsSection from "./components/testimonials/TestimonialsSection";
+import HowItWorksSection from "./components/HowItWorksSection";
 
 export default function Home() {
   return (

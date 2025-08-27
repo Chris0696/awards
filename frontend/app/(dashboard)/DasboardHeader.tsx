@@ -1,6 +1,6 @@
 import RingBellIcon from "@/assets/ringbell.svg";
 import SearchIcon from "@/assets/searchicon.svg";
-import { MenuIcon } from "lucide-react";
+
 import Image from "next/image";
 
 export default function DashboardHeader({ pageTitle }: { pageTitle: string }) {
@@ -27,9 +27,6 @@ export default function DashboardHeader({ pageTitle }: { pageTitle: string }) {
             />
           </div>
         </div>
-        <button className="md:hidden">
-          <MenuIcon />
-        </button>
       </div>
     </div>
   );

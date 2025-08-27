@@ -7,7 +7,7 @@ export default function ColoredOutlineBtn({ text, onClick }: Props) {
   return (
     <button
       onClick={onClick}
-      className="px-8 py-3 border border-secondary rounded-md cursor-pointer text-secondary hover:bg-secondary hover:text-gray-100 transition-colors"
+      className="px-2 md:px-8 py-3 border border-secondary rounded-md cursor-pointer text-secondary hover:bg-secondary hover:text-gray-100 transition-colors"
     >
       {text}
     </button>

@@ -1,5 +1,5 @@
-import EmailField from "@/components/EmailField";
-import PasswordField from "@/components/PasswordField";
+import EmailField from "@/app/(landing)/submit/forms/EmailField";
+import PasswordField from "@/app/(landing)/submit/forms/PasswordField";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 

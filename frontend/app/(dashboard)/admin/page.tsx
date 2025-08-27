@@ -1,7 +1,7 @@
 import { NewProjectsChart } from "@/components/dashboard/admin/NewProjectChart";
 import ProjectOverviewCard from "@/components/dashboard/admin/ProjectOverviewCard";
 import { VotesChart } from "@/components/dashboard/admin/VotesChart";
-import DashboardHeader from "@/components/dashboard/DasboardHeader";
+import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
 import FilterBtn from "@/components/dashboard/FilterBtn";
 import InfobulleCard from "@/components/dashboard/project-owner/InfobulleCard";
 import MyProjectCard from "@/components/dashboard/project-owner/MyProjectCard";

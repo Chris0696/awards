@@ -1,9 +1,8 @@
-import { links } from "@/app/common/headerlinks";
 import { X } from "lucide-react";
 import React from "react";
-import NavLink from "./NavLink";
-import Link from "next/link";
-import ColoredLink from "./ColoredLink";
+import NavLink from "../../common/NavLink";
+import ColoredLink from "../../../components/ui/ColoredLink";
+import { landingpagelinks } from "@/app/common/navigationlinks";
 
 export default function MobileMenu({
   showMobileMenu,
@@ -32,7 +31,7 @@ export default function MobileMenu({
         >
           <X />
         </button>
-        {links.map((link, idx) => (
+        {landingpagelinks.map((link, idx) => (
           <span key={idx} onClick={() => setShowMobileMenu(false)}>
             <NavLink href={link.url} text={link.page} />
           </span>

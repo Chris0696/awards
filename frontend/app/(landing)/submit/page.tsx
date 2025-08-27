@@ -1,5 +1,5 @@
-import SubmitHeroSection from "@/components/SubmitHeroSection";
-import SubmitProjectFormContainer from "@/components/SubmitProjectFormContainer";
+import SubmitProjectFormContainer from "@/app/(landing)/submit/forms/SubmitProjectFormContainer";
+import SubmitHeroSection from "./SubmitHeroSection";
 
 export default function page() {
   return (

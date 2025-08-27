@@ -1,5 +1,5 @@
-import ProjectCard from "./ProjectCard";
-import ColoredLink from "./ColoredLink";
+import ProjectCard from "@/app/(landing)/projects/ProjectCard";
+import ColoredLink from "../../../components/ui/ColoredLink";
 
 export default function DiscoverProjects() {
   return (

@@ -1,8 +1,8 @@
 "use client";
-import AddGdChildModal from "@/components/AddGdChildModal";
-import DashboardHeader from "@/components/dashboard/DasboardHeader";
+import AddGdChildModal from "@/components/modals/AddGdChildModal";
+import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
 import Table from "@/components/dashboard/Table";
-import SwitchPageBtn from "@/components/SwitchPageBtn";
+import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
 import { ChevronRightIcon } from "lucide-react";
 import { useState } from "react";
 import UserAvatar from "@/assets/user_avatar.svg";

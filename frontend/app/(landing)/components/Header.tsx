@@ -3,10 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { MenuIcon, X } from "lucide-react";
-import NavLink from "./NavLink";
-import { links } from "@/app/common/headerlinks";
+import NavLink from "../../common/NavLink";
 import MobileMenu from "./MobileMenu";
-import ColoredLink from "./ColoredLink";
+import ColoredLink from "../../../components/ui/ColoredLink";
+import { landingpagelinks } from "@/app/common/navigationlinks";
 
 export default function Header() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -22,7 +22,7 @@ export default function Header() {
           />
         </Link>
         <div className=" hidden md:flex space-x-6 items-center text-white  ">
-          {links.map((link, idx) => (
+          {landingpagelinks.map((link, idx) => (
             <NavLink key={idx} href={link.url} text={link.page} />
           ))}
           <ColoredLink url="/login" text="Se connecter" />
