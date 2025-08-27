@@ -1,10 +1,15 @@
+"use client";
 import ProfilImg from "@/assets/profil.png";
 import ArrowRightIcon from "@/assets/arrowRight.svg";
 import Image from "next/image";
-import Button from "./Button";
+
 import Link from "next/link";
+import MakeVoteModal from "./MakeVoteModal";
+import { useState } from "react";
+import ColoredOutlineBtn from "./ui/ColoredOutlineBtn";
 
 export default function ProjectCard() {
+  const [showModal, setShowModal] = useState(false);
   return (
     <div className="bg-white rounded-2xl w-xl  p-12">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center">
@@ -35,9 +40,10 @@ export default function ProjectCard() {
         </p>
       </div>
       <div className="flex  flex-col space-y-3 md:space-y-0 md:flex-row md:justify-between">
-        <button className="px-8 py-3 border border-secondary rounded-md cursor-pointer text-secondary hover:bg-secondary hover:text-gray-100 transition-colors">
-          Je vote pour ce projet
-        </button>
+        <ColoredOutlineBtn
+          text="Je vote pour ce projet"
+          onClick={() => setShowModal(true)}
+        />
         <Link
           href={"/projects/1"}
           className="flex items-center space-x-3 text-lg"
@@ -46,6 +52,7 @@ export default function ProjectCard() {
           <Image src={ArrowRightIcon} alt="Arrow Right" />
         </Link>
       </div>
+      <MakeVoteModal showModal={showModal} setShowModal={setShowModal} />
     </div>
   );
 }

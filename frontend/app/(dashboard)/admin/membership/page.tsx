@@ -33,18 +33,18 @@ export default function page() {
       <AddGdChildModal showModal={showModal} setShowModal={setShowModal} />
     </section>
   ) : (
-    <section>
+    <section className="w-full overflow-x-hidden">
       <h2 className="text-2xl font-semibold">Détails Ines TOTINON</h2>
       <div className="bg-gray-200/50 rounded-2xl px-6 pt-12 pb-3 mt-8">
         <h3 className="text-xl font-medium">Informations personnelles</h3>
-        <div className="md:flex space-x-24 mt-8">
+        <div className="xl:flex space-x-4 xl:space-x-24 mt-8">
           <div className="flex items-center space-x-2">
             <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
               <Image src={UserAvatar} alt="User avatar" />
             </div>
             <h3 className="text-xl text-gray-800">Ines Totinon</h3>
           </div>
-          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:space-x-8">
+          <div className="flex flex-col space-y-4 xl:space-y-0 xl:flex-row xl:space-x-8">
             <div>
               {" "}
               <label htmlFor="fullname" className="block">
@@ -86,7 +86,7 @@ export default function page() {
           </div>
         </div>
       </div>
-      <div className="flex justify-between mt-8 mb-3">
+      <div className="flex flex-col md:flex-row justify-between mt-8 mb-3">
         <h3 className="text-2xl font-bold">Liste des fileuls</h3>
         <div className="flex items-center bg-gray-100 rounded-md relative h-10">
           <Image

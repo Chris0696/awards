@@ -14,7 +14,7 @@ export default function ProjectsListPageHero() {
           présentation claire et percutante. Votez pour vos coups de coeur et
           contribuez au financement du projet gagnant.
         </p>
-        <ColoredLink text="Soumettre mon projet" url="" />
+        <ColoredLink text="Soumettre mon projet" url="/submit" />
       </div>
     </section>
   );

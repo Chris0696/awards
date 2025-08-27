@@ -13,23 +13,20 @@ export default function AdminLayout({
   return (
     <section className="flex h-screen relative">
       {/* Toggle button for mobile */}
-      <button
+      {/*  <button
         className="md:hidden fixed top-4 left-4 z-50 bg-primary text-white p-2 rounded"
         onClick={() => setSidebarOpen(true)}
       >
         ☰
-      </button>
-      {/* Sidebar */}
+      </button> */}
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      {/* Main content */}
-      <section className="flex-1 p-5">{children}</section>
+      <section className="flex-1 p-5 overflow-y-auto">{children}</section>
     </section>
   );
 }

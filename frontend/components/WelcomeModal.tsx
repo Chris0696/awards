@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Popover from "./Popover";
+import Popover from "./ui/Popover";
 import Link from "next/link";
 import MaterialIcon from "@/assets/materials.svg";
 

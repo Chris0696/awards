@@ -21,9 +21,9 @@ export default function HomePageHero() {
             inspirants
           </p>
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 text-center">
-            <ColoredLink text="Soumettre mon projet" url="" />
+            <ColoredLink text="Soumettre mon projet" url="/submit" />
 
-            <WhiteOutlineLink text="Découvrir les projets" url="" />
+            <WhiteOutlineLink text="Découvrir les projets" url="/projects" />
           </div>
         </div>
       </div>

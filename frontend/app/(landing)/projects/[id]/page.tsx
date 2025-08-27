@@ -11,7 +11,7 @@ export default function page() {
     <section className="pb-72">
       <div className="bg-primary text-white relative pb-56">
         <div className="flex justify-center pt-16 pb-10">
-          <p className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:space-x-3 text-gray-100">
+          <p className="flex  flex-col space-y-3 md:space-y-0 md:flex-row md:space-x-3 text-gray-100">
             <span className="flex flex-col  md:flex-row items-center space-x-2">
               <span>Découvrir les projets</span>
               <ArrowRight className="hidden md:block" size={16} />
@@ -22,7 +22,7 @@ export default function page() {
               <ArrowRight className="hidden md:block" size={16} />
               <ArrowDown className="md:hidden" size={16} />
             </span>
-            <span>
+            <span className="block max-w-72 mx-auto">
               Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis
               itaque
             </span>
@@ -34,7 +34,7 @@ export default function page() {
               Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis
               itaque impedit molestiae, tenetur harum
             </h2>
-            <div className="flex items-center justify-between my-7">
+            <div className="flex  items-center justify-between my-7">
               <div className="flex items-center space-x-1">
                 <Image
                   src={ProfilImg}
@@ -45,7 +45,7 @@ export default function page() {
               </div>
               <p className="text-gray-400">14 Janvier 2025</p>
               <div>
-                <p className="px-6 py-3 rounded-full bg-white text-primary">
+                <p className="px-2 text-center md:px-6 md:py-3 rounded-full bg-white text-primary">
                   1500 votes
                 </p>
               </div>
@@ -60,7 +60,7 @@ export default function page() {
             vitae fuga! Maiores dolorem amet eveniet iusto praesentium ipsa
             iste. Explicabo asperiores ratione ipsum tenetur.
           </p>
-          <div className="flex items-center space-x-4 mt-8">
+          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 items-center space-x-4 mt-8">
             <button className="border border-white px-6 py-2 rounded-md hover:bg-white hover:text-secondary transition-colors cursor-pointer">
               Voter pour ce projet-100 FCFA
             </button>
@@ -78,11 +78,11 @@ export default function page() {
         <Image
           src={ProjectImg}
           alt="Projet"
-          className="w-[75%] h-[350px] object-cover mx-auto rounded-lg absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2"
+          className="w-[85%] md:w-[75%] md:h-[350px] object-cover mx-auto rounded-lg absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2"
         />
       </div>
 
-      <div className="grid grid-cols-5 mt-72 w-3/4 mx-auto">
+      <div className="grid grid-cols-5 mt-40 md:mt-72 w-3/4 mx-auto">
         <div className="col-span-5 md:col-span-4 space-y-16 md:pr-28 mb-20 md:mb-0">
           <div>
             <h3 className="text-3xl font-semibold text-gray-700 mb-6">
@@ -141,7 +141,7 @@ export default function page() {
             </p>
           </div>
         </div>
-        <div className="col-span-5 md:col-span-1 bg-gray-50 py-14 px-6 rounded-lg h-max space-y-20">
+        <div className="col-span-5 md:col-span-1 bg-gray-50 md:py-14 px-6 rounded-lg h-max space-y-20">
           <div className="space-y-4">
             <h4 className="text-2xl font-semibold text-gray-700">
               Soutenez ce projet en votant dès maintenant

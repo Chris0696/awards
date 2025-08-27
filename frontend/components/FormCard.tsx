@@ -37,9 +37,9 @@ type Props = {
 export default function FormCard({ step = 1, children }: Props) {
   const currentStep = steps.find((s) => s.id === step);
   return (
-    <div className="w-full max-w-3xl mx-auto ">
+    <div className="w-full px-5 max-w-3xl mx-auto ">
       <div>
-        <h2 className="flex  items-center text-4xl font-bold mb-3 space-x-20">
+        <h2 className="flex  items-center text-xl md:text-4xl font-bold mb-3 space-x-20">
           <span className="flex items-center space-x-1">
             <span className="text-[#0026B0] font-medium">{step}/4</span>
             <ArrowRight size={20} />

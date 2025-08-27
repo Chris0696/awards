@@ -16,7 +16,7 @@ import { useState } from "react";
 export default function SubmitProjectFormContainer() {
   const [step, setStep] = useState(1);
   return (
-    <section className="pb-40 pt-28">
+    <section className="pb-40 pt-28" id="submit-form">
       {step === 1 && (
         <FormCard step={1}>
           <div className="space-y-6">
@@ -75,16 +75,16 @@ export default function SubmitProjectFormContainer() {
           <div className="mt-10">
             <FileInputField />
           </div>
-          <div className="flex justify-between items-center mt-6">
+          <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row justify-between items-center mt-6">
             <button
               onClick={() => setStep(1)}
-              className="border border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
+              className="border w-full md:w-auto border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
             >
               <ChevronLeft /> <span>Retourner</span>
             </button>
             <button
               onClick={() => setStep(3)}
-              className="bg-secondary px-10  py-2.5 cursor-pointer text-lg rounded-md text-white"
+              className="bg-secondary px-10 w-full md:w-auto  py-2.5 cursor-pointer text-lg rounded-md text-white"
             >
               Continuer
             </button>
@@ -113,16 +113,16 @@ export default function SubmitProjectFormContainer() {
                 placeholder="Où en êtes-vous ?"
               />
             </div>
-            <div className="flex justify-between items-center mt-6">
+            <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row justify-between items-center mt-6">
               <button
                 onClick={() => setStep(2)}
-                className="border border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
+                className="border w-full md:w-auto border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
               >
                 <ChevronLeft /> <span>Retourner</span>
               </button>
               <button
                 onClick={() => setStep(4)}
-                className="bg-secondary px-10  py-2.5 cursor-pointer text-lg rounded-md text-white"
+                className="bg-secondary w-full md:w-auto px-10  py-2.5 cursor-pointer text-lg rounded-md text-white"
               >
                 Continuer
               </button>
@@ -170,14 +170,14 @@ export default function SubmitProjectFormContainer() {
                 <span className="text-red-500">*</span>
               </label>
             </div>
-            <div className="flex justify-between items-center mt-20">
+            <div className="flex flex-col space-y-2 md:space-y-0 justify-between items-center mt-20">
               <button
                 onClick={() => setStep(3)}
-                className="border border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
+                className="border w-full md:w-auto border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
               >
                 <ChevronLeft /> <span>Retourner</span>
               </button>
-              <button className="bg-secondary px-10  py-2.5 cursor-pointer text-lg rounded-md text-white">
+              <button className="bg-secondary w-full md:w-auto px-10  py-2.5 cursor-pointer text-lg rounded-md text-white">
                 Continuer
               </button>
             </div>
