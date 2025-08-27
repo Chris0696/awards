@@ -4,9 +4,9 @@ import ArrowRightIcon from "@/assets/arrowRight.svg";
 import Image from "next/image";
 
 import Link from "next/link";
-import MakeVoteModal from "./MakeVoteModal";
 import { useState } from "react";
-import ColoredOutlineBtn from "./ui/ColoredOutlineBtn";
+import ColoredOutlineBtn from "@/components/ui/ColoredOutlineBtn";
+import MakeVoteModal from "@/components/modals/MakeVoteModal";
 
 export default function ProjectCard() {
   const [showModal, setShowModal] = useState(false);

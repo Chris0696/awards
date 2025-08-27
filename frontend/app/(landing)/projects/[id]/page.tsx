@@ -161,7 +161,7 @@ export default function page() {
               Déposez-la en quelques clics
             </p>
             <Link
-              href={""}
+              href={"/submit"}
               className="text-secondary text-lg hover:text-primary transition-colors"
             >
               <span>Soumettre mon projet</span>

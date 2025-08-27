@@ -1,12 +1,12 @@
 "use client";
 import { useState } from "react";
-import CategoryTag from "./CategoryTag";
-import ProjectCard from "./ProjectCard";
+import CategoryTag from "../../common/CategoryTag";
 import Link from "next/link";
-import ColoredLink from "./ColoredLink";
+import ColoredLink from "../../../components/ui/ColoredLink";
 import { ChevronRight } from "lucide-react";
 import HappymanImg from "@/assets/happyman.png";
 import Image from "next/image";
+import ProjectCard from "@/app/(landing)/projects/ProjectCard";
 
 type Category = {
   tagname: string;

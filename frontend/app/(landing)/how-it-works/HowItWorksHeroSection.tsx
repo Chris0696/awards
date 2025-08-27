@@ -1,5 +1,4 @@
-import Button from "./Button";
-import ColoredLink from "./ColoredLink";
+import ColoredLink from "@/components/ui/ColoredLink";
 
 export default function HowItWorksHeroSection() {
   return (

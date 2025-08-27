@@ -6,7 +6,7 @@ import LinkedinIcon from "@/assets/linkedin.svg";
 import TwitterIcon from "@/assets/twitter.svg";
 import WhatsappIcon from "@/assets/whatsapp.svg";
 import ArrowRight from "@/assets/arrowRight.svg";
-import WhiteOutlineLink from "./WhiteOutlineLink";
+import WhiteOutlineLink from "../../../components/ui/WhiteOutlineLink";
 
 export default function Footer() {
   return (

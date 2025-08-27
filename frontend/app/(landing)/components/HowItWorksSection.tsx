@@ -1,7 +1,6 @@
 import Image from "next/image";
-import Button from "./Button";
 import CurveImg from "@/assets/howitworkscurve.png";
-import ColoredOutlineLink from "./ColoredOutlineLink";
+import ColoredOutlineLink from "@/components/ui/ColoredOutlineLink";
 
 export default function HowItWorksSection() {
   return (

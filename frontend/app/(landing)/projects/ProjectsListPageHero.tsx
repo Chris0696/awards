@@ -1,5 +1,4 @@
-import Link from "next/link";
-import ColoredLink from "./ColoredLink";
+import ColoredLink from "@/components/ui/ColoredLink";
 
 export default function ProjectsListPageHero() {
   return (

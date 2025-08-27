@@ -20,7 +20,7 @@ export default function Popover({
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-2">
       <div className="bg-white  rounded-lg  relative w-full max-w-2xl">
         <div className="flex items-center justify-between rounded-t-lg bg-primary px-10 py-2 text-white">
           {!isLogin ? (

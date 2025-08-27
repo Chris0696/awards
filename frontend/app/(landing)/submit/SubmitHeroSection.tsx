@@ -1,7 +1,6 @@
 import Image from "next/image";
-import Button from "./Button";
 import HanddownIcon from "@/assets/handdown.svg";
-import ColoredLink from "./ColoredLink";
+import ColoredLink from "@/components/ui/ColoredLink";
 
 export default function SubmitHeroSection() {
   return (

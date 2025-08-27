@@ -1,7 +1,7 @@
-import DashboardHeader from "@/components/dashboard/DasboardHeader";
+import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
 import FilterBtn from "@/components/dashboard/FilterBtn";
 import Table from "@/components/dashboard/Table";
-import SwitchPageBtn from "@/components/SwitchPageBtn";
+import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
 import {
   ArrowRight,
   ChevronLeftIcon,

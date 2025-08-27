@@ -1,9 +1,9 @@
-import DashboardHeader from "@/components/dashboard/DasboardHeader";
+import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
 import FilterBtn from "@/components/dashboard/FilterBtn";
 import SynthesisCard from "@/components/dashboard/project-owner/SynthesisCard";
 import { VotesChart } from "@/components/dashboard/project-owner/VotesChart";
 import Table from "@/components/dashboard/Table";
-import SwitchPageBtn from "@/components/SwitchPageBtn";
+import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
 import Link from "next/link";
 import React from "react";
 import FacebookIcon from "@/assets/facebook.svg";
@@ -17,7 +17,7 @@ export default function StatisticPage() {
     <section className="">
       <DashboardHeader pageTitle="Statistiques" />
       <div className=" grid grid-cols-4 ">
-        <div className="col-span-4 xl:col-span-3  ">
+        <div className="col-span-4 xl:col-span-3 space-y-4  ">
           <div className="h-min bg-gray-200/50 rounded-xl p-6 space-y-6">
             <h2 className="text-xl font-medium text-gray-800">
               Synthèse globale

@@ -1,7 +1,5 @@
-import Link from "next/link";
-import AccordionItem from "./Accordion";
-import Accordion from "./Accordion";
-import ColoredOutlineLink from "./ColoredOutlineLink";
+import AccordionItem from "../../../components/Accordion";
+import ColoredOutlineLink from "../../../components/ui/ColoredOutlineLink";
 
 export default function FaqSection({ title }: { title: string }) {
   return (
