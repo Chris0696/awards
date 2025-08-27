@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Popover from "./Popover";
+import Popover from "./ui/Popover";
 import PhoneNumberField from "./PhoneNumberField";
 import NumberField from "./NumberField";
 import { ChevronRightIcon } from "lucide-react";

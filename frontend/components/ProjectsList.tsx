@@ -65,7 +65,7 @@ export default function ProjectsList() {
         </div>
       </div>
       <div className="mt-16 flex justify-center">
-        <ColoredLink text="Soumettre un projet maintenant" url="" />
+        <ColoredLink text="Soumettre un projet maintenant" url="/submit" />
       </div>
     </section>
   );

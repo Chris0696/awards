@@ -22,17 +22,23 @@ export default function Footer() {
             Ne laissez pas vos idées dormir dans un cannet.
           </p>
 
-          <WhiteOutlineLink text="Soumettre mon projet maintenant" url="" />
+          <WhiteOutlineLink
+            text="Soumettre mon projet maintenant"
+            url="/submit"
+          />
         </div>
       </div>
       <div className="flex flex-col md:flex-row md:justify-around items-center py-16  border-t border-b border-gray-50/35 md:px-56">
         <div className="space-y-6">
-          <Image
-            src={"/LOGO.svg"}
-            alt="Project Awards Logo"
-            width={200}
-            height={200}
-          />
+          <Link href={"/"}>
+            {" "}
+            <Image
+              src={"/LOGO.svg"}
+              alt="Project Awards Logo"
+              width={200}
+              height={200}
+            />
+          </Link>
 
           <p>Project Awards - Le tremplin des idées innovantes</p>
           <div className="flex space-x-4">

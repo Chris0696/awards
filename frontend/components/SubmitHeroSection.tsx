@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Button from "./Button";
 import HanddownIcon from "@/assets/handdown.svg";
+import ColoredLink from "./ColoredLink";
 
 export default function SubmitHeroSection() {
   return (
@@ -20,7 +21,10 @@ export default function SubmitHeroSection() {
           </p>
         </div>
         <div className="flex justify-center flex-col items-center">
-          <Button variant="filled">Soumettre mon projet maintenant</Button>
+          <ColoredLink
+            text="Soumettre mon projet maintenant"
+            url="#submit-form"
+          />
           <Image src={HanddownIcon} alt="Handown Icon" className="mt-1.5" />
         </div>
       </div>

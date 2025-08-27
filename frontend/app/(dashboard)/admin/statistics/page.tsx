@@ -16,8 +16,8 @@ export default function StatisticPage() {
   return !isAdmin ? (
     <section className="">
       <DashboardHeader pageTitle="Statistiques" />
-      <div className=" md:grid md:grid-cols-4 ">
-        <div className=" md:col-span-3  ">
+      <div className=" grid grid-cols-4 ">
+        <div className="col-span-4 xl:col-span-3  ">
           <div className="h-min bg-gray-200/50 rounded-xl p-6 space-y-6">
             <h2 className="text-xl font-medium text-gray-800">
               Synthèse globale
@@ -42,8 +42,8 @@ export default function StatisticPage() {
             </div>
           </div>
         </div>
-        <div className="md:col-span-1">
-          <div className="bg-gray-200/50 rounded-lg p-3 w-full md:w-[80%] mx-auto ">
+        <div className="col-span-4 mt-5 xl:mt-0 xl:col-span-1">
+          <div className="bg-gray-200/50 rounded-lg p-3 w-full xl:w-[80%] mx-auto ">
             <h4 className="font-medium text-xl">
               Un simple partage peut faire la différence !
             </h4>

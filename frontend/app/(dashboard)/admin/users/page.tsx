@@ -5,7 +5,7 @@ import SwitchPageBtn from "@/components/SwitchPageBtn";
 
 export default function page() {
   return (
-    <div>
+    <div className="overflow-x-hidden">
       <DashboardHeader pageTitle="Utilisateurs inscrits" />
       <div className=" flex justify-end space-x-3  mb-5">
         <FilterBtn text="Date" />

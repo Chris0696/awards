@@ -1,4 +1,5 @@
 import Button from "./Button";
+import ColoredLink from "./ColoredLink";
 
 export default function HowItWorksHeroSection() {
   return (
@@ -15,7 +16,7 @@ export default function HowItWorksHeroSection() {
           </p>
         </div>
         <div className="flex justify-center flex-col items-center">
-          <Button variant="filled">Soumettre mon projet maintenant</Button>
+          <ColoredLink text="Soumettre mon projet maintenant" url="/submit" />
         </div>
       </div>
     </section>

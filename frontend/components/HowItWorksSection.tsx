@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Button from "./Button";
 import CurveImg from "@/assets/howitworkscurve.png";
+import ColoredOutlineLink from "./ColoredOutlineLink";
 
 export default function HowItWorksSection() {
   return (
@@ -8,12 +9,12 @@ export default function HowItWorksSection() {
       <div className="w-5/6">
         <h2 className="text-primary font-bold text-4xl">Comment ça marche ?</h2>
         <div className="mt-10 relative">
-          <div className="space-y-9 w-sm">
-            <p className="text-[1.7rem] text-gray-600 leading-9">
+          <div className="space-y-9 md:w-sm">
+            <p className="text-[1.7rem] text-gray-600 leading-9 ">
               En trois étapes simples, passez de l'idée à la réalisation. Vous
               êtes prêts? Donnez vie à votre projet maintenant.
             </p>
-            <Button variant="outline">Soumettre mon projet</Button>
+            <ColoredOutlineLink url="/submit" text="Soumettre mon projet" />
           </div>
           <div className="md:relative  w-full">
             <div className="hidden w-full md:flex md:absolute left-2/5 -translate-x-1/2 -translate-y-1/2 -z-40">

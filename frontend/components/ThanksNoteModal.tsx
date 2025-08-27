@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Popover from "./Popover";
+import Popover from "./ui/Popover";
 import CheckIcon from "@/assets/check.svg";
 import ShootingStarIcon from "@/assets/shootstar.svg";
 import ShareNetworkIcon from "@/assets/sharenetwork.svg";

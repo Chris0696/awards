@@ -29,7 +29,7 @@ export default function DiscoverProjects() {
       </div>
 
       <div className="flex justify-center py-12 md:pt-24  md:pb-20">
-        <ColoredLink text="Voir tous les projets en cours" url="" />
+        <ColoredLink text="Voir tous les projets en cours" url="/projects" />
       </div>
     </section>
   );

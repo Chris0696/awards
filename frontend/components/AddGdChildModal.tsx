@@ -1,5 +1,5 @@
 import React from "react";
-import Popover from "./Popover";
+import Popover from "./ui/Popover";
 import TextField from "./TextField";
 import EmailField from "./EmailField";
 import PhoneNumberField from "./PhoneNumberField";
