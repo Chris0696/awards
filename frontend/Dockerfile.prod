@@ -1,25 +1,40 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine
+
+# Create a non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
 
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
 
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm ci --production
+
+# Copy the source code
 COPY . .
+
+# Build the Next.js app
 RUN npm run build
 
-FROM node:20-alpine AS runner
-WORKDIR /app
+# Set ownership and permissions for the app directory
+RUN chown -R nextjs:nodejs /app && \
+    chmod -R 755 /app && \
+    mkdir -p .next /tmp && \
+    chown -R nextjs:nodejs .next /tmp && \
+    chmod -R 755 .next /tmp
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Create and set permissions for next-env.d.ts to avoid EACCES errors
+RUN touch /app/next-env.d.ts && \
+    chown nextjs:nodejs /app/next-env.d.ts && \
+    chmod 664 /app/next-env.d.ts
 
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
+# Switch to non-root user
 USER nextjs
 
 EXPOSE 3000
-ENV PORT 3000
 
-CMD ["node", "server.js"]
+# Environment variables for Next.js
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+
+CMD ["npm", "run", "start"]
