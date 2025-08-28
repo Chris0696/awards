@@ -50,6 +50,7 @@ class Category(models.Model):
     active = models.BooleanField(default=True)
     slug = models.SlugField(unique=True, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # category_id = ShortUUIDField(null=True, unique=True, length=8, max_length=20, alphabet="1234567890ABCDEF")
 
     class Meta:
         ordering = ['category_name']

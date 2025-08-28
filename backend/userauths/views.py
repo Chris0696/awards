@@ -3,6 +3,7 @@ from django.shortcuts import render
 from userauths.utils import send_otp_email
 from .models import Profile, User
 from userauths import serializers as api_serializer
+from api import serializers as register_serializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import generics, status
@@ -18,7 +19,13 @@ class MyTokenObtainPairView(TokenObtainPairView):
 class RegisterViewAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
-    serializer_class = api_serializer.RegisterSerializer
+    serializer_class = register_serializer.RegisterSerializer
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        response_data = serializer.save()
+        return Response(response_data, status=status.HTTP_201_CREATED)
     
 
 class AdminRegisterViewAPIView(generics.CreateAPIView):

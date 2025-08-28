@@ -1,11 +1,12 @@
 from django.contrib.auth.password_validation import validate_password
-from project.models import Commercial
-from projectowner.models import Owner
+from project.models import Commercial, Category, Project
+# from project.serializers import ProjectCreateUpdateSerializer
 from rest_framework import serializers
 from .models import Profile, User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.utils.translation import gettext_lazy as _
 import re
+from django.db import transaction
 
 
 USER_TYPES = (
@@ -28,98 +29,100 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         
         return token
 
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(
-        write_only=True,
-        required=True,
-        min_length=8,
-        validators=[validate_password],
-        style={'input_type': 'password'}
-    )
-    full_name = serializers.CharField(max_length=100, required=True)
-    phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
-    country_code = serializers.CharField(max_length=5, required=False, allow_blank=True)
-    profession = serializers.CharField(required=False, allow_blank=True)
-    age = serializers.IntegerField(required=False, allow_null=True)
-    affiliate = serializers.CharField(required=False, allow_blank=True, write_only=True)  # Champ ajouté explicitement
 
-    class Meta:
-        model = User
-        fields = ('full_name', 'email', 'country_code', 'phone', 'profession', 'password', 'age', 'affiliate')
+    
+# class RegisterSerializer(serializers.ModelSerializer):
+#     password = serializers.CharField(
+#         write_only=True,
+#         required=True,
+#         min_length=8,
+#         validators=[validate_password],
+#         style={'input_type': 'password'}
+#     )
+#     full_name = serializers.CharField(max_length=100, required=True)
+#     phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
+#     country_code = serializers.CharField(max_length=5, required=False, allow_blank=True)
+#     profession = serializers.CharField(required=False, allow_blank=True)
+#     age = serializers.IntegerField(required=False, allow_null=True)
+#     affiliate = serializers.CharField(required=False, allow_blank=True, write_only=True)  # Champ ajouté explicitement
 
-    def validate(self, attrs):
-        # Valider le code pays
-        country_code = attrs.get('country_code')
-        if country_code and not re.match(r'^\+\d{1,3}$', country_code):
-            raise serializers.ValidationError({"country_code": _("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33).")})
+#     class Meta:
+#         model = User
+#         fields = ('full_name', 'email', 'country_code', 'phone', 'profession', 'password', 'age', 'affiliate')
 
-        # Valider le numéro de téléphone
-        phone = attrs.get('phone')
-        if phone and not re.match(r'^\d{7,15}$', phone):
-            raise serializers.ValidationError({"phone": _("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")})
+#     def validate(self, attrs):
+#         # Valider le code pays
+#         country_code = attrs.get('country_code')
+#         if country_code and not re.match(r'^\+\d{1,3}$', country_code):
+#             raise serializers.ValidationError({"country_code": _("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33).")})
 
-        # Valider l'âge
-        age = attrs.get('age')
-        if age and (age < 18 or age > 120):
-            raise serializers.ValidationError({"age": _("L'âge doit être compris entre 18 et 120 ans.")})
+#         # Valider le numéro de téléphone
+#         phone = attrs.get('phone')
+#         if phone and not re.match(r'^\d{7,15}$', phone):
+#             raise serializers.ValidationError({"phone": _("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")})
 
-        # Valider le lien d'affiliation
-        affiliate = attrs.get('affiliate')
-        if affiliate:
-            try:
-                # Recherche exacte ou partielle selon le format de affiliate_link
-                commercial = Commercial.objects.get(affiliate_link=affiliate)  # Recherche exacte
-                attrs['commercial'] = commercial  # Stocker le commercial pour la création
-            except Commercial.DoesNotExist:
-                raise serializers.ValidationError({"affiliate": _("Lien d'affiliation invalide.")})
-            except Commercial.MultipleObjectsReturned:
-                raise serializers.ValidationError({"affiliate": _("Plusieurs commerciaux correspondent à ce lien d'affiliation.")})
+#         # Valider l'âge
+#         age = attrs.get('age')
+#         if age and (age < 18 or age > 120):
+#             raise serializers.ValidationError({"age": _("L'âge doit être compris entre 18 et 120 ans.")})
 
-        return attrs
+#         # Valider le lien d'affiliation
+#         affiliate = attrs.get('affiliate')
+#         if affiliate:
+#             try:
+#                 # Recherche exacte ou partielle selon le format de affiliate_link
+#                 commercial = Commercial.objects.get(affiliate_link=affiliate)  # Recherche exacte
+#                 attrs['commercial'] = commercial  # Stocker le commercial pour la création
+#             except Commercial.DoesNotExist:
+#                 raise serializers.ValidationError({"affiliate": _("Lien d'affiliation invalide.")})
+#             except Commercial.MultipleObjectsReturned:
+#                 raise serializers.ValidationError({"affiliate": _("Plusieurs commerciaux correspondent à ce lien d'affiliation.")})
 
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError(_("Cet email est déjà utilisé."))
-        return value
+#         return attrs
 
-    def create(self, validated_data):
-        # Extraire les champs
-        phone = validated_data.pop('phone', None)
-        country_code = validated_data.pop('country_code', None)
-        profession = validated_data.pop('profession', None)
-        age = validated_data.pop('age', None)
-        commercial = validated_data.pop('commercial', None)  # Récupérer le commercial validé
+#     def validate_email(self, value):
+#         if User.objects.filter(email=value).exists():
+#             raise serializers.ValidationError(_("Cet email est déjà utilisé."))
+#         return value
 
-        # Générer un username basé sur l'email
-        email = validated_data['email']
-        base_username = email.split('@')[0]
-        username = base_username
-        counter = 1
-        while User.objects.filter(username=username).exists():
-            username = f"{base_username}{counter}"
-            counter += 1
+#     def create(self, validated_data):
+#         # Extraire les champs
+#         phone = validated_data.pop('phone', None)
+#         country_code = validated_data.pop('country_code', None)
+#         profession = validated_data.pop('profession', None)
+#         age = validated_data.pop('age', None)
+#         commercial = validated_data.pop('commercial', None)  # Récupérer le commercial validé
 
-        # Créer l'utilisateur avec user_type='owner'
-        user = User.objects.create_user(
-            email=validated_data['email'],
-            username=username,
-            full_name=validated_data['full_name'],
-            password=validated_data['password'],
-            user_type='owner'
-        )
+#         # Générer un username basé sur l'email
+#         email = validated_data['email']
+#         base_username = email.split('@')[0]
+#         username = base_username
+#         counter = 1
+#         while User.objects.filter(username=username).exists():
+#             username = f"{base_username}{counter}"
+#             counter += 1
 
-        # Créer le profil Owner avec le commercial
-        owner = Owner.objects.create(
-            user=user,
-            full_name=user.full_name,
-            phone=phone,
-            country_code=country_code,
-            profession=profession,
-            age=age,
-            commercial=commercial
-        )
+#         # Créer l'utilisateur avec user_type='owner'
+#         user = User.objects.create_user(
+#             email=validated_data['email'],
+#             username=username,
+#             full_name=validated_data['full_name'],
+#             password=validated_data['password'],
+#             user_type='owner'
+#         )
 
-        return user
+#         # Créer le profil Owner avec le commercial
+#         owner = Owner.objects.create(
+#             user=user,
+#             full_name=user.full_name,
+#             phone=phone,
+#             country_code=country_code,
+#             profession=profession,
+#             age=age,
+#             commercial=commercial
+#         )
+
+#         return user
 
 
 class AdminRegisterSerializer(serializers.ModelSerializer):

@@ -34,3 +34,57 @@
   "file": "file.pdf",
   "image": "image.jpg"
 }
+
+
+// Création de compte avec projet automatiquement
+
+// Sélection d’une catégorie existante
+
+
+{
+  "full_name": "Jean Dupont",
+  "email": "jean.dupont@example.com",
+  "password": "Motdepasse123!",
+  "country_code": "+229",
+  "phone": "1234567890",
+  "profession": "Entrepreneur",
+  "age": 30,
+  "affiliate": "http://localhost:8000/api/v1/user/register/?affiliate=COM_778AF735",
+  "project": {
+    "category_id": 1,
+    "project_title": "Projet d'accès à l'eau",
+    "local_area_impact": "Région de Cotonou",
+    "main_objective": "Améliorer l'accès à l'eau",
+    "solution": "Construction de puits",
+    "description": "Description détaillée",
+    "estimated_budget": 600000.00,
+    "target_audience": "Communautés rurales",
+    "progress_report": "En cours de planification",
+    "owner_project_status": "brouillon"
+  }
+}
+
+// Création d’une nouvelle catégorie
+
+{
+  "full_name": "Marie Durand",
+  "email": "marie.durand@example.com",
+  "country_code": "+229",
+  "phone": "0166301056",
+  "profession": "Éducatrice",
+  "password": "Motdepasse123!",
+  "age": 30,
+  "affiliate": "http://localhost:8000/api/v1/user/register/?affiliate=COM_BA915475",
+  "project": {
+    "category_name": "Formation Ecole",
+    "project_title": "École verte",
+    "local_area_impact": "Région de Porto-Novo",
+    "main_objective": "Promouvoir l'éducation écologique",
+    "solution": "Construction d'écoles durables",
+    "description": "Projet pour des écoles écologiques",
+    "estimated_budget": "800000",
+    "target_audience": "Enfants",
+    "progress_report": "Planification initiale",
+    "owner_project_status": "brouillon"
+  }
+}
