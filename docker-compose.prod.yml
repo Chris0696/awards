@@ -26,9 +26,9 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     ports:
-      - "8000:8000"
+     - "8080:8000"
     depends_on:
       postgres_db:
         condition: service_healthy
@@ -44,7 +44,7 @@ services:
         echo 'Waiting for database...' &&
         python manage.py migrate &&
         python manage.py collectstatic --noinput &&
-        gunicorn awards.wsgi:application --name awards --workers 3 -b :8000
+        python manage.py runserver 0.0.0.0:8000
       "
     networks:
       - awards-bridge
@@ -54,16 +54,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.prod
     ports:
-      - "3000:3000"
+      - "8081:3000"
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app:ro  # Read-only to prevent host permission issues
     env_file:
       - .env
     environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000
-      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://185.98.136.244:8080
+      - NODE_ENV=development
       - NEXT_TELEMETRY_DISABLED=1
     networks:
       - awards-bridge
