@@ -1,9 +1,13 @@
+import { Controller, useFormContext } from "react-hook-form";
+
 type Props = {
+  name: string;
   label: string;
   placeholder?: string;
 };
 
-export default function TextField({ label, placeholder }: Props) {
+export default function TextField({ label, placeholder, name }: Props) {
+  const { control } = useFormContext();
   return (
     <div>
       <label
@@ -12,12 +16,22 @@ export default function TextField({ label, placeholder }: Props) {
       >
         <span>{label}</span> <span className="text-red-500">*</span>
       </label>
-      <input
-        type="text"
-        name={label}
-        id={label}
-        placeholder={placeholder}
-        className="border-none outline-none bg-gray-100 px-2 py-3 rounded-md w-full"
+      <Controller
+        control={control}
+        name={name}
+        render={({ field, fieldState: { error } }) => (
+          <>
+            <input
+              {...field}
+              type="text"
+              name={label}
+              id={label}
+              placeholder={placeholder}
+              className="border-none outline-none bg-gray-100 px-2 py-3 rounded-md w-full"
+            />
+            <p className="text-sm text-red-500">{error?.message} </p>
+          </>
+        )}
       />
     </div>
   );

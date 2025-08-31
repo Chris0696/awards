@@ -3,12 +3,14 @@ import Popover from "../ui/Popover";
 import TextField from "../../app/(landing)/submit/forms/TextField";
 import EmailField from "../../app/(landing)/submit/forms/EmailField";
 import PhoneNumberField from "../../app/(landing)/submit/forms/PhoneNumberField";
+import { FormProvider, useForm } from "react-hook-form";
 
 type Props = {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
 };
 export default function AddGdChildModal({ showModal, setShowModal }: Props) {
+  const methods = useForm();
   return (
     <Popover
       visible={showModal}
@@ -16,27 +18,41 @@ export default function AddGdChildModal({ showModal, setShowModal }: Props) {
       title=""
       isLogin
     >
-      <div className="px-16 pb-16 pt-8">
-        <div className="flex justify-center text-center mb-8">
-          <div>
-            <h2 className="text-4xl font-bold">Affiliés</h2>
-            <p className="text-xl">Créer un affilié (Commerciaux)</p>
+      <FormProvider {...methods}>
+        <form className="px-16 pb-16 pt-8">
+          <div className="flex justify-center text-center mb-8">
+            <div>
+              <h2 className="text-4xl font-bold">Affiliés</h2>
+              <p className="text-xl">Créer un affilié (Commerciaux)</p>
+            </div>
           </div>
-        </div>
-        <div className="space-y-4">
-          <TextField label="Nom complet" placeholder="Nom & prénoms" />
-          <EmailField label="Adresse mail" placeholder="Email" />
-          <PhoneNumberField label="Téléphone" placeholder="+229 01xxxxxxxx" />
-        </div>
-        <div className="mt-12">
-          <button
-            className="bg-primary w-full py-4 px-4 text-white rounded-lg text-lg flex items-center justify-center cursor-pointer hover:bg-white hover:border hover:border-primary hover:text-primary
+          <div className="space-y-4">
+            <TextField
+              name="affiliateName"
+              label="Nom complet"
+              placeholder="Nom & prénoms"
+            />
+            <EmailField
+              name="affilateEmail"
+              label="Adresse mail"
+              placeholder="Email"
+            />
+            <PhoneNumberField
+              name="affiliatePhoneNumber"
+              label="Téléphone"
+              placeholder="+229 01xxxxxxxx"
+            />
+          </div>
+          <div className="mt-12">
+            <button
+              className="bg-primary w-full py-4 px-4 text-white rounded-lg text-lg flex items-center justify-center cursor-pointer hover:bg-white hover:border hover:border-primary hover:text-primary
         "
-          >
-            Créer
-          </button>
-        </div>
-      </div>
+            >
+              Créer
+            </button>
+          </div>
+        </form>
+      </FormProvider>
     </Popover>
   );
 }
