@@ -5,12 +5,14 @@ import ArtworkImg from "@/assets/artworklight.jpg";
 import Popover from "../ui/Popover";
 import PhoneNumberField from "@/app/(landing)/submit/forms/PhoneNumberField";
 import NumberField from "@/app/(landing)/submit/forms/NumberField";
+import { FormProvider, useForm } from "react-hook-form";
 
 type Props = {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
 };
 export default function MakeVoteModal({ showModal, setShowModal }: Props) {
+  const methods = useForm();
   return (
     <Popover
       title="Je vote pour le projet “Kit Solaire Mobile”"
@@ -41,20 +43,34 @@ export default function MakeVoteModal({ showModal, setShowModal }: Props) {
             />
           </div>
         </div>
-        <div className="mt-12 md:space-y-4">
-          <PhoneNumberField label="Numéro" placeholder="Ex:0161000000" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <NumberField label="Nombre de vote" placeholder="2" />
+        <FormProvider {...methods}>
+          <form className="mt-12 md:space-y-4">
+            <PhoneNumberField
+              name="voterPhoneNumber"
+              label="Numéro"
+              placeholder="Ex:0161000000"
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <NumberField
+                name="voteCount"
+                label="Nombre de vote"
+                placeholder="2"
+              />
 
-            <NumberField label="Montant(XOF)" placeholder="200" />
-          </div>
-          <div className="mt-10">
-            <button className="flex items-center justify-center space-x-2 bg-secondary text-white px-4 py-2 rounded-md w-full cursor-pointer">
-              <span>Se connecter</span>
-              <ChevronRightIcon />
-            </button>
-          </div>
-        </div>
+              <NumberField
+                name="voteAmount"
+                label="Montant(XOF)"
+                placeholder="200"
+              />
+            </div>
+            <div className="mt-10">
+              <button className="flex items-center justify-center space-x-2 bg-secondary text-white px-4 py-2 rounded-md w-full cursor-pointer">
+                <span>Se connecter</span>
+                <ChevronRightIcon />
+              </button>
+            </div>
+          </form>
+        </FormProvider>
       </div>
     </Popover>
   );
