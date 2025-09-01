@@ -1,0 +1,23 @@
+export type ProjectInput = {
+  full_name: string;
+  email: string;
+  country_code: string;
+  phone: string;
+  profession: string;
+  password: string;
+  age: number;
+  affiliate: string;
+  project: {
+    category_id?: number;
+    category_name: string;
+    project_title: string;
+    local_area_impact: string;
+    main_objective: string;
+    solution: string;
+    description: string;
+    estimated_budget: number;
+    target_audience: string;
+    progress_report: string;
+    owner_project_status: "brouillon" | "desactive" | "publie";
+  };
+};

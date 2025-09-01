@@ -15,6 +15,8 @@ import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
 import { projectSchema } from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { projectService } from "@/lib/services/projectService";
+import { ProjectInput } from "@/app/common/types/project";
 
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {
@@ -22,28 +24,54 @@ export default function SubmitProjectFormContainer() {
     resolver: zodResolver(projectSchema),
     mode: "onChange",
     defaultValues: {
-      poFullname: "",
-      poEmail: "",
-      poPhonenumber: "",
-      poProfession: "",
-      poPassword: "",
-      poAge: undefined,
-      projectName: "",
-      projectArea: "",
-      projectCategory: "",
-      projectBudget: undefined,
-      projectDescription: "",
-      projectGoal: "",
-      projectInterest: "",
-      projectTarget: "",
-      projectLevel: "",
-      acceptReformulation: false,
-      acceptTerms: false,
+      full_name: "",
+      email: "",
+      phone: "",
+      profession: "",
+      password: "",
+      age: undefined,
+      //category_id: undefined,
+      category_name: "",
+      project_title: "",
+      local_area_impact: "",
+      estimated_budget: undefined,
+      description: "",
+      main_objective: "",
+      solution: "",
+      target_audience: "",
+      progress_report: "",
+      /* acceptReformulation: false,
+      acceptTerms: false, */
     },
   });
   const [step, setStep] = useState(1);
-  const onSubmit = (data: ProjectForm) => {
+  const onSubmit = async (data: ProjectForm) => {
     console.log(data, "data");
+
+    const payload: ProjectInput = {
+      full_name: data.full_name,
+      email: data.email,
+      country_code: "+229",
+      phone: data.phone,
+      profession: data.profession,
+      password: data.password,
+      age: data.age,
+      affiliate: "data.affiliate",
+      project: {
+        //category_id: data.category_id,
+        category_name: data.category_name,
+        project_title: data.project_title,
+        local_area_impact: data.local_area_impact,
+        main_objective: data.main_objective,
+        solution: data.solution,
+        description: data.description,
+        estimated_budget: data.estimated_budget,
+        target_audience: data.target_audience,
+        progress_report: data.progress_report,
+        owner_project_status: "brouillon",
+      },
+    };
+    projectService.createProject(payload);
   };
   return (
     <section className="pb-40 pt-28" id="submit-form">
@@ -53,35 +81,35 @@ export default function SubmitProjectFormContainer() {
             <FormCard step={1}>
               <div className="space-y-6">
                 <TextField
-                  name="poFullname"
+                  name="full_name"
                   label="Nom & prénom"
                   placeholder="Nom & prénom"
                 />
                 <EmailField
-                  name="poEmail"
+                  name="email"
                   label="Adresse e-mail"
                   placeholder="Example@gmail.com"
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <PhoneNumberField
-                    name="poPhonenumber"
+                    name="phone"
                     label="Numéro de téléphone"
                     placeholder="06 12 34 56 78"
                   />
 
                   <TextField
-                    name="poProfession"
+                    name="profession"
                     label="Profession ou statut actuel"
                     placeholder="Étudiant, entrepreneur, employé, etc"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <PasswordField
-                    name="poPassword"
+                    name="password"
                     label="Mot de passe"
                     placeholder="xxxxxxxxxxxxxxxxx"
                   />
-                  <NumberField name="poAge" label="Âge" placeholder="18" />
+                  <NumberField name="age" label="Âge" placeholder="18" />
                 </div>
               </div>
               <div className="mt-16">
@@ -89,12 +117,12 @@ export default function SubmitProjectFormContainer() {
                   type="button"
                   onClick={async () => {
                     const valid = await methods.trigger([
-                      "poFullname",
-                      "poEmail",
-                      "poPhonenumber",
-                      "poProfession",
-                      "poPassword",
-                      "poAge",
+                      "full_name",
+                      "email",
+                      "phone",
+                      "profession",
+                      "age",
+                      "password",
                     ]);
                     if (valid) setStep(2);
                   }}
@@ -110,20 +138,20 @@ export default function SubmitProjectFormContainer() {
             <FormCard step={2}>
               <div className="space-y-6">
                 <TextField
-                  name="projectName"
+                  name="project_title"
                   label="Nom du projet"
                   placeholder="Titre clair et accrocheur pour présenter le projet"
                 />
                 <TextField
-                  name="projectArea"
+                  name="local_area_impact"
                   label="Zone géographique d'impact"
                   placeholder='Ex: "Cotonou", "Nord du Bénin", "Afrique francophone" '
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <SelectField name="projectCategory" />
+                  <SelectField name="category_name" />
 
                   <NumberField
-                    name="projectBudget"
+                    name="estimated_budget"
                     label="Budget estimé"
                     placeholder="Ex: 1 000 000"
                   />
@@ -143,10 +171,10 @@ export default function SubmitProjectFormContainer() {
                   type="button"
                   onClick={async () => {
                     const valid = await methods.trigger([
-                      "projectName",
-                      "projectArea",
-                      "projectCategory",
-                      "projectBudget",
+                      "project_title",
+                      "local_area_impact",
+                      "category_name",
+                      "estimated_budget",
                     ]);
                     if (valid) setStep(3);
                   }}
@@ -160,25 +188,25 @@ export default function SubmitProjectFormContainer() {
           {step === 3 && (
             <FormCard step={3}>
               <div className="space-y-6">
-                <TextareaField name="projectDescription" />
+                <TextareaField name="description" />
                 <TextField
-                  name="projectGoal"
+                  name="main_objective"
                   label="Objectif principal"
                   placeholder="Quel est le but ultime de ce projet ? (Ex: Réduire le taux d'abandon scolaire)"
                 />
                 <TextField
-                  name="projectInterest"
+                  name="solution"
                   label="Problème que votre projet resout"
                   placeholder="Quel problème essayez-vous de résoudre ?"
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <TextField
-                    name="projectTarget"
+                    name="target_audience"
                     label="Public cible"
                     placeholder="À qui s'adresse le projet ?"
                   />
                   <TextField
-                    name="projectLevel"
+                    name="progress_report"
                     label="État d'avancement"
                     placeholder="Où en êtes-vous ?"
                   />
@@ -194,11 +222,11 @@ export default function SubmitProjectFormContainer() {
                     type="button"
                     onClick={async () => {
                       const valid = await methods.trigger([
-                        "projectDescription",
-                        "projectGoal",
-                        "projectInterest",
-                        "projectTarget",
-                        "projectLevel",
+                        "description",
+                        "main_objective",
+                        "target_audience",
+                        "progress_report",
+                        "solution",
                       ]);
                       if (valid) setStep(4);
                     }}
@@ -215,7 +243,7 @@ export default function SubmitProjectFormContainer() {
             <FormCard step={4}>
               <div>
                 <div className="flex flex-col space-y-10">
-                  <label
+                  {/*  <label
                     htmlFor="acceptReformulation"
                     className="flex items-center space-x-4 cursor-pointer"
                   >
@@ -237,8 +265,8 @@ export default function SubmitProjectFormContainer() {
                         {methods.formState.errors.acceptReformulation.message}
                       </span>
                     )}
-                  </label>
-                  <label
+                  </label> */}
+                  {/* <label
                     htmlFor="acceptTerms"
                     className="flex items-center space-x-4 cursor-pointer"
                   >
@@ -260,7 +288,8 @@ export default function SubmitProjectFormContainer() {
                         {methods.formState.errors.acceptTerms.message}
                       </span>
                     )}
-                  </label>
+                  </label> */}
+                  <p>yup</p>
                 </div>
                 <div className="flex flex-col space-y-2 md:space-y-0 justify-between items-center mt-20">
                   <button

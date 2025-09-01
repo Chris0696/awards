@@ -31,7 +31,7 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 # on DEBUG, allow every host
 if DEBUG:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "185.98.136.244"]
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "185.98.136.244", "backend"]
     CSRF_TRUSTED_ORIGINS = [
         "http://localhost:8002",
     ]
@@ -41,6 +41,7 @@ else:
         'vps114277.serveur-vps.net',
         'localhost',
         '127.0.0.1',
+         "backend"
     ]
     CSRF_TRUSTED_ORIGINS = [
         'http://185.98.136.244',
