@@ -23,6 +23,35 @@ class CategorySerializer(serializers.ModelSerializer):
         return obj.project_count()
 
 
+class CategoryStatsSerializer(serializers.ModelSerializer):
+    project_count = serializers.IntegerField()
+    
+    class Meta:
+        model = Category
+        fields = ['category_name', 'project_count', 'slug']
+        
+
+class RecentProjectSerializer(serializers.ModelSerializer):
+    votes = serializers.IntegerField(source='vote_count')
+    rank = serializers.IntegerField()
+    
+    class Meta:
+        model = Project
+        fields = ['project_id', 'project_title', 'platform_status', 'votes', 'rank', 'created_at']
+
+
+class RecentVoteSerializer(serializers.ModelSerializer):
+    project_title = serializers.CharField(source='project.project_title')
+    user = serializers.CharField(source='user.full_name', allow_null=True, default='Anonyme')
+    review = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Vote
+        fields = ['project_title', 'user', 'vote', 'review', 'created_at']
+    
+    def get_review(self, obj):
+        return obj.review[:100] + "..." if len(obj.review) > 100 else obj.review
+
 # class ProjectSerializer(serializers.ModelSerializer):
 #     category_id = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), source='category')
 #     owner_id = serializers.PrimaryKeyRelatedField(read_only=True, source='owner')
@@ -99,223 +128,9 @@ class CategorySerializer(serializers.ModelSerializer):
 
 #     def validate(self, attrs):
 #         # Vérifier que soit category_id soit category_name est fourni, mais pas les deux
-#         category_id = attrs.get('category')
-#         category_name = attrs.get('category_name')
-#         if category_id and category_name:
-#             raise serializers.ValidationError({
-#                 "category": _("Vous devez fournir soit un category_id, soit un category_name, mais pas les deux.")
-#             })
-#         if not category_id and not category_name:
-#             raise serializers.ValidationError({
-#                 "category": _("Vous devez fournir un category_id ou un category_name.")
-#             })
-
-#         # Valider category_name (si fourni)
-#         if category_name:
-#             if Category.objects.filter(category_name=category_name).exists():
-#                 raise serializers.ValidationError({
-#                     "category_name": _("Une catégorie avec ce nom existe déjà. Veuillez sélectionner une catégorie existante ou utiliser un autre nom.")
-#                 })
-#             attrs['category'] = {'category_name': category_name, 'active': False}
-
-#         # Vérifier owner_project_status
-#         # valid_owner_statuses = [choice[0] for choice in Project.OWNER_STATUS]
-#         # owner_project_status = attrs.get('owner_project_status', 'brouillon')
-#         # if owner_project_status not in valid_owner_statuses:
-#         #     raise serializers.ValidationError({
-#         #         "owner_project_status": _("Statut invalide pour le projet.")
-#         #     })
-
-#         # Validation de l'owner (seulement pour les endpoints authentifiés)
-#         request = self.context.get('request')
-#         if request and hasattr(request, 'user') and request.user.is_authenticated:
-#             user = request.user
-#             if user.user_type != 'owner':
-#                 raise serializers.ValidationError({
-#                     "error": _("Seul un utilisateur de type 'owner' peut créer ou modifier un projet.")
-#                 })
-#             try:
-#                 owner = Owner.objects.get(user=user)
-#                 attrs['owner'] = owner
-#                 if owner.commercial:
-#                     attrs['commercial'] = owner.commercial
-#             except Owner.DoesNotExist:
-#                 raise serializers.ValidationError({
-#                     "error": _("Aucun profil Owner associé à cet utilisateur.")
-#                 })
-
-#         return attrs
-
-#     def create(self, validated_data):
-#         category_data = validated_data.pop('category', None)
-#         if category_data and isinstance(category_data, dict):
-#             category = Category.objects.create(
-#                 category_name=category_data['category_name'],
-#                 active=category_data['active']
-#             )
-#             validated_data['category'] = category
-
-#         project = super().create(validated_data)
-#         if not project.slug:
-#             project.slug = slugify(f"{project.project_title}-{project.project_id}")
-#             project.save()
-#         return project
-
-#     def to_representation(self, instance):
-#         representation = super().to_representation(instance)
-#         representation['category_id'] = instance.category.id if instance.category else None
-#         return representation
-
-#     def update(self, instance, validated_data):
-#         # Empêcher la modification de platform_status, admin_comment, et category_name
-#         validated_data.pop('platform_status', None)
-#         validated_data.pop('admin_comment', None)
-#         validated_data.pop('category_name', None)  # category_name non autorisé pour les mises à jour
-#         return super().update(instance, validated_data)
-
-
-class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
-    category_id = serializers.PrimaryKeyRelatedField(
-        queryset=Category.objects.filter(active=True),
-        source='category',
-        required=False,
-        allow_null=True,
-        write_only=True
-    )
-    category_name = serializers.CharField(
-        max_length=100,
-        required=False,
-        allow_blank=True,
-        write_only=True
-    )
-    owner_id = serializers.PrimaryKeyRelatedField(
-        read_only=True,
-        source='owner'
-    )
-
-    class Meta:
-        model = Project
-        fields = [
-            'project_id', 'category_id', 'category_name', 'owner_id', 'file', 'image',
-            'project_title', 'local_area_impact', 'main_objective', 'solution',
-            'description', 'estimated_budget', 'target_audience', 'progress_report',
-            'owner_project_status'
-        ]
-        read_only_fields = ['project_id', 'owner_id']
-
-    def validate(self, attrs):
-        # Vérifier que soit category_id soit category_name est fourni, mais pas les deux
-        category_id = attrs.get('category')  # category_id est mappé sur category via source='category'
-        category_name = attrs.get('category_name')
-        
-        if category_id and category_name:
-            raise serializers.ValidationError({
-                "category": _("Vous devez fournir soit un category_id, soit un category_name, mais pas les deux.")
-            })
-        if not category_id and not category_name:
-            raise serializers.ValidationError({
-                "category": _("Vous devez fournir un category_id ou un category_name.")
-            })
-
-        # Valider category_name (si fourni)
-        if category_name:
-            # Vérifier si une catégorie avec ce nom existe déjà et est active
-            existing_category = Category.objects.filter(category_name=category_name, active=True).first()
-            if existing_category:
-                # Si une catégorie active existe, l'utiliser au lieu de créer une nouvelle
-                attrs['category'] = existing_category
-                attrs.pop('category_name', None)  # Retirer category_name des attrs
-            else:
-                # Sinon, marquer pour créer une nouvelle catégorie
-                attrs['category'] = {'category_name': category_name, 'active': False}
-
-        # Validation de l'owner (seulement pour les endpoints authentifiés)
-        request = self.context.get('request')
-        
-        # MODIFICATION : Ne pas valider l'owner si on est dans un contexte d'inscription
-        # (quand il n'y a pas de request ou que l'utilisateur n'est pas authentifié)
-        if request and hasattr(request, 'user') and request.user.is_authenticated:
-            user = request.user
-            if user.user_type != 'owner':
-                raise serializers.ValidationError({
-                    "error": _("Seul un utilisateur de type 'owner' peut créer ou modifier un projet.")
-                })
-            try:
-                owner = Owner.objects.get(user=user)
-                attrs['owner'] = owner
-                if owner.commercial:
-                    attrs['commercial'] = owner.commercial
-            except Owner.DoesNotExist:
-                raise serializers.ValidationError({
-                    "error": _("Aucun profil Owner associé à cet utilisateur.")
-                })
-
-        return attrs
-
-    def create(self, validated_data):
-        # Retirer category_name pour éviter de le passer à Project.objects.create
-        validated_data.pop('category_name', None)
-        
-        # Gérer la création de la catégorie
-        category_data = validated_data.pop('category', None)
-        if category_data and isinstance(category_data, dict):
-            category = Category.objects.create(
-                category_name=category_data['category_name'],
-                active=category_data['active']
-            )
-            validated_data['category'] = category
-
-        project = super().create(validated_data)
-        if not project.slug:
-            project.slug = slugify(f"{project.project_title}-{project.project_id}")
-            project.save()
-        return project
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['category_id'] = instance.category.id if instance.category else None
-        return representation
-
-    def update(self, instance, validated_data):
-        # Empêcher la modification de platform_status, admin_comment, et category_name
-        validated_data.pop('platform_status', None)
-        validated_data.pop('admin_comment', None)
-        validated_data.pop('category_name', None)
-        return super().update(instance, validated_data)
-
-# class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
-#     category_id = serializers.PrimaryKeyRelatedField(
-#         queryset=Category.objects.filter(active=True),
-#         source='category',
-#         required=False,
-#         allow_null=True,
-#         write_only=True
-#     )
-#     category_name = serializers.CharField(
-#         max_length=100,
-#         required=False,
-#         allow_blank=True,
-#         write_only=True
-#     )
-#     owner_id = serializers.PrimaryKeyRelatedField(
-#         read_only=True,
-#         source='owner'
-#     )
-
-#     class Meta:
-#         model = Project
-#         fields = [
-#             'project_id', 'category_id', 'category_name', 'owner_id', 'file', 'image',
-#             'project_title', 'local_area_impact', 'main_objective', 'solution',
-#             'description', 'estimated_budget', 'target_audience', 'progress_report',
-#             'owner_project_status'
-#         ]
-#         read_only_fields = ['project_id', 'owner_id']
-
-#     def validate(self, attrs):
-#         # Vérifier que soit category_id soit category_name est fourni, mais pas les deux
 #         category_id = attrs.get('category')  # category_id est mappé sur category via source='category'
 #         category_name = attrs.get('category_name')
+        
 #         if category_id and category_name:
 #             raise serializers.ValidationError({
 #                 "category": _("Vous devez fournir soit un category_id, soit un category_name, mais pas les deux.")
@@ -327,22 +142,21 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
 
 #         # Valider category_name (si fourni)
 #         if category_name:
-#             if Category.objects.filter(category_name=category_name).exists():
-#                 raise serializers.ValidationError({
-#                     "category_name": _("Une catégorie avec ce nom existe déjà. Veuillez sélectionner une catégorie existante ou utiliser un autre nom.")
-#                 })
-#             attrs['category'] = {'category_name': category_name, 'active': False}
-
-#         # Vérifier owner_project_status
-#         # valid_owner_statuses = [choice[0] for choice in Project.OWNER_STATUS]
-#         # owner_project_status = attrs.get('owner_project_status', 'brouillon')
-#         # if owner_project_status not in valid_owner_statuses:
-#         #     raise serializers.ValidationError({
-#         #         "owner_project_status": _("Statut invalide pour le projet.")
-#         #     })
+#             # Vérifier si une catégorie avec ce nom existe déjà et est active
+#             existing_category = Category.objects.filter(category_name=category_name, active=True).first()
+#             if existing_category:
+#                 # Si une catégorie active existe, l'utiliser au lieu de créer une nouvelle
+#                 attrs['category'] = existing_category
+#                 attrs.pop('category_name', None)  # Retirer category_name des attrs
+#             else:
+#                 # Sinon, marquer pour créer une nouvelle catégorie
+#                 attrs['category'] = {'category_name': category_name, 'active': False}
 
 #         # Validation de l'owner (seulement pour les endpoints authentifiés)
 #         request = self.context.get('request')
+        
+#         # MODIFICATION : Ne pas valider l'owner si on est dans un contexte d'inscription
+#         # (quand il n'y a pas de request ou que l'utilisateur n'est pas authentifié)
 #         if request and hasattr(request, 'user') and request.user.is_authenticated:
 #             user = request.user
 #             if user.user_type != 'owner':
@@ -391,6 +205,120 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
 #         validated_data.pop('admin_comment', None)
 #         validated_data.pop('category_name', None)
 #         return super().update(instance, validated_data)
+
+
+class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.filter(active=True),
+        source='category',
+        required=False,
+        allow_null=True,
+        write_only=True
+    )
+    category_name = serializers.CharField(
+        max_length=100,
+        required=False,
+        allow_blank=True,
+        write_only=True
+    )
+    owner_id = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        source='owner'
+    )
+
+    class Meta:
+        model = Project
+        fields = [
+            'project_id', 'category_id', 'category_name', 'owner_id', 'file', 'image',
+            'project_title', 'local_area_impact', 'main_objective', 'solution',
+            'description', 'estimated_budget', 'target_audience', 'progress_report',
+            'owner_project_status'
+        ]
+        read_only_fields = ['project_id', 'owner_id']
+
+    def validate(self, attrs):
+        # Vérifier que soit category_id soit category_name est fourni, mais pas les deux
+        category_id = attrs.get('category')  # Contient l'instance Category si category_id est valide
+        category_name = attrs.get('category_name')
+
+        if category_id and category_name:
+            raise serializers.ValidationError({
+                "category": _("Vous devez fournir soit un category_id, soit un category_name, mais pas les deux.")
+            })
+        if not category_id and not category_name:
+            raise serializers.ValidationError({
+                "category": _("Vous devez fournir un category_id ou un category_name.")
+            })
+
+        # Valider category_name (si fourni)
+        if category_name:
+            existing_category = Category.objects.filter(category_name=category_name, active=True).first()
+            if existing_category:
+                # Si une catégorie active existe, l'utiliser
+                attrs['category'] = existing_category
+                attrs.pop('category_name', None)
+            else:
+                # Créer une nouvelle catégorie avec active=False
+                attrs['category'] = {'category_name': category_name, 'active': False}
+
+        # Vérifier owner_project_status
+        # valid_owner_statuses = [choice[0] for choice in Project.OWNER_STATUS]
+        # owner_project_status = attrs.get('owner_project_status', 'brouillon')
+        # if owner_project_status not in valid_owner_statuses:
+        #     raise serializers.ValidationError({
+        #         "owner_project_status": _("Statut invalide pour le projet.")
+        #     })
+
+        # Validation de l'owner (seulement pour les endpoints authentifiés)
+        request = self.context.get('request')
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            user = request.user
+            if user.user_type != 'owner':
+                raise serializers.ValidationError({
+                    "error": _("Seul un utilisateur de type 'owner' peut créer ou modifier un projet.")
+                })
+            try:
+                owner = Owner.objects.get(user=user)
+                attrs['owner'] = owner
+                if owner.commercial:
+                    attrs['commercial'] = owner.commercial
+            except Owner.DoesNotExist:
+                raise serializers.ValidationError({
+                    "error": _("Aucun profil Owner associé à cet utilisateur.")
+                })
+
+        return attrs
+
+    def create(self, validated_data):
+        # Retirer category_name pour éviter de le passer à Project.objects.create
+        validated_data.pop('category_name', None)
+
+        # Gérer la création de la catégorie
+        category_data = validated_data.pop('category', None)
+        if category_data and isinstance(category_data, dict):
+            category = Category.objects.create(
+                category_name=category_data['category_name'],
+                active=category_data['active']
+            )
+            validated_data['category'] = category
+
+        project = super().create(validated_data)
+        if not project.slug:
+            project.slug = slugify(f"{project.project_title}-{project.project_id}")
+            project.save()
+        return project
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['category_id'] = instance.category.id if instance.category else None
+        return representation
+
+    def update(self, instance, validated_data):
+        # Empêcher la modification de platform_status, admin_comment, et category_name
+        validated_data.pop('platform_status', None)
+        validated_data.pop('admin_comment', None)
+        validated_data.pop('category_name', None)
+        return super().update(instance, validated_data)
     
 
 class ProjectListSerializer(serializers.ModelSerializer):

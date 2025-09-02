@@ -91,3 +91,5 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
         user_id = self.kwargs['user_id']
         user = User.objects.get(id=user_id)
         return Profile.objects.get(user=user)
+    
+

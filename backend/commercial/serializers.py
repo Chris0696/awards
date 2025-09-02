@@ -31,4 +31,13 @@ class CommercialSerializer(serializers.ModelSerializer):
         if value < 0 or value > 100:
             raise serializers.ValidationError(_("Le taux de commission doit être compris entre 0 et 100%."))
         return value
+
+
+class CommercialStatsSerializer(serializers.ModelSerializer):
+    projects_brought = serializers.IntegerField()
+    total_votes = serializers.IntegerField()
+    
+    class Meta:
+        model = Commercial
+        fields = ['full_name', 'projects_brought', 'total_votes', 'affiliate_link']
     

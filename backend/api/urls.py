@@ -12,7 +12,7 @@ urlpatterns = [
     path("auth/token/refresh/", TokenRefreshView.as_view()),
     
     # Register Endpoints
-    path("auth/register/", UserViews.RegisterViewAPIView.as_view(), name='register'),
+    path("auth/register/authorproject", UserViews.RegisterViewAPIView.as_view(), name='register'),
     path('auth/admin/register/commercial', UserViews.AdminRegisterViewAPIView.as_view(), name='admin_register'),
     
     path("auth/password-reset/<email>/", UserViews.PasswordResetEmailVerifyAPIView.as_view(), name='password_reset_email'),
@@ -39,6 +39,12 @@ urlpatterns = [
     
      # === STATISTIQUES ===
     path('stats/general/', ApiViews.general_stats_api, name='general_stats'),
+    
+    
+    # === DASHBOARDS ===
+    path('dashboard/admin/', ApiViews.AdminDashboardAPIView.as_view(), name='admin_dashboard'),
+    path('dashboard/owner/', ApiViews.OwnerDashboardAPIView.as_view(), name='owner_dashboard'),
+    path('dashboard/commercial/', ApiViews.CommercialDashboardAPIView.as_view(), name='commercial_dashboard'),
     
     
     # Vote Endpoints

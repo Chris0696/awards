@@ -1,7 +1,8 @@
 from django.contrib.auth.password_validation import validate_password
+from commercial.serializers import CommercialStatsSerializer
 from project.models import Commercial, Category, Project
 from projectowner.models import Owner
-from project.serializers import ProjectCreateUpdateSerializer
+from project.serializers import CategoryStatsSerializer, ProjectCreateUpdateSerializer, RecentProjectSerializer, RecentVoteSerializer
 from rest_framework import serializers
 from userauths.models import Profile, User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -49,7 +50,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Valider le lien d'affiliation
         affiliate = attrs.get('affiliate')
         if affiliate:
-            # Extraire le code d'affiliation de l'URL
             affiliate_code = affiliate.split('affiliate=')[-1] if 'affiliate=' in affiliate else affiliate
             try:
                 commercial = Commercial.objects.get(affiliate_link__endswith=affiliate_code)
@@ -59,7 +59,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             except Commercial.MultipleObjectsReturned:
                 raise serializers.ValidationError({"affiliate": _("Plusieurs commerciaux correspondent à ce lien d'affiliation.")})
 
-        # Valider les données du projet (si fourni)
+        # Valider les données du projet
         project_data = attrs.get('project')
         if project_data:
             project_serializer = ProjectCreateUpdateSerializer(data=project_data, context=self.context)
@@ -116,33 +116,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Créer le projet si fourni
         project = None
         if project_data:
-            # SOLUTION PRINCIPALE : Créer le projet directement avec tous les champs requis
-            
-            # Gérer la catégorie
-            category_data = project_data.pop('category', None)
-            category_name = project_data.pop('category_name', None)
-            
-            if category_name:
-                # Créer une nouvelle catégorie si category_name est fourni
-                category, created = Category.objects.get_or_create(
-                    category_name=category_name,
-                    defaults={'active': False}
-                )
-                project_data['category'] = category
-            elif category_data:
-                project_data['category'] = category_data
-
-            # Assigner l'owner et le commercial AVANT la création
+            # Assigner l'owner et le commercial
             project_data['owner'] = owner
-            project_data['commercial'] = commercial
-            
-            # Créer le projet avec tous les champs requis
-            project = Project.objects.create(**project_data)
-            
-            # Générer le slug si nécessaire
-            if not project.slug:
-                project.slug = slugify(f"{project.project_title}-{project.project_id}")
-                project.save()
+            if commercial:
+                project_data['commercial'] = commercial
+            # Utiliser ProjectCreateUpdateSerializer pour créer le projet
+            project_serializer = ProjectCreateUpdateSerializer()
+            project = project_serializer.create(project_data)
 
         # Retourner les données de l'utilisateur et du projet
         response_data = {
@@ -156,6 +136,26 @@ class RegisterSerializer(serializers.ModelSerializer):
             'project': ProjectCreateUpdateSerializer(project).data if project else None
         }
         return response_data
+
+
+
+class AdminDashboardSerializer(serializers.Serializer):
+    general_stats = serializers.DictField(child=serializers.IntegerField(allow_null=True))
+    user_stats = serializers.DictField(child=serializers.IntegerField(allow_null=True))
+    vote_stats = serializers.DictField(child=serializers.FloatField(allow_null=True))
+    recent_activity = serializers.DictField(child=serializers.IntegerField(allow_null=True))
+    top_categories = CategoryStatsSerializer(many=True)
+    top_commercials = CommercialStatsSerializer(many=True)
+    
+
+class OwnerDashboardSerializer(serializers.Serializer):
+    profile = serializers.DictField()
+    project_stats = serializers.DictField(child=serializers.IntegerField(allow_null=True))
+    vote_stats = serializers.DictField(child=serializers.FloatField(allow_null=True))
+    recent_projects = RecentProjectSerializer(many=True)
+    recent_votes = RecentVoteSerializer(many=True)
+    owner_ranking = serializers.DictField(child=serializers.IntegerField(allow_null=True))
+    top_project_votes = serializers.IntegerField() 
     
     
 # class RegisterSerializer(serializers.ModelSerializer):
@@ -264,176 +264,30 @@ class RegisterSerializer(serializers.ModelSerializer):
 #         # Créer le projet si fourni
 #         project = None
 #         if project_data:
-#             project = ProjectCreateUpdateSerializer().create(project_data)
-#             project.owner = owner
-#             project.commercial = commercial
-#             project.save()
-#             if not project.slug:
-#                 project.slug = slugify(f"{project.project_title}-{project.project_id}")
-#                 project.save()
-
-#         # Retourner les données de l'utilisateur et du projet
-#         response_data = {
-#             'user': {
-#                 'id': user.id,
-#                 'email': user.email,
-#                 'full_name': user.full_name,
-#                 'username': user.username,
-#                 'user_type': user.user_type
-#             },
-#             'project': ProjectCreateUpdateSerializer(project).data if project else None
-#         }
-#         return response_data
-
-# class RegisterSerializer(serializers.ModelSerializer):
-#     password = serializers.CharField(
-#         write_only=True,
-#         required=True,
-#         min_length=8,
-#         validators=[validate_password],
-#         style={'input_type': 'password'}
-#     )
-#     full_name = serializers.CharField(max_length=100, required=True)
-#     phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
-#     country_code = serializers.CharField(max_length=5, required=False, allow_blank=True)
-#     profession = serializers.CharField(required=False, allow_blank=True)
-#     age = serializers.IntegerField(required=False, allow_null=True)
-#     affiliate = serializers.CharField(required=False, allow_blank=True, write_only=True)
-#     project = serializers.JSONField(required=False, write_only=True)
-
-#     class Meta:
-#         model = User
-#         fields = ('full_name', 'email', 'country_code', 'phone', 'profession', 'password', 'age', 'affiliate', 'project')
-
-#     def validate(self, attrs):
-#         # Valider le code pays
-#         country_code = attrs.get('country_code')
-#         if country_code and not re.match(r'^\+\d{1,3}$', country_code):
-#             raise serializers.ValidationError({"country_code": _("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33).")})
-
-#         # Valider le numéro de téléphone
-#         phone = attrs.get('phone')
-#         if phone and not re.match(r'^\d{7,15}$', phone):
-#             raise serializers.ValidationError({"phone": _("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")})
-
-#         # Valider l'âge
-#         age = attrs.get('age')
-#         if age and (age < 18 or age > 120):
-#             raise serializers.ValidationError({"age": _("L'âge doit être compris entre 18 et 120 ans.")})
-
-#         # Valider le lien d'affiliation
-#         affiliate = attrs.get('affiliate')
-#         if affiliate:
-#             try:
-#                 commercial = Commercial.objects.get(affiliate_link__endswith=affiliate)
-#                 attrs['commercial'] = commercial
-#             except Commercial.DoesNotExist:
-#                 raise serializers.ValidationError({"affiliate": _("Lien d'affiliation invalide.")})
-#             except Commercial.MultipleObjectsReturned:
-#                 raise serializers.ValidationError({"affiliate": _("Plusieurs commerciaux correspondent à ce lien d'affiliation.")})
-
-#         # Valider les données du projet (si fourni)
-#         project_data = attrs.get('project')
-#         if project_data:
-#             # Vérifier que soit category_id soit category_name est fourni, mais pas les deux
-#             category_id = project_data.get('category_id')
-#             category_name = project_data.get('category_name')
-#             if category_id and category_name:
-#                 raise serializers.ValidationError({"project": _("Vous devez fournir soit un category_id, soit un category_name, mais pas les deux.")})
-#             if not category_id and not category_name:
-#                 raise serializers.ValidationError({"project": _("Vous devez fournir un category_id ou un category_name.")})
-
-#             # Valider category_id (si fourni)
-#             if category_id:
-#                 try:
-#                     category = Category.objects.get(id=category_id, active=True)
-#                     attrs['project']['category'] = category
-#                 except Category.DoesNotExist:
-#                     raise serializers.ValidationError({"project.category_id": _("Catégorie invalide ou inactive.")})
-
-#             # Valider category_name (si fourni)
-#             if category_name:
-#                 print("category_name=======", category_name)
-#                 if Category.objects.filter(category_name=category_name).exists():
-#                     raise serializers.ValidationError({"project.category_name": _("Une catégorie avec ce nom existe déjà. Veuillez sélectionner une catégorie existante ou utiliser un autre nom.")})
-#                 attrs['project']['category'] = {'category_name': category_name, 'active': False}  # Stocker pour création
-
-#             # Vérifier owner_project_status
-#             # valid_owner_statuses = [choice[0] for choice in Project.OWNER_STATUS]
-#             # owner_project_status = project_data.get('owner_project_status', 'brouillon')
-#             # if owner_project_status not in valid_owner_statuses:
-#             #     raise serializers.ValidationError({"project.owner_project_status": _("Statut invalide pour le projet.")})
-
-#             # Valider les autres champs du projet avec ProjectCreateUpdateSerializer
-#             project_serializer = ProjectCreateUpdateSerializer(data=project_data, context=self.context)
-#             if not project_serializer.is_valid():
-#                 raise serializers.ValidationError({"project": project_serializer.errors})
-
-#         return attrs
-
-#     def validate_email(self, value):
-#         if User.objects.filter(email=value).exists():
-#             raise serializers.ValidationError(_("Cet email est déjà utilisé."))
-#         return value
-
-#     @transaction.atomic
-#     def create(self, validated_data):
-#         # Extraire les champs
-#         phone = validated_data.pop('phone', None)
-#         country_code = validated_data.pop('country_code', None)
-#         profession = validated_data.pop('profession', None)
-#         age = validated_data.pop('age', None)
-#         commercial = validated_data.pop('commercial', None)
-#         project_data = validated_data.pop('project', None)
-
-#         # Générer un username basé sur l'email
-#         email = validated_data['email']
-#         base_username = email.split('@')[0]
-#         username = base_username
-#         counter = 1
-#         while User.objects.filter(username=username).exists():
-#             username = f"{base_username}{counter}"
-#             counter += 1
-
-#         # Créer l'utilisateur avec user_type='owner'
-#         user = User.objects.create_user(
-#             email=validated_data['email'],
-#             username=username,
-#             full_name=validated_data['full_name'],
-#             password=validated_data['password'],
-#             user_type='owner'
-#         )
-
-#         # Créer le profil Owner
-#         owner = Owner.objects.create(
-#             user=user,
-#             full_name=user.full_name,
-#             phone=phone,
-#             country_code=country_code,
-#             profession=profession,
-#             age=age,
-#             commercial=commercial
-#         )
-
-#         # Créer le projet si fourni
-#         project = None
-#         if project_data:
+#             # SOLUTION PRINCIPALE : Créer le projet directement avec tous les champs requis
+            
+#             # Gérer la catégorie
 #             category_data = project_data.pop('category', None)
-#             if category_data:
+#             category_name = project_data.pop('category_name', None)
+            
+#             if category_name:
 #                 # Créer une nouvelle catégorie si category_name est fourni
-#                 category = Category.objects.create(
-#                     category_name=category_data['category_name'],
-#                     active=category_data['active']
+#                 category, created = Category.objects.get_or_create(
+#                     category_name=category_name,
+#                     defaults={'active': False}
 #                 )
-#             else:
-#                 # Utiliser la catégorie existante
-#                 category = project_data['category']
+#                 project_data['category'] = category
+#             elif category_data:
+#                 project_data['category'] = category_data
 
+#             # Assigner l'owner et le commercial AVANT la création
 #             project_data['owner'] = owner
-#             project_data['category'] = category
-#             if commercial:
-#                 project_data['commercial'] = commercial
+#             project_data['commercial'] = commercial
+            
+#             # Créer le projet avec tous les champs requis
 #             project = Project.objects.create(**project_data)
+            
+#             # Générer le slug si nécessaire
 #             if not project.slug:
 #                 project.slug = slugify(f"{project.project_title}-{project.project_id}")
 #                 project.save()
@@ -450,3 +304,4 @@ class RegisterSerializer(serializers.ModelSerializer):
 #             'project': ProjectCreateUpdateSerializer(project).data if project else None
 #         }
 #         return response_data
+    
