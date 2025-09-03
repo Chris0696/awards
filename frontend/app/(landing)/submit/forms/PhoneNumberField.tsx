@@ -1,4 +1,6 @@
 import { Controller, useFormContext } from "react-hook-form";
+import PhoneInputWithCountrySelect from "react-phone-number-input/react-hook-form";
+import "react-phone-number-input/style.css";
 
 type Props = {
   name: string;
@@ -13,7 +15,7 @@ export default function PhoneNumberField({ label, placeholder, name }: Props) {
       <label className="block text-gray-800 text-lg font-medium">
         <span>{label}</span> <span className="text-red-500">*</span>
       </label>
-      <Controller
+      {/*  <Controller
         control={control}
         name={name}
         render={({ field, fieldState: { error } }) => (
@@ -27,6 +29,15 @@ export default function PhoneNumberField({ label, placeholder, name }: Props) {
             <p className="text-sm text-red-500">{error?.message} </p>
           </>
         )}
+      /> */}
+      <PhoneInputWithCountrySelect
+        control={control}
+        international
+        name={name}
+        defaultCountry="BJ"
+        placeholder={placeholder}
+        countryCallingCodeEditable={false}
+        className="border-none outline-none bg-gray-100 px-2 py-3 rounded-md w-full "
       />
     </div>
   );

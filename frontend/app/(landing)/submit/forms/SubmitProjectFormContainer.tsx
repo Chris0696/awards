@@ -14,6 +14,7 @@ import Step3 from "./steps/Step3";
 import Step4 from "./steps/Step4";
 import { mapServerErrors } from "@/lib/utils/mapServerErrors";
 import { toast } from "sonner";
+import { formatPhoneNumber, parsePhoneNumber } from "react-phone-number-input";
 
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {
@@ -54,8 +55,8 @@ export default function SubmitProjectFormContainer() {
     const payload: ProjectInput = {
       full_name: data.full_name,
       email: data.email,
-      country_code: "+229",
-      phone: data.phone,
+      country_code: parsePhoneNumber(data.phone)?.countryCallingCode ?? "",
+      phone: formatPhoneNumber(data.phone),
       profession: data.profession,
       password: data.password,
       age: data.age,

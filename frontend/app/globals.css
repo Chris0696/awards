@@ -129,3 +129,8 @@ html {
     @apply bg-background text-foreground;
   }
 }
+
+.PhoneInput input.PhoneInputInput {
+  border: none !important;
+  outline: none !important;
+}
