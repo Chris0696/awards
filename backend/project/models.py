@@ -50,8 +50,8 @@ class Category(models.Model):
     active = models.BooleanField(default=True)
     slug = models.SlugField(unique=True, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    # category_id = ShortUUIDField(null=True, unique=True, length=8, max_length=20, alphabet="1234567890ABCDEF")
-
+    category_id = ShortUUIDField(unique=True, length=8, max_length=20, alphabet="1234567890ABCDEF")
+    
     class Meta:
         ordering = ['category_name']
         verbose_name_plural = "Categories"
@@ -65,10 +65,6 @@ class Category(models.Model):
     def project_count(self):
         return self.project_set.count()
     
-    # def course_count(self):
-    #     return Project.objects.filter(category=self).count()
-
-
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.category_name)

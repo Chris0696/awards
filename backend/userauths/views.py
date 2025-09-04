@@ -10,11 +10,48 @@ from rest_framework import generics, status
 from django.contrib.auth.hashers import check_password
 from rest_framework.response import Response
 from .serializers import AdminRegisterSerializer, ProfileSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+from rest_framework.views import APIView
+from django.utils.translation import gettext_lazy as _
+
+
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = api_serializer.MyTokenObtainPairSerializer
     
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # Récupérer le token d'accès depuis l'en-tête Authorization
+            auth_header = request.headers.get('Authorization', '')
+            if not auth_header.startswith('Bearer '):
+                return Response(
+                    {"error": _("Token invalide ou manquant.")},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            access_token = auth_header.split(' ')[1]
+
+            # Créer un token de rafraîchissement fictif pour gérer la liste noire
+            # (SimpleJWT utilise les refresh tokens pour la gestion de la liste noire)
+            refresh_token = RefreshToken()
+            refresh_token.access_token = access_token
+            refresh_token.blacklist()
+
+            return Response(
+                {"message": _("Déconnexion réussie.")},
+                status=status.HTTP_205_RESET_CONTENT
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
 
 class RegisterViewAPIView(generics.CreateAPIView):
     queryset = User.objects.all()

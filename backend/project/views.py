@@ -5,13 +5,13 @@ from commercial.serializers import CommercialSerializer
 from projectowner.models import Owner
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.filters import SearchFilter, OrderingFilter
-
+from rest_framework import viewsets
 
 from django.utils.translation import gettext_lazy as _
 from .models import Category, Commercial, Project, Vote, VotePayment, VotePrice
-from .serializers import CategorySerializer, ProjectCreateUpdateSerializer, ProjectDetailSerializer, ProjectListSerializer, VotePriceSerializer, VoteSerializer, VotePaymentSerializer
+from .serializers import CategoryAdminSerializer, CategorySerializer, ProjectCreateUpdateSerializer, ProjectDetailSerializer, ProjectListSerializer, VotePriceSerializer, VoteSerializer, VotePaymentSerializer
 
 from rest_framework.pagination import PageNumberPagination
 
@@ -45,18 +45,29 @@ class StandardResultsSetPagination(PageNumberPagination):
 
 
 # === VUES CATEGORIES ===
-class CategoryListAPIView(generics.ListAPIView):
-    queryset = Category.objects.filter(active=True)
-    serializer_class = CategorySerializer
-    permission_classes = [AllowAny]
-    ordering = ['category_name']
-
-
-class CategoryDetailAPIView(generics.RetrieveAPIView):
-    queryset = Category.objects.filter(active=True)
-    serializer_class = CategorySerializer
-    permission_classes = [AllowAny]
+# class CategoryListAPIView(generics.ListAPIView):
+#     queryset = Category.objects.filter(active=True)
+#     serializer_class = CategorySerializer
+#     permission_classes = [AllowAny]
+#     ordering = ['category_name']
     
+
+# === VUES CATEGORIES ===
+class ActiveCategoryListView(generics.ListAPIView):
+    """
+    Endpoint public pour récupérer la liste des catégories actives
+    À utiliser dans le frontend pour populer la liste déroulante
+    """
+    serializer_class = CategorySerializer
+    queryset = Category.objects.filter(active=True).order_by('category_name')
+    permission_classes = []  # Accessible sans authentification
+
+
+
+class CategoryAdminViewSet(viewsets.ModelViewSet):
+    serializer_class = CategoryAdminSerializer
+    queryset = Category.objects.all().order_by('category_name')
+    permission_classes = [IsAdminUser]  # Seuls les admins peuvent gérer les catégories
 
 # === SERIALIZERS PROJECT ===
 

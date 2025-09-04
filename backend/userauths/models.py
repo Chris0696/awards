@@ -13,7 +13,12 @@ USER_TYPES = (
 
 class User(AbstractUser):
     username = models.CharField(unique=True, max_length=100)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(
+        unique=True,
+        error_messages={
+            'unique': _("Cet email est déjà utilisé.")
+        }
+    )
     full_name = models.CharField(max_length=100, verbose_name=_("Nom et Prénom"))
     phone = models.CharField(max_length=25, blank=True, null=True, unique=True)
     user_type = models.CharField(max_length=20, choices=USER_TYPES, default="user")

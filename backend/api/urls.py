@@ -1,14 +1,20 @@
-from django.urls import path
+from django.urls import path, include
 from userauths import views as UserViews
 from rest_framework_simplejwt.views import TokenRefreshView
 from project import views as ProjectViews
 from commercial import views as CommercialViews
 from api import views as ApiViews
 from projectowner import views as OwnerViews
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'admin/categories', ProjectViews.CategoryAdminViewSet, basename='admin-categories')
+
 
 urlpatterns = [
     # Authentification Endpoints
     path('auth/login/', UserViews.MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/logout/', UserViews.LogoutView.as_view(), name='logout'),
     path("auth/token/refresh/", TokenRefreshView.as_view()),
     
     # Register Endpoints
@@ -29,12 +35,16 @@ urlpatterns = [
     path('projects/<str:project_id>/delete/', ProjectViews.ProjectDeleteAPIView.as_view(), name='project_delete'),
     
     # CATEGORIES Endpoints
-    path('categories/', ProjectViews.CategoryListAPIView.as_view(), name='category_list'),
-    path('categories/<int:pk>/', ProjectViews.CategoryDetailAPIView.as_view(), name='category_detail'),
+    # Endpoint public pour lister les catégories actives
+    path('categories/', ProjectViews.ActiveCategoryListView.as_view(), name='active_categories'),
+    # path('categories/<int:pk>/', ProjectViews.CategoryDetailAPIView.as_view(), name='category_detail'),
+    # path('admin/categories/', ProjectViews.CategoryAdminViewSet.as_view(), name='admin_category'),
+    path('', include(router.urls)),
     
+    # path('categories/debug/', ProjectViews.CategoryListView.as_view(), name='categories-debug')
     
     # Commercials Endpoints
-    path('user/commercials/', CommercialViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
+    # path('user/commercials/', CommercialViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
     path('user/commercials/<int:pk>/', CommercialViews.CommercialDetailView.as_view(), name='commercial_detail'),
     
      # === STATISTIQUES ===
