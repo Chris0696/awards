@@ -4,14 +4,17 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const response = await fetch(`${process.env.API_URL}auth/register/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.API_TOKEN ?? ""}`,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await fetch(
+      `${process.env.API_URL}auth/register/authorproject`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.API_TOKEN ?? ""}`,
+        },
+        body: JSON.stringify(body),
+      }
+    );
 
     const contentType = response.headers.get("content-type");
 

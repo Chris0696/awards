@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
 import { projectSchema } from "@/lib/schemas";
@@ -19,6 +19,7 @@ import { formatPhoneNumber, parsePhoneNumber } from "react-phone-number-input";
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {
   const [showModal, setShowModal] = useState(false);
+
   const methods = useForm<ProjectForm>({
     resolver: zodResolver(projectSchema),
     mode: "onChange",
@@ -39,6 +40,8 @@ export default function SubmitProjectFormContainer() {
       solution: "",
       target_audience: "",
       progress_report: "",
+      affiliate: "",
+      owner_project_status: "brouillon",
       /*  acceptReformulation: false,
       acceptTerms: false, */
     },
@@ -55,8 +58,8 @@ export default function SubmitProjectFormContainer() {
     const payload: ProjectInput = {
       full_name: data.full_name,
       email: data.email,
-      country_code: parsePhoneNumber(data.phone)?.countryCallingCode ?? "",
-      phone: formatPhoneNumber(data.phone),
+      country_code: `+${parsePhoneNumber(data.phone)?.countryCallingCode}`,
+      phone: formatPhoneNumber(data.phone).replaceAll(" ", ""),
       profession: data.profession,
       password: data.password,
       age: data.age,
