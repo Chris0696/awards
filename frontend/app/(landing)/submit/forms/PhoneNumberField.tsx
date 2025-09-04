@@ -1,4 +1,6 @@
+"use client";
 import { Controller, useFormContext } from "react-hook-form";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import PhoneInputWithCountrySelect from "react-phone-number-input/react-hook-form";
 import "react-phone-number-input/style.css";
 
@@ -15,29 +17,26 @@ export default function PhoneNumberField({ label, placeholder, name }: Props) {
       <label className="block text-gray-800 text-lg font-medium">
         <span>{label}</span> <span className="text-red-500">*</span>
       </label>
-      {/*  <Controller
+      <Controller
         control={control}
         name={name}
         render={({ field, fieldState: { error } }) => (
           <>
-            <input
+            <PhoneInputWithCountrySelect
               {...field}
-              type="tel"
+              international
+              name={name}
+              defaultCountry="BJ"
               placeholder={placeholder}
-              className="border-none outline-none bg-gray-100 px-2 py-3 rounded-md w-full"
+              countryCallingCodeEditable={false}
+              rules={{
+                validate: (val) => isValidPhoneNumber(val) || "Numéro invalide",
+              }}
+              className="border-none outline-none bg-gray-100 px-2 py-3 rounded-md w-full "
             />
             <p className="text-sm text-red-500">{error?.message} </p>
           </>
         )}
-      /> */}
-      <PhoneInputWithCountrySelect
-        control={control}
-        international
-        name={name}
-        defaultCountry="BJ"
-        placeholder={placeholder}
-        countryCallingCodeEditable={false}
-        className="border-none outline-none bg-gray-100 px-2 py-3 rounded-md w-full "
       />
     </div>
   );
