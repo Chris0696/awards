@@ -304,11 +304,11 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'api.auth.CustomJWTAuthentication',
-    ],
-}
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'api.auth.CustomJWTAuthentication',
+#     ],
+# }
 
 # Set coresheader to allow all origin
 CORS_ALLOW_ALL_ORIGINS = True
