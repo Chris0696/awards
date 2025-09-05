@@ -26,7 +26,7 @@ export default function Step2({
           placeholder='Ex: "Cotonou", "Nord du Bénin", "Afrique francophone" '
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SelectField name="category_name" />
+          <SelectField name="category_id" />
 
           <NumberField
             name="estimated_budget"
@@ -51,7 +51,7 @@ export default function Step2({
             const valid = await trigger([
               "project_title",
               "local_area_impact",
-              "category_name",
+              "category_id",
               "estimated_budget",
             ]);
             if (valid) setStep(3);
