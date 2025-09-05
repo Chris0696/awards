@@ -30,8 +30,8 @@ export default function SubmitProjectFormContainer() {
       profession: "",
       password: "",
       age: undefined,
-      //category_id: undefined,
-      category_name: "",
+      category_id: "",
+      //category_name: "",
       project_title: "",
       local_area_impact: "",
       estimated_budget: undefined,
@@ -42,8 +42,8 @@ export default function SubmitProjectFormContainer() {
       progress_report: "",
       affiliate: "",
       owner_project_status: "brouillon",
-      /*  acceptReformulation: false,
-      acceptTerms: false, */
+      acceptReformulation: false,
+      acceptTerms: false,
     },
   });
   const {
@@ -64,9 +64,11 @@ export default function SubmitProjectFormContainer() {
       password: data.password,
       age: data.age,
       affiliate: "",
+      accept_project_reformulation: data.acceptReformulation,
+      accept_terms_of_use: data.acceptTerms,
       project: {
-        //category_id: data.category_id,
-        category_name: data.category_name,
+        category_id: data.category_id,
+        //category_name: data.category_name,
         project_title: data.project_title,
         local_area_impact: data.local_area_impact,
         main_objective: data.main_objective,

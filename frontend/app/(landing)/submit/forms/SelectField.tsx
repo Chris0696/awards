@@ -1,8 +1,33 @@
+"use client";
 import { ChevronDown } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
+
+type Category = {
+  category_id: string;
+  category_name: string;
+};
 
 export default function SelectField({ name }: { name: string }) {
   const { control } = useFormContext();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const res = await fetch("/api/categories");
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        const data = await res.json();
+        setCategories(data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCategories();
+  }, []);
   return (
     <div>
       <label className="block text-gray-800 text-lg font-medium">
@@ -20,9 +45,11 @@ export default function SelectField({ name }: { name: string }) {
                 className="appearance-none border-none outline-none bg-gray-100 px-2 py-2 rounded-md w-full text-gray-500 text-lg"
               >
                 <option value="">Sélectionnez une catégorie</option>
-                <option value="categorie4">Catégorie 1</option>
-                <option value="categorie5">Catégorie 2</option>
-                <option value="categorie6">Catégorie 3</option>
+                {categories.map((category, idx) => (
+                  <option key={idx} value={category.category_id}>
+                    {category.category_name}{" "}
+                  </option>
+                ))}
               </select>
               <span className="absolute right-2 top-1/2 transform -translate-y-1/2">
                 <ChevronDown size={20} />
