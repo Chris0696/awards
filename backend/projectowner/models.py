@@ -14,6 +14,14 @@ class Owner(models.Model):
     profession = models.TextField(null=True, blank=True, verbose_name=_("Profession"))
     age = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Âge"))
     commercial = models.ForeignKey(Commercial, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Commercial affilié"))
+    accept_project_reformulation = models.BooleanField(
+        default=False,
+        verbose_name=_("J'accepte que mon projet soit reformulé par l'équipe Project Awards selon les critères du site.")
+    )
+    accept_terms_of_use = models.BooleanField(
+        default=False,
+        verbose_name=_("J'ai lu et j'accepte les conditions d'utilisation.")
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

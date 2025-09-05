@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.utils.translation import gettext_lazy as _
-
+from rest_framework import serializers
 
 USER_TYPES = (
     ("admin", _("Administrateur")),
@@ -15,9 +15,7 @@ class User(AbstractUser):
     username = models.CharField(unique=True, max_length=100)
     email = models.EmailField(
         unique=True,
-        error_messages={
-            'unique': _("Cet email est déjà utilisé.")
-        }
+        
     )
     full_name = models.CharField(max_length=100, verbose_name=_("Nom et Prénom"))
     phone = models.CharField(max_length=25, blank=True, null=True, unique=True)

@@ -26,27 +26,72 @@ class RegisterSerializer(serializers.ModelSerializer):
     age = serializers.IntegerField(required=False, allow_null=True)
     affiliate = serializers.CharField(required=False, allow_blank=True, write_only=True)
     project = ProjectCreateUpdateSerializer(required=False, write_only=True)
+    accept_project_reformulation = serializers.BooleanField(
+        
+        required=True,
+        error_messages={
+            'required': _("Vous devez accepter que votre projet soit reformulé par l'équipe Project Awards.")
+        }
+    )
+    
+    accept_terms_of_use = serializers.BooleanField(
+    
+        required=True,
+        error_messages={
+            'required': _("Vous devez accepter les conditions d'utilisation.")
+        }
+    )
 
     class Meta:
         model = User
-        fields = ('full_name', 'email', 'country_code', 'phone', 'profession', 'password', 'age', 'affiliate', 'project')
+        fields = ('full_name', 'email', 'country_code', 'phone', 'profession', 'password', 'age', 'affiliate', 'project', 'accept_project_reformulation', 'accept_terms_of_use')
 
     def validate(self, attrs):
+        # Valider les cases à cocher
+        if not attrs.get('accept_project_reformulation'):
+            raise serializers.ValidationError({
+                "error": {
+                    "accept_project_reformulation": [
+                        _("Vous devez accepter que votre projet soit reformulé par l'équipe Project Awards.")
+                    ]
+                }
+            })
+        if not attrs.get('accept_terms_of_use'):
+            raise serializers.ValidationError({
+                "error": {
+                    "accept_terms_of_use": [
+                        _("Vous devez accepter les conditions d'utilisation.")
+                    ]
+                }
+            })
         # Valider le code pays
         print("RegisterSerializer attrs:", attrs)
         country_code = attrs.get('country_code')
         if country_code and not re.match(r'^\+\d{1,3}$', country_code):
-            raise serializers.ValidationError({"country_code": _("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33).")})
+            raise serializers.ValidationError({
+                "error": {
+                    "country_code": [_("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33).")]
+                }
+                })
 
         # Valider le numéro de téléphone
         phone = attrs.get('phone')
         if phone and not re.match(r'^\d{7,15}$', phone):
-            raise serializers.ValidationError({"phone": _("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")})
+            raise serializers.ValidationError({
+                "error": {
+                    "phone": [_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")]
+                }
+                })
 
         # Valider l'âge
         age = attrs.get('age')
         if age and (age < 18 or age > 120):
-            raise serializers.ValidationError({"age": _("L'âge doit être compris entre 18 et 120 ans.")})
+            raise serializers.ValidationError({
+                "error": {
+                    "age": [_("L'âge doit être compris entre 18 et 120 ans.")]
+                }
+
+                })
 
         # Valider le lien d'affiliation
         affiliate = attrs.get('affiliate')
@@ -56,9 +101,17 @@ class RegisterSerializer(serializers.ModelSerializer):
                 commercial = Commercial.objects.get(affiliate_link__endswith=affiliate_code)
                 attrs['commercial'] = commercial
             except Commercial.DoesNotExist:
-                raise serializers.ValidationError({"affiliate": _("Lien d'affiliation invalide.")})
+                raise serializers.ValidationError({
+                    "error": {
+                        "affiliate": [_("Lien d'affiliation invalide.")]
+                    }
+                    })
             except Commercial.MultipleObjectsReturned:
-                raise serializers.ValidationError({"affiliate": _("Plusieurs commerciaux correspondent à ce lien d'affiliation.")})
+                raise serializers.ValidationError({
+                    "error": {
+                        "affiliate": [_("Plusieurs commerciaux correspondent à ce lien d'affiliation.")]
+                    }
+                    })
 
         # Valider les données du projet
         project_data = attrs.get('project')
@@ -78,7 +131,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError(_("Cet email est déjà utilisé."))
+            raise serializers.ValidationError({
+                "error" :{
+                    "email": _("Cet email est déjà utilisé.")
+                }
+                })
         return value
 
     @transaction.atomic
@@ -90,6 +147,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         age = validated_data.pop('age', None)
         commercial = validated_data.pop('commercial', None)
         project_data = validated_data.pop('project', None)
+        accept_project_reformulation = validated_data.pop('accept_project_reformulation')
+        accept_terms_of_use = validated_data.pop('accept_terms_of_use')
 
         # Générer un username basé sur l'email
         email = validated_data['email']
@@ -117,7 +176,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             country_code=country_code,
             profession=profession,
             age=age,
-            commercial=commercial
+            commercial=commercial,
+            accept_project_reformulation=accept_project_reformulation,
+            accept_terms_of_use=accept_terms_of_use
         )
 
         # Créer le projet si fourni

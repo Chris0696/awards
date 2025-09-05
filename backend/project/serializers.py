@@ -86,9 +86,10 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
         required=True,
         write_only=True,
         error_messages={
-            'required': _("Vous devez obligatoirement choisir une catégorie pour le projet."),
-            'does_not_exist': _("La catégorie sélectionnée n'existe pas ou n'est pas active.")
-        }
+        "required": "Vous devez obligatoirement choisir une catégorie pour le projet.",
+        "blank": "Le champ catégorie ne peut pas être vide.",
+        "max_length": "L’identifiant de catégorie est trop long."
+    }
     )
     owner_id = serializers.PrimaryKeyRelatedField(
         read_only=True,
@@ -111,7 +112,11 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
         print("Validating attrs:", attrs)  # Débogage
         if not category_id:
             raise serializers.ValidationError({
-                "category_id": _("Vous devez obligatoirement choisir une catégorie pour le projet.")
+                "error": {
+                    "project" :{
+                        "category_id": _("Vous devez obligatoirement choisir une catégorie pour le projet.")
+                    }
+                }
             })
         
         try:
@@ -120,7 +125,12 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
             print("Found category:", category.category_name)  # Débogage
         except Category.DoesNotExist:
             raise serializers.ValidationError({
-                "category_id": _("La catégorie sélectionnée n'existe pas ou n'est pas active.")
+                "error": {
+                    "project" :{
+                        "category_id": _("La catégorie sélectionnée n'existe pas ou n'est pas active.")
+                    }
+                }
+                
             })
 
         # Ne pas retirer category_id ici pour éviter de perturber d'autres validations
@@ -133,7 +143,9 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
             user = request.user
             if user.user_type != 'owner':
                 raise serializers.ValidationError({
-                    "error": _("Seul un utilisateur de type 'owner' peut créer ou modifier un projet.")
+                    "error": {
+                        "non_field_errors": [_("Seul un utilisateur de type 'owner' peut créer ou modifier un projet.")]
+                    }
                 })
             try:
                 owner = Owner.objects.get(user=user)
@@ -142,10 +154,23 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
                     attrs['commercial'] = owner.commercial
             except Owner.DoesNotExist:
                 raise serializers.ValidationError({
-                    "error": _("Aucun profil Owner associé à cet utilisateur.")
+                    "error": {
+                        "non_field_errors": [_("Aucun profil Owner associé à cet utilisateur.")]
+                    }
                 })
 
         return attrs
+    
+    def to_internal_value(self, data):
+        try:
+            return super().to_internal_value(data)
+        except serializers.ValidationError as e:
+            errors = {}
+            for field, messages in e.detail.items():
+                # On prend le premier message si plusieurs
+                custom_message = messages[0]
+                errors.setdefault("error", {}).setdefault("project", {})[field] = custom_message
+            raise serializers.ValidationError(errors)
 
     def create(self, validated_data):
         # Retirer category_id après validation pour éviter un conflit avec le champ category
