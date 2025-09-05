@@ -1,3 +1,79 @@
+# services:
+#   postgres_db:
+#     image: postgres:16.1-bookworm
+#     ports:
+#       - "5434:5432"
+#     volumes:
+#       - awards_local_pgdata:/var/lib/postgresql/data
+#     env_file: .env
+#     environment:
+#       - POSTGRES_DB=${DB_NAME}
+#       - POSTGRES_USER=${DB_USER}
+#       - POSTGRES_PASSWORD=${DB_PASS}
+#     logging:
+#       driver: json-file
+#       options:
+#         max-file: "3"
+#         max-size: 15m
+#     networks:
+#       - awards-bridge
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+
+#   backend:
+#     build:
+#       context: ./backend
+#       dockerfile: Dockerfile.prod
+#     ports:
+#      - "8080:8000"
+#     depends_on:
+#       postgres_db:
+#         condition: service_healthy
+#     volumes:
+#       - ./backend:/usr/src/app
+#       - awards_collectstatic:/usr/src/app/collectstatic
+#       - ./backend/log:/usr/src/app/log
+#       - ./backend/media:/usr/src/app/media
+#       - ./.env:/usr/src/app/.env:ro
+#     env_file: .env
+#     command: >
+#       sh -c "
+#         echo 'Waiting for database...' &&
+#         python manage.py migrate &&
+#         python manage.py collectstatic --noinput &&
+#         python manage.py runserver 0.0.0.0:8000
+#       "
+#     networks:
+#       - awards-bridge
+
+#   web:
+#     build:
+#       context: ./frontend
+#       dockerfile: Dockerfile.prod
+#     ports:
+#       - "8081:3000"
+#     depends_on:
+#       - backend
+#     env_file:
+#       - .env
+#     environment:
+#       - NEXT_PUBLIC_API_URL=http://185.98.136.244:8080
+#       - NODE_ENV=development
+#       - NEXT_TELEMETRY_DISABLED=1
+#     networks:
+#       - awards-bridge
+
+# networks:
+#   awards-bridge:
+#     driver: bridge
+
+# volumes:
+#   awards_local_pgdata: {}
+#   awards_collectstatic: {}
+
 services:
   postgres_db:
     image: postgres:16.1-bookworm
@@ -27,8 +103,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    ports:
-     - "8080:8000"
+    # Retirer l'exposition de port - sera accessible via nginx
     depends_on:
       postgres_db:
         condition: service_healthy
@@ -39,12 +114,14 @@ services:
       - ./backend/media:/usr/src/app/media
       - ./.env:/usr/src/app/.env:ro
     env_file: .env
+    environment:
+      - ALLOWED_HOSTS=awardprojectvoting.scarsoft.net,localhost,127.0.0.1,backend
     command: >
       sh -c "
         echo 'Waiting for database...' &&
         python manage.py migrate &&
         python manage.py collectstatic --noinput &&
-        python manage.py runserver 0.0.0.0:8000
+        gunicorn awards.wsgi:application --name awards --workers 3 -b 0.0.0.0:8000
       "
     networks:
       - awards-bridge
@@ -53,18 +130,43 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-    ports:
-      - "8081:3000"
+    # Retirer l'exposition de port - sera accessible via nginx
     depends_on:
       - backend
     env_file:
       - .env
     environment:
-      - NEXT_PUBLIC_API_URL=http://185.98.136.244:8080
-      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=https://awardprojectvoting.scarsoft.net/api
+      - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
     networks:
       - awards-bridge
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - awards_collectstatic:/var/www/static:ro
+      - ./backend/media:/var/www/media:ro
+    depends_on:
+      - backend
+      - web
+    networks:
+      - awards-bridge
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./nginx/ssl:/etc/letsencrypt
+      - ./nginx/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email contact@scarsoft.net -d awardprojectvoting.scarsoft.net --agree-tos
+    depends_on:
+      - nginx
 
 networks:
   awards-bridge:
