@@ -1,3 +1,4 @@
+"use client";
 import { NewProjectsChart } from "@/components/dashboard/admin/NewProjectChart";
 import ProjectOverviewCard from "@/components/dashboard/admin/ProjectOverviewCard";
 import { VotesChart } from "@/components/dashboard/admin/VotesChart";
@@ -7,14 +8,18 @@ import InfobulleCard from "@/components/dashboard/project-owner/InfobulleCard";
 import MyProjectCard from "@/components/dashboard/project-owner/MyProjectCard";
 import OverviewCard from "@/components/dashboard/project-owner/OverviewCard";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function AdminPage() {
-  const isAdmin = true;
+  const user = useAuthStore((state) => state.user);
+
   return (
     <>
-      {!isAdmin ? (
+      {user?.user_type !== "admin" ? (
         <section className="space-y-24">
-          <DashboardHeader pageTitle="Bienvenu sur votre espace personnel, Mireille" />
+          <DashboardHeader
+            pageTitle={`Bienvenu sur votre espace personnel, ${user?.full_name} `}
+          />
           <div className="flex  space-x-14">
             <div className="flex space-x-4">
               <OverviewCard />

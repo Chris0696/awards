@@ -24,7 +24,7 @@ export async function POST() {
     // Mettre à jour le cookie access_token
     const response = NextResponse.json({ access: data.access });
     response.cookies.set("access_token", data.access, {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",

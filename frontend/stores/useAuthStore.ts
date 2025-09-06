@@ -3,9 +3,10 @@ import { create } from "zustand";
 
 interface User {
   user_id: number;
-  email?: string;
-  is_staff?: boolean;
-  is_superuser?: boolean;
+  full_name: string;
+  email: string;
+  username: string;
+  user_type: string;
 }
 
 interface AuthState {
@@ -46,8 +47,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const user = await getCurrentUser();
       set({ user });
-    } catch {
-      set({ user: null });
+    } catch (err: any) {
+      if (err.status === 401) {
+        try {
+          await get().refreshToken();
+          const user = await getCurrentUser();
+          set({ user });
+        } catch {
+          set({ user: null });
+        }
+      } else {
+        set({ user: null });
+      }
     }
   },
 }));

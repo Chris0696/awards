@@ -7,9 +7,11 @@ import NavLink from "../../common/NavLink";
 import MobileMenu from "./MobileMenu";
 import ColoredLink from "../../../components/ui/ColoredLink";
 import { landingpagelinks } from "@/app/common/navigationlinks";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function Header() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const user = useAuthStore((state) => state.user);
   return (
     <header className="bg-primary py-5 px-10">
       <nav className="flex justify-between">
@@ -25,7 +27,11 @@ export default function Header() {
           {landingpagelinks.map((link, idx) => (
             <NavLink key={idx} href={link.url} text={link.page} />
           ))}
-          <ColoredLink url="/login" text="Se connecter" />
+          {!user ? (
+            <ColoredLink url="/login" text="Se connecter" />
+          ) : (
+            <ColoredLink url="/admin" text="Dashboard" />
+          )}
         </div>
         <button
           className="text-white md:hidden"

@@ -3,12 +3,14 @@ import { cookies } from "next/headers";
 import { jwtDecode } from "jwt-decode";
 
 interface JwtPayload {
+  exp: number;
+  iat: number;
+  jti: string;
   user_id: number;
-  email?: string;
-  is_staff?: boolean;
-  is_superuser?: boolean;
-  exp?: number;
-  [key: string]: any;
+  full_name: string;
+  email: string;
+  username: string;
+  user_type: string;
 }
 
 export async function GET() {
@@ -29,8 +31,9 @@ export async function GET() {
     return NextResponse.json({
       user_id: decoded.user_id,
       email: decoded.email,
-      is_staff: decoded.is_staff ?? false,
-      is_superuser: decoded.is_superuser ?? false,
+      full_name: decoded.full_name,
+      username: decoded.username,
+      user_type: decoded.user_type,
     });
   } catch (err) {
     console.error("JWT decode error:", err);

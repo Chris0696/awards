@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import AppInitialiser from "./(dashboard)/AppInitialiser";
+import { AuthWatcher } from "./(dashboard)/admin/AuthWatcher";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -21,8 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${outfit.variable}`}>
       <body className="font-outfit ">
-        <main className=" ">{children}</main>
+        <main className=" ">
+          <AppInitialiser>{children}</AppInitialiser>
+        </main>
         <Toaster richColors position="top-right" />
+        <AuthWatcher />
       </body>
     </html>
   );
