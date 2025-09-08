@@ -1,14 +1,29 @@
+"use client";
 import { formatDate } from "@/app/common/types/common";
 import { ProjectInfo } from "@/app/common/types/project";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { MoreVerticalIcon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import CreateNewAuthProjectModal from "@/app/(dashboard)/admin/projects/CreateNewAuthProjectModal";
+import { useState } from "react";
 
 type Props = {
   projects: ProjectInfo[];
 };
 
 export default function Table({ projects }: Props) {
+  const [showModal, setShowModal] = useState(false);
   const user = useAuthStore((state) => state.user);
+  const [project, setProject] = useState<ProjectInfo | undefined>(undefined);
+  const openEditModal = (project: ProjectInfo) => {
+    setProject(project);
+    setShowModal(true);
+  };
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">
       <table className=" w-full">
@@ -37,9 +52,11 @@ export default function Table({ projects }: Props) {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Position actuelle
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
+            {user?.user_type === "user" && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -71,13 +88,42 @@ export default function Table({ projects }: Props) {
                 {project.owner.total_votes_received}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">1</td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                <MoreVerticalIcon />
-              </td>
+              {user?.user_type === "user" && (
+                <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button>
+                        <MoreVerticalIcon />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem>
+                        <button
+                          className="cursor-pointer"
+                          onClick={() => openEditModal(project)}
+                        >
+                          Reformuler et publier
+                        </button>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <button className="cursor-pointer">Publié</button>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <button className="cursor-pointer">Rejeter</button>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
       </table>
+      <CreateNewAuthProjectModal
+        showModal={showModal}
+        setShowModal={setShowModal}
+        project={project}
+      />
     </div>
   );
 }

@@ -1,8 +1,10 @@
+"use client";
 import { X } from "lucide-react";
 import React from "react";
 import NavLink from "../../common/NavLink";
 import ColoredLink from "../../../components/ui/ColoredLink";
 import { landingpagelinks } from "@/app/common/navigationlinks";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function MobileMenu({
   showMobileMenu,
@@ -11,6 +13,7 @@ export default function MobileMenu({
   showMobileMenu: boolean;
   setShowMobileMenu: (showMobileMenu: boolean) => void;
 }) {
+  const user = useAuthStore((state) => state.user);
   return (
     <aside
       style={{
@@ -36,13 +39,17 @@ export default function MobileMenu({
             <NavLink href={link.url} text={link.page} />
           </span>
         ))}
-        <ColoredLink
-          url={"/login"}
-          text="Se connecter"
-          onClick={() => {
-            setShowMobileMenu(false);
-          }}
-        />
+        {!user ? (
+          <ColoredLink
+            url={"/login"}
+            text="Se connecter"
+            onClick={() => {
+              setShowMobileMenu(false);
+            }}
+          />
+        ) : (
+          <ColoredLink url="/admin" text="Dashboard" />
+        )}
       </div>
     </aside>
   );

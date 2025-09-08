@@ -12,7 +12,7 @@ export default function page() {
         <FilterBtn text="Statut" />
       </div>
       <div>
-        <Table />
+        <Table projects={[]} />
       </div>
       <SwitchPageBtn />
     </div>

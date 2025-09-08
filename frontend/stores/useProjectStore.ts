@@ -1,4 +1,4 @@
-import { ProjectInfo } from "@/app/common/types/project";
+import { ProjectInfo, ProjectInput } from "@/app/common/types/project";
 import { projectService } from "@/lib/services/projectService";
 import { create } from "zustand";
 
@@ -12,5 +12,9 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   setProjects: async () => {
     const projects = await projectService.getProjects();
     set({ projects: projects });
+  },
+
+  updateProject: async (project: ProjectInput) => {
+    await projectService.updateProject(project);
   },
 }));
