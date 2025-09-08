@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginInterceptorPage() {
   const router = useRouter();
+
   return (
     <Popover
       title="Je vote"

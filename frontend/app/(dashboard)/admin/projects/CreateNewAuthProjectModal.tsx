@@ -2,6 +2,7 @@ import Step1 from "@/app/(landing)/submit/forms/steps/Step1";
 import Step2 from "@/app/(landing)/submit/forms/steps/Step2";
 import Step3 from "@/app/(landing)/submit/forms/steps/Step3";
 import Step4 from "@/app/(landing)/submit/forms/steps/Step4";
+import { ProjectInfo } from "@/app/common/types/project";
 import Popover from "@/components/ui/Popover";
 import { authProjectSchema } from "@/lib/schemas";
 import { projectService } from "@/lib/services/projectService";
@@ -9,7 +10,7 @@ import { mapServerErrors } from "@/lib/utils/mapServerErrors";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -17,6 +18,7 @@ import z from "zod";
 type Props = {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
+  project?: ProjectInfo;
 };
 
 type AuthProjectInput = z.infer<typeof authProjectSchema>;
@@ -24,7 +26,9 @@ type AuthProjectInput = z.infer<typeof authProjectSchema>;
 export default function CreateNewAuthProjectModal({
   showModal,
   setShowModal,
+  project,
 }: Props) {
+  console.log(project, "projectsss");
   const methods = useForm<AuthProjectInput>({
     resolver: zodResolver(authProjectSchema),
     mode: "onChange",
@@ -49,6 +53,7 @@ export default function CreateNewAuthProjectModal({
 
   const onSubmit = async (data: AuthProjectInput) => {
     const payload = {
+      project_id: project?.project_id,
       affiliate: "",
       accept_project_reformulation: data.acceptReformulation,
       accept_terms_of_use: data.acceptTerms,
@@ -64,6 +69,11 @@ export default function CreateNewAuthProjectModal({
       owner_project_status: "brouillon",
     };
     try {
+      if (project) {
+        await projectService.updateProject(payload);
+        setShowModal(false);
+        reset();
+      }
       await projectService.addNewProject(payload);
       setShowModal(false);
       reset();
@@ -72,9 +82,29 @@ export default function CreateNewAuthProjectModal({
       toast.error(message);
     }
   };
+  useEffect(() => {
+    if (project) {
+      reset({
+        category_id: project.category.category_id ?? "",
+        project_title: project.project_title ?? "",
+        local_area_impact: project.local_area_impact ?? "Agla",
+        estimated_budget: Number(project.estimated_budget ?? undefined),
+        description: project.description ?? "",
+        main_objective: project.main_objective ?? "Main objective edited",
+        solution: project.solution ?? "Solution edited",
+        target_audience: project.target_audience ?? "Jeune edited",
+        progress_report: project.progress_report ?? "Début edited",
+        affiliate: project.affiliate ?? "",
+        owner_project_status: project.owner_project_status ?? "publie",
+        acceptReformulation: true,
+        acceptTerms: true,
+      });
+    }
+  }, [project, reset]);
+
   return (
     <Popover
-      title="Créer un nouveau projet"
+      title={project ? "Réformuler le projet" : "Créer un nouveau projet"}
       visible={showModal}
       onClose={() => setShowModal(false)}
     >
