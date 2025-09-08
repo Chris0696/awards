@@ -44,7 +44,7 @@ urlpatterns = [
     # path('categories/debug/', ProjectViews.CategoryListView.as_view(), name='categories-debug')
     
     # Commercials Endpoints
-    # path('user/commercials/', CommercialViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
+    path('user/commercials/', CommercialViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
     path('user/commercials/<int:pk>/', CommercialViews.CommercialDetailView.as_view(), name='commercial_detail'),
     
      # === STATISTIQUES ===
