@@ -1,6 +1,8 @@
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
+  const access = (await cookies()).get("access_token")?.value;
   try {
     const body = await req.json();
 
@@ -10,7 +12,6 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.API_TOKEN ?? ""}`,
         },
         body: JSON.stringify(body),
       }

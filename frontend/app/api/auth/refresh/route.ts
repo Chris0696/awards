@@ -2,16 +2,18 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 export async function POST() {
-  const refresh = cookies().get("refresh_token")?.value;
+  const refresh = (await cookies()).get("refresh_token")?.value;
+  const access = (await cookies()).get("access_token")?.value;
 
   if (!refresh) {
     return NextResponse.json({ error: "No refresh token" }, { status: 401 });
   }
 
   try {
-    const res = await fetch(`${process.env.API_URL}auth/token/refresh/`, {
+    const res = await fetch(`${process.env.API_URL}auth/refresh/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      ...(access ? { Authorization: `Bearer ${access}` } : {}),
       body: JSON.stringify({ refresh }),
     });
 

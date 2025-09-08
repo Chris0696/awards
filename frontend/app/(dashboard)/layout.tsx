@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Sidebar from "@/app/(dashboard)/Sidebar";
 import { MenuIcon } from "lucide-react";
+import { ProjectInitializer } from "./admin/projects/ProjectInitializer";
 
 export default function AdminLayout({
   children,
@@ -27,6 +28,7 @@ export default function AdminLayout({
         />
       )}
       <section className="flex-1 p-5 overflow-y-auto">{children}</section>
+      <ProjectInitializer />
     </section>
   );
 }
