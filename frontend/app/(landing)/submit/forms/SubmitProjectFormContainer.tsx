@@ -3,7 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
-import { projectSchema } from "@/lib/schemas";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { projectService } from "@/lib/services/projectService";
 import { ProjectInput } from "@/app/common/types/project";
@@ -15,6 +15,7 @@ import Step4 from "./steps/Step4";
 import { mapServerErrors } from "@/lib/utils/mapServerErrors";
 import { toast } from "sonner";
 import { formatPhoneNumber, parsePhoneNumber } from "react-phone-number-input";
+import { projectSchema } from "@/lib/schemas";
 
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {
