@@ -39,6 +39,11 @@ export const dashboardlinks = [
     isRequireAdmin: true,
   },
   {
+    page: "Catégories & Tags",
+    url: "/admin/categories",
+    isRequireAdmin: true,
+  },
+  {
     page: "Mon compte",
     url: "/admin/account",
     isRequireAdmin: false,

@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 export default function Sidebar({
   open,
@@ -20,12 +21,21 @@ export default function Sidebar({
   onClose?: () => void;
 }) {
   const { user, logout } = useAuthStore();
+  const router = useRouter();
 
   const filteredLinks = dashboardlinks.filter((link) => {
-    if (user?.user_type !== "admin") {
+    if (user?.user_type === "owner") {
       return !link.isRequireAdmin;
+    } else if (user?.user_type === "") {
+    } else {
+      return dashboardlinks;
     }
   });
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
 
   return (
     <aside
@@ -73,7 +83,7 @@ export default function Sidebar({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem>
-                <button className="cursor-pointer" onClick={logout}>
+                <button className="cursor-pointer" onClick={handleLogout}>
                   Se déconnecter
                 </button>
               </DropdownMenuItem>

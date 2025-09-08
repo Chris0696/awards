@@ -7,15 +7,19 @@ import FilterBtn from "@/components/dashboard/FilterBtn";
 import InfobulleCard from "@/components/dashboard/project-owner/InfobulleCard";
 import MyProjectCard from "@/components/dashboard/project-owner/MyProjectCard";
 import OverviewCard from "@/components/dashboard/project-owner/OverviewCard";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useEffect, useState } from "react";
+
+import { useProjectStore } from "@/stores/useProjectStore";
 
 export default function AdminPage() {
   const user = useAuthStore((state) => state.user);
+  const projects = useProjectStore((state) => state.projects);
 
   return (
     <>
-      {user?.user_type !== "admin" ? (
+      {user?.user_type === "owner" ? (
         <section className="space-y-24">
           <DashboardHeader
             pageTitle={`Bienvenu sur votre espace personnel, ${user?.full_name} `}
@@ -33,10 +37,9 @@ export default function AdminPage() {
               Mes projets
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <MyProjectCard />
-              <MyProjectCard />
-              <MyProjectCard />
-              <MyProjectCard />
+              {projects?.map((project) => (
+                <MyProjectCard key={project.project_id} project={project} />
+              ))}
             </div>
           </div>
         </section>

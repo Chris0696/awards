@@ -1,12 +1,8 @@
 "use client";
+import { Category } from "@/app/common/types/category";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-
-type Category = {
-  category_id: string;
-  category_name: string;
-};
 
 export default function SelectField({ name }: { name: string }) {
   const { control } = useFormContext();

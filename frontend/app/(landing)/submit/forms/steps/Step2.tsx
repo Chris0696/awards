@@ -5,6 +5,7 @@ import NumberField from "../NumberField";
 import SelectField from "../SelectField";
 import TextField from "../TextField";
 import { useFormContext } from "react-hook-form";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function Step2({
   setStep,
@@ -12,6 +13,7 @@ export default function Step2({
   setStep: (step: number) => void;
 }) {
   const { trigger } = useFormContext();
+  const user = useAuthStore((state) => state.user);
   return (
     <FormCard step={2}>
       <div className="space-y-6">
@@ -39,12 +41,14 @@ export default function Step2({
         <FileInputField />
       </div>
       <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row justify-between items-center mt-6">
-        <button
-          onClick={() => setStep(1)}
-          className="border w-full md:w-auto border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
-        >
-          <ChevronLeft /> <span>Retourner</span>
-        </button>
+        {!user && (
+          <button
+            onClick={() => setStep(1)}
+            className="border w-full md:w-auto border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
+          >
+            <ChevronLeft /> <span>Retourner</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={async () => {

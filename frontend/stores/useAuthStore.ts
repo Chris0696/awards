@@ -28,8 +28,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    set({ accessToken: null, user: null });
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.error("Erreur lors du logout:", data);
+      }
+    } catch (err) {
+      console.error("Erreur réseau lors du logout:", err);
+    } finally {
+      set({ accessToken: null, user: null });
+    }
   },
 
   refreshToken: async () => {

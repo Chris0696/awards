@@ -8,11 +8,13 @@ import { useState } from "react";
 import UserAvatar from "@/assets/user_avatar.svg";
 import Image from "next/image";
 import SearchIcon from "@/assets/searchicon.svg";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function page() {
   const [showModal, setShowModal] = useState(false);
-  const isAdmin = true;
-  return !isAdmin ? (
+  const user = useAuthStore((state) => state.user);
+
+  return user?.user_type === "user" ? (
     <section>
       <DashboardHeader pageTitle="Affiliation" />
       <div className="mb-8">
@@ -25,7 +27,7 @@ export default function page() {
         </button>
       </div>
       <div>
-        <Table />
+        <Table projects={[]} />
       </div>
       <div>
         <SwitchPageBtn />
@@ -104,7 +106,7 @@ export default function page() {
         </div>
       </div>
       <div>
-        <Table />
+        <Table projects={[]} />
       </div>
       <div>
         <SwitchPageBtn />
