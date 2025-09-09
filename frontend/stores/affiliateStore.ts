@@ -1,5 +1,5 @@
 import { AffiliateInfo, AffiliateInput } from "@/app/common/types/affiliate";
-import { affiliateService } from "@/lib/services/affiliateService";
+import { affiliateService } from "@/frontendlib/services/affiliateService";
 import { create } from "zustand";
 
 interface AffiliateStore {

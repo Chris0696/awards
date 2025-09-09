@@ -4,15 +4,24 @@ import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
 import Table from "@/components/dashboard/Table";
 import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
 import { ChevronRightIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UserAvatar from "@/assets/user_avatar.svg";
 import Image from "next/image";
 import SearchIcon from "@/assets/searchicon.svg";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useAffiliateStore } from "@/stores/affiliateStore";
+import AffiliateTable from "@/components/dashboard/AffiliateTable";
 
 export default function page() {
   const [showModal, setShowModal] = useState(false);
   const user = useAuthStore((state) => state.user);
+  const affiliates = useAffiliateStore((state) => state.affiliates);
+  const fetchAffiliates = useAffiliateStore((state) => state.fetchAffiliates);
+  console.log(affiliates, "affiliates");
+
+  useEffect(() => {
+    fetchAffiliates();
+  }, []);
 
   return user?.user_type === "user" ? (
     <section>
@@ -27,7 +36,7 @@ export default function page() {
         </button>
       </div>
       <div>
-        <Table projects={[]} />
+        <AffiliateTable affiliates={affiliates} />
       </div>
       <div>
         <SwitchPageBtn />

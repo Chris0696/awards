@@ -4,9 +4,9 @@ import Step3 from "@/app/(landing)/submit/forms/steps/Step3";
 import Step4 from "@/app/(landing)/submit/forms/steps/Step4";
 import { ProjectInfo } from "@/app/common/types/project";
 import Popover from "@/components/ui/Popover";
-import { authProjectSchema } from "@/lib/schemas";
-import { projectService } from "@/lib/services/projectService";
-import { mapServerErrors } from "@/lib/utils/mapServerErrors";
+import { authProjectSchema } from "@/frontendlib/schemas";
+import { projectService } from "@/frontendlib/services/projectService";
+import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft } from "lucide-react";
 

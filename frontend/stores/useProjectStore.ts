@@ -1,5 +1,6 @@
 import { ProjectInfo, ProjectInput } from "@/app/common/types/project";
-import { projectService } from "@/lib/services/projectService";
+import { projectService } from "@/frontendlib/services/projectService";
+
 import { create } from "zustand";
 
 interface ProjectStore {

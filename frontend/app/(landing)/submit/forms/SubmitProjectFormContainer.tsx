@@ -5,17 +5,19 @@ import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { projectService } from "@/lib/services/projectService";
+
 import { ProjectInput } from "@/app/common/types/project";
 import ThanksNoteModal from "@/components/modals/ThanksNoteModal";
 import Step1 from "./steps/Step1";
 import Step2 from "./steps/Step2";
 import Step3 from "./steps/Step3";
 import Step4 from "./steps/Step4";
-import { mapServerErrors } from "@/lib/utils/mapServerErrors";
+
 import { toast } from "sonner";
 import { formatPhoneNumber, parsePhoneNumber } from "react-phone-number-input";
-import { projectSchema } from "@/lib/schemas";
+import { projectSchema } from "@/frontendlib/schemas";
+import { projectService } from "@/frontendlib/services/projectService";
+import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
 
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {

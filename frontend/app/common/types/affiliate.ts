@@ -6,7 +6,18 @@ export type AffiliateInput = {
 };
 
 export type AffiliateInfo = {
-  username: string;
-  email: string;
-  user_type: string;
+  affiliate_link: string;
+  commission_earned: string;
+  commission_rate: string;
+  created_at: string;
+  full_name: string;
+  id: number;
+  is_active: boolean;
+  phone: string | null;
+  total_projects: number;
+  total_published_projects: number;
+  total_rejected_projects: number;
+  total_revenue: string;
+  total_votes: number;
+  user_email: string;
 };

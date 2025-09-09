@@ -1,9 +1,10 @@
 "use client";
 import EmailField from "@/app/(landing)/submit/forms/EmailField";
 import PasswordField from "@/app/(landing)/submit/forms/PasswordField";
-import { userSchema } from "@/lib/schemas";
-import { login } from "@/lib/services/authService";
-import { mapServerErrors } from "@/lib/utils/mapServerErrors";
+import { userSchema } from "@/frontendlib/schemas";
+import { login } from "@/frontendlib/services/authService";
+import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";

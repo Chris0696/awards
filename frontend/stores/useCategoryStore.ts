@@ -1,10 +1,10 @@
 import { create } from "zustand";
+
+import { AdminCategory, Category } from "@/app/common/types/category";
 import {
-  getCategories,
   createCategory,
   fetchAdminCategories,
-} from "@/lib/services/categoryService";
-import { AdminCategory, Category } from "@/app/common/types/category";
+} from "@/frontendlib/services/categoryService";
 
 interface CategoryStore {
   categories: AdminCategory[];
