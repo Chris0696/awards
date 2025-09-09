@@ -8,10 +8,12 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets
+from rest_framework.views import APIView
+
 
 from django.utils.translation import gettext_lazy as _
 from .models import Category, Commercial, Project, Vote, VotePayment, VotePrice
-from .serializers import CategoryAdminSerializer, CategorySerializer, ProjectCreateUpdateSerializer, ProjectDetailSerializer, ProjectListSerializer, VotePriceSerializer, VoteSerializer, VotePaymentSerializer
+from .serializers import CategoryAdminSerializer, CategorySerializer, ProjectCreateUpdateSerializer, ProjectDetailSerializer, ProjectListSerializer, VoteAndPaySerializer, VotePriceSerializer, VoteSerializer, VotePaymentSerializer
 
 from rest_framework.pagination import PageNumberPagination
 
@@ -241,4 +243,15 @@ class VotePaymentCreateAPIView(generics.CreateAPIView):
     queryset = VotePayment.objects.all()
     serializer_class = VotePaymentSerializer
     permission_classes = [permissions.AllowAny]  # Peut être restreint à IsAuthenticated si nécessaire
+    
+
+class VoteAndPayAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = VoteAndPaySerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            result = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     

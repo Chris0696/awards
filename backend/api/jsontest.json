@@ -88,3 +88,11 @@
     "owner_project_status": "brouillon"
   }
 }
+
+// commercial
+{
+  "username": "Ange Valdo",
+  "email": "chrisoswolf@gmail.com",
+  "password": "Pass12345!",
+  "user_type": "commercial"
+}

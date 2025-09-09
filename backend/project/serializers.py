@@ -367,58 +367,6 @@ class VoteSerializer(serializers.ModelSerializer):
         return representation
     
 
-# class VotePaymentSerializer(serializers.ModelSerializer):
-#     vote_id = serializers.PrimaryKeyRelatedField(queryset=Vote.objects.all(), source='vote')
-#     payment_method_id = serializers.CharField(write_only=True, required=True)  # Pour Orange Money, par exemple
-
-#     class Meta:
-#         model = VotePayment
-#         fields = ['id', 'vote_id', 'amount', 'status', 'payment_method', 'transaction_id', 'created_at', 'paid_at', 'payment_method_id']
-#         read_only_fields = ['status', 'transaction_id', 'created_at', 'paid_at']
-
-#     def validate(self, attrs):
-#         vote = attrs.get('vote')
-#         vote_count = vote.vote_count
-
-#         # Vérifier si le vote est déjà payé
-#         if VotePayment.objects.filter(vote=vote).exists():
-#             raise serializers.ValidationError({"vote": _("Ce vote a déjà été payé.")})
-
-#         # Récupérer le prix correspondant au vote_count
-#         try:
-#             vote_price = VotePrice.objects.get(vote_count=vote_count, active=True)
-#             attrs['amount'] = vote_price.price
-#         except VotePrice.DoesNotExist:
-#             raise serializers.ValidationError({"vote_count": _("Aucun prix défini pour ce nombre de votes.")})
-
-#         return attrs
-
-#     def create(self, validated_data):
-#         payment_method_id = validated_data.pop('payment_method_id')
-#         vote = validated_data['vote']
-
-#         # Créer le paiement
-#         payment = VotePayment.objects.create(
-#             user=vote.user,
-#             vote=vote,
-#             amount=validated_data['amount'],
-#             status='en_attente',
-#             payment_method='orange_money'  # À ajuster selon le système de paiement
-#         )
-
-#         # Simuler un paiement réussi (à remplacer par une intégration réelle)
-#         payment.status = 'paye'
-#         payment.paid_at = timezone.now()
-#         payment.transaction_id = f"TXN_{uuid.uuid4().hex[:10].upper()}"
-#         payment.save()
-
-#         # Activer le vote après paiement réussi
-#         vote.active = True
-#         vote.save()
-
-#         return payment
-
-
 class VotePriceSerializer(serializers.ModelSerializer):
     class Meta:
         model = VotePrice
@@ -493,3 +441,114 @@ class VotePaymentSerializer(serializers.ModelSerializer):
 
         return payment
     
+class VoteAndPaySerializer(serializers.Serializer):
+    project_id = serializers.PrimaryKeyRelatedField(queryset=Project.objects.all(), source='project')
+    vote = serializers.IntegerField(min_value=1, max_value=5, help_text=_("Note de 1 à 5 étoiles"))
+    vote_count = serializers.IntegerField(min_value=1, help_text=_("Nombre de votes achetés"))
+    phone = serializers.CharField(
+        max_length=20,
+        required=True,
+        validators=[RegexValidator(r'^\d{7,15}$', message=_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres."))]
+    )
+    country_code = serializers.CharField(
+        max_length=5,
+        required=True,
+        validators=[RegexValidator(r'^\+\d{1,3}$', message=_("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33)."))]
+    )
+    payment_method_id = serializers.CharField(required=True, help_text=_("Identifiant de la méthode de paiement"))
+
+    def validate(self, attrs):
+        request = self.context.get('request')
+        project = attrs.get('project')
+        vote_count = attrs.get('vote_count')
+
+        # Vérifier si le projet est en statut "publie"
+        if project.platform_status != 'publie':
+            raise serializers.ValidationError({
+                "error": {"project_id": [_("Ce projet n'est pas ouvert aux votes.")]}
+            })
+
+        # Calculer le montant basé sur le prix fixe
+        try:
+            vote_price = VotePrice.objects.get(vote_count=1, active=True)
+            attrs['amount'] = vote_price.price * vote_count
+        except VotePrice.DoesNotExist:
+            raise serializers.ValidationError({
+                "error": {"vote_count": [_("Aucun prix défini pour les votes.")]}
+            })
+
+        # Si l'utilisateur est authentifié
+        if request.user.is_authenticated:
+            attrs['user'] = request.user
+        else:
+            # Chercher un utilisateur existant avec le numéro de téléphone
+            phone = attrs['phone']
+            country_code = attrs['country_code']
+            full_phone = f"{country_code}{phone}"
+            try:
+                user = User.objects.get(phone=full_phone)
+                attrs['user'] = user
+            except User.DoesNotExist:
+                # Créer un utilisateur temporaire
+                username = f"voter_{phone}_{uuid.uuid4().hex[:8]}"
+                user = User.objects.create(
+                    username=username,
+                    email=f"{username}@temp.com",
+                    phone=full_phone,
+                    full_name=phone,
+                    user_type='user',
+                    is_active=False
+                )
+                attrs['user'] = user
+
+        return attrs
+
+    def create(self, validated_data):
+        print("VoteAndPaySerializer validated_data:", validated_data)  # Débogage
+        vote_count = validated_data.pop('vote_count')
+        phone = validated_data.pop('phone')
+        country_code = validated_data.pop('country_code')
+        payment_method_id = validated_data.pop('payment_method_id')
+        amount = validated_data.pop('amount')
+
+        # Créer le vote (non actif)
+        vote = Vote.objects.create(
+            **validated_data,
+            active=False,
+            vote_count=vote_count,
+            phone=phone,
+            country_code=country_code
+        )
+
+        # Créer le paiement
+        payment = VotePayment.objects.create(
+            vote=vote,
+            amount=amount,
+            status='en_attente',
+            payment_method='orange_money'  # À remplacer par une intégration réelle
+        )
+
+        # Simuler un paiement réussi (à remplacer par une intégration réelle)
+        payment.status = 'paye'
+        payment.paid_at = timezone.now()
+        payment.transaction_id = f"TXN_{uuid.uuid4().hex[:10].upper()}"
+        payment.save()
+
+        # Activer le vote après paiement
+        vote.active = True
+        vote.save()
+
+        return {
+            'vote': vote,
+            'payment': payment
+        }
+
+    def to_representation(self, instance):
+        vote = instance['vote']
+        payment = instance['payment']
+        vote_serializer = VoteSerializer(vote, context=self.context)
+        payment_serializer = VotePaymentSerializer(payment, context=self.context)
+        return {
+            'vote': vote_serializer.data,
+            'payment': payment_serializer.data
+        }

@@ -32,7 +32,6 @@ PAYMENT_STATUS = (
     ("en_attente", _("En attente")),
     ("paye", _("Payé")),
     ("echec", _("Échec")),
-    ("rembourse", _("Remboursé")),
 )
 
 VOTE_CHOICES = (
@@ -195,7 +194,7 @@ class Commercial(models.Model):
 class Vote(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Projet"))
-    vote = models.IntegerField(choices=VOTE_CHOICES, verbose_name=_("Nombre d'étoile"))
+    vote = models.IntegerField(choices=VOTE_CHOICES, blank=True, null=True, verbose_name=_("Nombre d'étoile"))
     country_code = models.CharField(max_length=5, blank=True, null=True, verbose_name=_("Code pays")) 
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
     active = models.BooleanField(default=False)  # Activé après paiement
@@ -237,17 +236,17 @@ class VotePrice(models.Model):
 class VotePayment(models.Model):
     """Paiements pour les votes"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    vote = models.OneToOneField(Vote, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='en_attente')
-    payment_method = models.CharField(max_length=50, blank=True)
-    transaction_id = models.CharField(max_length=100, blank=True, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    paid_at = models.DateTimeField(null=True, blank=True)
+    vote = models.OneToOneField(Vote, on_delete=models.CASCADE, verbose_name=_("Vote"))
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Montant"))
+    status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='en_attente', verbose_name=_("Statut"))
+    payment_method = models.CharField(max_length=50, blank=True, verbose_name=_("Méthode de paiement"))
+    transaction_id = models.CharField(max_length=100, blank=True, unique=True, verbose_name=_("ID de transaction"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Créé le"))
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Payé le"))
     
     def __str__(self):
-        return f"Paiement {self.amount}€ - {self.status}"
-    
+        return f"Paiement {self.amount} FCFA - {self.status}"
+
     def save(self, *args, **kwargs):
         if self.status == 'paye' and not self.paid_at:
             self.paid_at = timezone.now()

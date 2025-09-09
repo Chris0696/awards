@@ -60,14 +60,16 @@ urlpatterns = [
     # Vote Endpoints
     
     path('votes/', ProjectViews.VoteListAPIView.as_view(), name='vote_list'),
-    path('votes/create/', ProjectViews.VoteCreateAPIView.as_view(), name='vote_create'),
+    # path('votes/create/', ProjectViews.VoteCreateAPIView.as_view(), name='vote_create'),
     path('votes/<int:id>/', ProjectViews.VoteDetailAPIView.as_view(), name='vote_detail'),
+    path('votes/vote-and-pay/', ProjectViews.VoteAndPayAPIView.as_view(), name='vote_and_pay'),
     
-    path('vote-prices/', ProjectViews.VotePriceListAPIView.as_view(), name='vote_price_list_create'),
-    path('vote-prices/<int:pk>/', ProjectViews.VotePriceDetailAPIView.as_view(), name='vote_price_detail'),
+    
+    path('votes/vote-prices/', ProjectViews.VotePriceListAPIView.as_view(), name='vote_price_list'),
+    path('votes/vote-prices/<int:pk>/', ProjectViews.VotePriceDetailAPIView.as_view(), name='vote_price_detail'),
     
     # Payments Endpoints
-    path('vote-payments/', ProjectViews.VotePaymentListAPIView.as_view(), name='vote_payment_list'),
-    path('vote-payments/create/', ProjectViews.VotePaymentCreateAPIView.as_view(), name='vote_payment_create'),
+    path('votes/vote-payments/', ProjectViews.VotePaymentListAPIView.as_view(), name='vote_payment_list'),
+    # path('vote-payments/create/', ProjectViews.VotePaymentCreateAPIView.as_view(), name='vote_payment_create'),
 
 ]
