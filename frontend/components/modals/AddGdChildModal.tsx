@@ -6,9 +6,9 @@ import PhoneNumberField from "../../app/(landing)/submit/forms/PhoneNumberField"
 import { FormProvider, useForm } from "react-hook-form";
 import PasswordField from "@/app/(landing)/submit/forms/PasswordField";
 import z from "zod";
-import { affiliateSchema } from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAffiliateStore } from "@/stores/affiliateStore";
+import { affiliateSchema } from "@/frontendlib/schemas";
 
 type Props = {
   showModal: boolean;

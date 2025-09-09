@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/services/authService";
+import { getCurrentUser } from "@/frontendlib/services/authService";
 import { create } from "zustand";
 
 interface User {

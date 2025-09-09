@@ -1,8 +1,8 @@
 import TextField from "@/app/(landing)/submit/forms/TextField";
 import Popover from "@/components/ui/Popover";
-import { categorySchema } from "@/lib/schemas";
-import { createCategory } from "@/lib/services/categoryService";
-import { mapServerErrors } from "@/lib/utils/mapServerErrors";
+import { categorySchema } from "@/frontendlib/schemas";
+import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
+
 import { useCategoryStore } from "@/stores/useCategoryStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";

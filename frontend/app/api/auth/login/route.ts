@@ -1,4 +1,4 @@
-import { handleApiError } from "@/lib/utils/handleApiErrors";
+import { handleApiError } from "@/frontendlib/utils/handleApiErrors";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {

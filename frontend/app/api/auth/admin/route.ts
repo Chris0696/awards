@@ -3,17 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET() {
   const access = (await cookies()).get("access_token")?.value;
 
-  const res = await fetch(
-    `${process.env.API_URL}auth/admin/register/commercial`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${access}`,
-      },
-      cache: "no-store",
-    }
-  );
+  const res = await fetch(`${process.env.API_URL}user/commercials/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${access}`,
+    },
+    cache: "no-store",
+  });
 
   const data = await res.json();
   return NextResponse.json(data, { status: res.status });
