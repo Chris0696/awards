@@ -191,6 +191,34 @@ class Commercial(models.Model):
         return (total_revenue * self.commission_rate) / 100
     
 
+class VotePriceSettings(models.Model):
+    """Configuration globale des prix"""
+    vote_price = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=100.00,
+        verbose_name=_("Prix par vote")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Configuration globale")
+        verbose_name_plural = _("Configurations globales")
+    
+    def __str__(self):
+        return f"Prix par vote: {self.vote_price}"
+    
+    @classmethod
+    def get_vote_price(cls):
+        """Récupère le prix actuel d'un vote"""
+        try:
+            settings = cls.objects.first()
+            return settings.vote_price if settings else 100.00
+        except cls.DoesNotExist:
+            return 100.00
+        
+        
 class Vote(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Projet"))
@@ -218,35 +246,39 @@ class Vote(models.Model):
     def profile(self):
         return Profile.objects.get(user=self.user) if self.user else None
     
-
-class VotePrice(models.Model):
-    """Configuration des prix des votes"""
-    vote_count = models.IntegerField(unique=True, verbose_name=_("Nombre de votes"))
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Prix"))
-    active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['vote_count']
-    
-    def __str__(self):
-        return f"{self.vote_count} vote(s) - {self.price}€"
+    @property
+    def total_price(self):
+        """Calcule le prix total basé sur le nombre de votes"""
+        return VotePriceSettings.get_vote_price() * self.vote_count
     
 
+# class VotePrice(models.Model):
+#     """Configuration des prix des votes"""
+#     vote_count = models.IntegerField(unique=True, verbose_name=_("Nombre de votes"))
+#     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Prix"))
+#     active = models.BooleanField(default=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
+    
+#     class Meta:
+#         ordering = ['vote_count']
+    
+#     def __str__(self):
+#         return f"{self.vote_count} vote(s) - {self.price}€"
+    
 class VotePayment(models.Model):
     """Paiements pour les votes"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    vote = models.OneToOneField(Vote, on_delete=models.CASCADE, verbose_name=_("Vote"))
-    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Montant"))
-    status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='en_attente', verbose_name=_("Statut"))
-    payment_method = models.CharField(max_length=50, blank=True, verbose_name=_("Méthode de paiement"))
-    transaction_id = models.CharField(max_length=100, blank=True, unique=True, verbose_name=_("ID de transaction"))
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Créé le"))
-    paid_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Payé le"))
+    vote = models.OneToOneField(Vote, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='en_attente')
+    payment_method = models.CharField(max_length=50, blank=True)
+    transaction_id = models.CharField(max_length=100, blank=True, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
-        return f"Paiement {self.amount} FCFA - {self.status}"
-
+        return f"Paiement {self.amount} - {self.status}"
+    
     def save(self, *args, **kwargs):
         if self.status == 'paye' and not self.paid_at:
             self.paid_at = timezone.now()

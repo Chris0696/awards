@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from api.serializers import AdminDashboardSerializer, OwnerDashboardSerializer
+from project.serializers import ProjectAnalyticsVoteSerializer, ProjectListSerializer
 from projectowner.models import Owner
 from userauths.serializers import UserSerializer
 from projectowner.serializers import OwnerSerializer
 from userauths.permissions import IsAdminOrReadOnly
-from project.serializers import ProjectDetailSerializer, ProjectListSerializer, VoteSerializer
+# from project.serializers import ProjectDetailSerializer, ProjectListSerializer, VoteSerializer
 from commercial.serializers import CommercialSerializer
-from project.models import Commercial, Project, Category, User, Vote, VotePayment, VotePrice
+from project.models import Commercial, Project, Category, User, Vote, VotePayment, VotePriceSettings
 from django.db.models.expressions import Window
 # from django.db.models.functions import Avg
 from django.db.models.functions import Rank
@@ -15,7 +16,6 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework import generics, permissions
-
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from datetime import timedelta
@@ -175,11 +175,10 @@ def commercial_performance_stats(request, commercial_id):
     
     return Response(data, status=status.HTTP_200_OK)
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def project_analytics(request, project_id):
-    """Analytiques détaillées d'un projet"""
+    """Analytiques détaillées d'un projet - Version adaptée au nouveau système"""
     
     try:
         project = Project.objects.get(project_id=project_id)
@@ -202,34 +201,101 @@ def project_analytics(request, project_id):
     votes = project.vote_set.filter(active=True)
     vote_distribution = votes.values('vote').annotate(count=Count('vote')).order_by('vote')
     
-    # Évolution temporelle des votes
+    # Évolution temporelle des votes avec revenus
     vote_timeline = []
+    cumulative_votes = 0
+    cumulative_revenue = 0
+    
     for vote in votes.order_by('created_at'):
+        cumulative_votes += vote.vote_count  # Nombre total de votes achetés
+        
+        # Récupérer le montant payé pour ce vote
+        try:
+            payment = VotePayment.objects.get(vote=vote, status='paye')
+            vote_revenue = float(payment.amount)
+            cumulative_revenue += vote_revenue
+        except VotePayment.DoesNotExist:
+            vote_revenue = 0
+        
         vote_timeline.append({
-            'date': vote.created_at.strftime('%Y-%m-%d'),
-            'vote': vote.vote,
-            'cumulative_count': votes.filter(created_at__lte=vote.created_at).count()
+            'date': vote.created_at.strftime('%Y-%m-%d %H:%M'),
+            'vote_rating': vote.vote,
+            'votes_bought': vote.vote_count,
+            'revenue': vote_revenue,
+            'cumulative_votes': cumulative_votes,
+            'cumulative_revenue': cumulative_revenue
         })
     
-    # Revenus générés
-    total_revenue = VotePayment.objects.filter(
+    # Revenus détaillés
+    paid_payments = VotePayment.objects.filter(
         vote__project=project, status='paye'
-    ).aggregate(total=Sum('amount'))['total'] or 0
+    )
+    total_revenue = paid_payments.aggregate(total=Sum('amount'))['total'] or 0
     
+    # Répartition par méthode de paiement
+    payment_methods = paid_payments.values('payment_method').annotate(
+        count=Count('id'),
+        total=Sum('amount')
+    )
+    
+    # Top votants (basé sur le nombre de votes achetés)
+    top_voters = votes.values(
+        'user__first_name', 'user__last_name', 'phone', 'country_code'
+    ).annotate(
+        total_votes=Sum('vote_count'),
+        total_spent=Sum('votepayment__amount')
+    ).order_by('-total_votes')[:10]
+    
+    # Votes par période (derniers 30 jours par jour)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    daily_stats = []
+    
+    for i in range(30):
+        date = thirty_days_ago + timedelta(days=i)
+        date_start = date.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_end = date_start + timedelta(days=1)
+        
+        day_votes = votes.filter(created_at__range=[date_start, date_end])
+        day_revenue = paid_payments.filter(
+            created_at__range=[date_start, date_end]
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        daily_stats.append({
+            'date': date.strftime('%Y-%m-%d'),
+            'votes_count': day_votes.count(),
+            'total_votes_bought': day_votes.aggregate(total=Sum('vote_count'))['total'] or 0,
+            'revenue': float(day_revenue)
+        })
+    
+    # Données de réponse
     data = {
-        'project': ProjectDetailSerializer(project).data,
+        'project': {
+            'id': project.project_id,
+            'title': project.project_title,
+            'status': project.platform_status,
+            'created_at': project.created_at,
+            'validated_at': project.validated_at,
+            'featured': project.featured
+        },
         'vote_stats': {
-            'total_votes': votes.count(),
+            'total_votes_transactions': votes.count(),  # Nombre de transactions
+            'total_votes_bought': votes.aggregate(total=Sum('vote_count'))['total'] or 0,  # Votes achetés au total
             'average_rating': project.average_rating(),
-            'distribution': list(vote_distribution),
+            'rating_distribution': list(vote_distribution),
             'timeline': vote_timeline
         },
         'revenue_stats': {
             'total_revenue': float(total_revenue),
-            'revenue_per_vote': float(total_revenue / votes.count()) if votes.count() > 0 else 0
+            'average_per_transaction': float(total_revenue / votes.count()) if votes.count() > 0 else 0,
+            'current_vote_price': float(VotePriceSettings.get_vote_price()),
+            'payment_methods': list(payment_methods)
         },
-        'recent_votes': VoteSerializer(
-            votes.order_by('-created_at')[:10], many=True
+        'analytics': {
+            'daily_stats': daily_stats,
+            'top_voters': list(top_voters)
+        },
+        'recent_votes': ProjectAnalyticsVoteSerializer(
+            votes.order_by('-created_at')[:20], many=True
         ).data
     }
     

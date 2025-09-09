@@ -9,6 +9,8 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'admin/categories', ProjectViews.CategoryAdminViewSet, basename='admin-categories')
+router.register(r'admin/projects', ProjectViews.ProjectAdminViewSet, basename='admin-projects')
+
 
 
 urlpatterns = [
@@ -33,6 +35,9 @@ urlpatterns = [
     path('projects/<str:project_id>/', ProjectViews.ProjectDetailAPIView.as_view(), name='project_detail'),
     path('projects/<str:project_id>/update/', ProjectViews.ProjectUpdateAPIView.as_view(), name='project_update'),
     path('projects/<str:project_id>/delete/', ProjectViews.ProjectDeleteAPIView.as_view(), name='project_delete'),
+    
+    # Analytics
+    path('projects/<str:project_id>/analytics/', ApiViews.project_analytics, name='project-analytics'),
     
     # CATEGORIES Endpoints
     # Endpoint public pour lister les catégories actives
@@ -59,17 +64,30 @@ urlpatterns = [
     
     # Vote Endpoints
     
-    path('votes/', ProjectViews.VoteListAPIView.as_view(), name='vote_list'),
+    # path('votes/', ProjectViews.VoteListAPIView.as_view(), name='vote_list'),
     # path('votes/create/', ProjectViews.VoteCreateAPIView.as_view(), name='vote_create'),
-    path('votes/<int:id>/', ProjectViews.VoteDetailAPIView.as_view(), name='vote_detail'),
-    path('votes/vote-and-pay/', ProjectViews.VoteAndPayAPIView.as_view(), name='vote_and_pay'),
+    # path('votes/<int:id>/', ProjectViews.VoteDetailAPIView.as_view(), name='vote_detail'),
+    # path('votes/vote-and-pay/', ProjectViews.VoteAndPayAPIView.as_view(), name='vote_and_pay'),
     
     
-    path('votes/vote-prices/', ProjectViews.VotePriceListAPIView.as_view(), name='vote_price_list'),
-    path('votes/vote-prices/<int:pk>/', ProjectViews.VotePriceDetailAPIView.as_view(), name='vote_price_detail'),
+    # path('votes/vote-prices/', ProjectViews.VotePriceListAPIView.as_view(), name='vote_price_list'),
+    # path('votes/vote-prices/<int:pk>/', ProjectViews.VotePriceDetailAPIView.as_view(), name='vote_price_detail'),
     
     # Payments Endpoints
-    path('votes/vote-payments/', ProjectViews.VotePaymentListAPIView.as_view(), name='vote_payment_list'),
+    # path('votes/vote-payments/', ProjectViews.VotePaymentListAPIView.as_view(), name='vote_payment_list'),
     # path('vote-payments/create/', ProjectViews.VotePaymentCreateAPIView.as_view(), name='vote_payment_create'),
+    
+    
+    # Route principale pour créer un vote et le payer
+    path('votes/create-and-pay/', ProjectViews.VoteAndPaymentCreateAPIView.as_view(), name='vote-create-and-pay'),
+    
+    # Routes utilitaires
+    path('votes/price/', ProjectViews.get_vote_price, name='vote-price'),
+    path('votes/calculate-cost/', ProjectViews.calculate_vote_cost, name='calculate-vote-cost'),
+    
+    # Configuration admin
+    path('admin/voteprice/', ProjectViews.VotePriceSettingsAPIView.as_view(), name='voteprice-settings'),
+    
+    
 
 ]
