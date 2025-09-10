@@ -12,10 +12,22 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { useEffect, useState } from "react";
 
 import { useProjectStore } from "@/stores/useProjectStore";
+import { useDashboardStatsStore } from "@/stores/useDashboardStatsStore";
 
 export default function AdminPage() {
   const user = useAuthStore((state) => state.user);
   const projects = useProjectStore((state) => state.projects);
+  const { getAdminStats, adminStats, getOwnerStats, ownerStats } =
+    useDashboardStatsStore();
+
+  useEffect(() => {
+    if (user && user?.user_type === "user") {
+      getAdminStats();
+    }
+    if (user && user?.user_type === "owner") {
+      getOwnerStats();
+    }
+  }, [user]);
 
   return (
     <>
@@ -26,9 +38,22 @@ export default function AdminPage() {
           />
           <div className="flex  space-x-14">
             <div className="flex space-x-4">
-              <OverviewCard />
-              <OverviewCard />
-              <OverviewCard />
+              <OverviewCard
+                color="text-[#34C759]"
+                title="Projets soumis et validés par Project Awards"
+                total={ownerStats?.project_stats.validated}
+              />
+              <OverviewCard
+                color="text-[#CECE2C]"
+                title="Projets soumis en cours de validation par Project Awards"
+                total={ownerStats?.project_stats.pending}
+              />
+              <OverviewCard
+                color="text-[#FF7F00]"
+                title="Total des votes reçus"
+                showThumb
+                total={ownerStats?.vote_stats.total_votes}
+              />
             </div>
             <InfobulleCard />
           </div>
@@ -47,12 +72,36 @@ export default function AdminPage() {
         <section>
           <DashboardHeader pageTitle="Tableau de bord global" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 mb-10 gap-4">
-            <ProjectOverviewCard color="text-[#CECE2C]" />
-            <ProjectOverviewCard color="text-[#34C759]" />
-            <ProjectOverviewCard color="text-[#FF3B30]" />
-            <ProjectOverviewCard color="text-[#0026B0]" />
-            <ProjectOverviewCard color="text-[#2C2C2E]" />
-            <ProjectOverviewCard color="text-[#FF7F00]" />
+            <ProjectOverviewCard
+              title="Nombre total de projets soumis"
+              total={adminStats?.general_stats.total}
+              color="text-[#CECE2C]"
+            />
+            <ProjectOverviewCard
+              title="Nombre total de projets validés"
+              total={adminStats?.general_stats.validated}
+              color="text-[#34C759]"
+            />
+            <ProjectOverviewCard
+              title="Nombre total de projets rejetés"
+              total={adminStats?.general_stats.rejected}
+              color="text-[#FF3B30]"
+            />
+            <ProjectOverviewCard
+              title="Total des votes enregistrés"
+              total={adminStats?.vote_stats.total_votes}
+              color="text-[#0026B0]"
+            />
+            <ProjectOverviewCard
+              title="Total utilisateurs"
+              total={adminStats?.user_stats.total_users}
+              color="text-[#2C2C2E]"
+            />
+            <ProjectOverviewCard
+              title="Revenus générés(Paiment de vote)"
+              total={adminStats?.vote_stats.total_revenue}
+              color="text-[#FF7F00]"
+            />
           </div>
           <div className="grid  grid-cols-7 gap-4">
             <div className="col-span-7 lg:col-span-4 flex flex-col space-y-3 bg-gray-200/50 px-4 py-8 rounded-xl max-w-sm md:max-w-full overflow-x-auto">

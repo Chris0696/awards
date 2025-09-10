@@ -33,7 +33,7 @@ export default function AffiliateTable({ affiliates }: Props) {
           </tr>
         </thead>
         <tbody>
-          {affiliates.map((affiliate, idx) => (
+          {affiliates?.map((affiliate, idx) => (
             <tr
               key={idx}
               className="hover:bg-white hover:rounded-full transition-colors"
