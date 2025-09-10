@@ -13,7 +13,7 @@ export default function ProjectOverviewCard({
         {title ? title : "Nombre total de projets validés"}
       </h4>
       <p className={`text-4xl font-semibold ${color}  `}>
-        {total ? total : 150}
+        {total !== undefined ? total : 150}
       </p>
     </div>
   );
