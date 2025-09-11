@@ -60,7 +60,7 @@ export async function GET() {
   }
 }
 
-export async function PUT(req: NextRequest) {
+export async function PATCH(req: NextRequest) {
   const access = (await cookies()).get("access_token")?.value;
   try {
     const body = await req.json();
@@ -68,7 +68,7 @@ export async function PUT(req: NextRequest) {
     const response = await fetch(
       `${process.env.API_URL}projects/${body.project_id}/update/`,
       {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${access}`,
@@ -91,6 +91,31 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json(data, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const body = await req.json();
+  const access = (await cookies()).get("access_token")?.value;
+  if (!access) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+  try {
+    const res = await fetch(
+      `${process.env.API_URL}projects/${body.project_id}/delete/`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${access}`,
+        },
+      }
+    );
+    return NextResponse.json(
+      { success: true, message: "Projet supprimé avec succès" },
+      { status: 200 }
+    );
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

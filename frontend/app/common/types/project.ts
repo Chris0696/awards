@@ -84,3 +84,36 @@ export type ProjectInfo = {
   vote_count: number;
   total_revenue: number;
 };
+
+export type AdminProjectInfo = {
+  id: number;
+  project_id: string;
+  slug: string;
+  project_title: string;
+  description: string;
+  local_area_impact: string;
+  main_objective: string;
+  solution: string;
+  estimated_budget: string;
+  target_audience: string;
+  progress_report: string;
+  platform_status: string;
+  owner_project_status: string;
+  featured: boolean;
+  created_at: string;
+  updated_at: string;
+  validated_at: string | null;
+  admin_comment: string | null;
+  category: number;
+  owner: number;
+  owner_name: string;
+  owner_email: string;
+  commercial: string | null;
+  commercial_name: string | null;
+  file: string | null;
+  image: string | null;
+  total_votes: number;
+  average_rating: number;
+  total_revenue: number;
+  active_votes_count: number;
+};

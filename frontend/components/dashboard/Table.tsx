@@ -11,6 +11,9 @@ import {
 } from "../ui/dropdown-menu";
 import CreateNewAuthProjectModal from "@/app/(dashboard)/admin/projects/CreateNewAuthProjectModal";
 import { useState } from "react";
+import { projectService } from "@/frontendlib/services/projectService";
+import Popover from "../ui/Popover";
+import { useProjectStore } from "@/stores/useProjectStore";
 
 type Props = {
   projects: ProjectInfo[];
@@ -18,6 +21,8 @@ type Props = {
 
 export default function Table({ projects }: Props) {
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string>("");
   const user = useAuthStore((state) => state.user);
   const [project, setProject] = useState<ProjectInfo | undefined>(undefined);
   const openEditModal = (project: ProjectInfo) => {
@@ -52,11 +57,10 @@ export default function Table({ projects }: Props) {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Position actuelle
             </th>
-            {user?.user_type === "user" && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            )}
+
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -88,33 +92,51 @@ export default function Table({ projects }: Props) {
                 {project.owner.total_votes_received}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">1</td>
-              {user?.user_type === "user" && (
-                <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button>
-                        <MoreVerticalIcon />
+
+              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button>
+                      <MoreVerticalIcon />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>
+                      <button
+                        className="cursor-pointer"
+                        onClick={() => openEditModal(project)}
+                      >
+                        Reformuler et publier
                       </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem>
-                        <button
-                          className="cursor-pointer"
-                          onClick={() => openEditModal(project)}
-                        >
-                          Reformuler et publier
-                        </button>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <button className="cursor-pointer">Publié</button>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <button className="cursor-pointer">Rejeter</button>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              )}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <button
+                        onClick={() =>
+                          projectService.updateProject({
+                            project_id: project.project_id,
+                            owner_project_status: "publie",
+                            category_id: project.category.category_id,
+                          })
+                        }
+                        className="cursor-pointer"
+                      >
+                        Publié
+                      </button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <button
+                        onClick={() => {
+                          setShowConfirmationModal(true);
+                          setProjectToDelete(project.project_id);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        Supprimer
+                      </button>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -124,6 +146,56 @@ export default function Table({ projects }: Props) {
         setShowModal={setShowModal}
         project={project}
       />
+      <ConfirmDeleteModal
+        setShowConfirmationModal={setShowConfirmationModal}
+        showConfirmationModal={showConfirmationModal}
+        projectId={projectToDelete}
+      />
     </div>
   );
 }
+
+const ConfirmDeleteModal = ({
+  showConfirmationModal,
+  setShowConfirmationModal,
+  projectId,
+}: {
+  showConfirmationModal: boolean;
+  setShowConfirmationModal: (show: boolean) => void;
+  projectId: string;
+}) => {
+  const deleteOwnerProject = useProjectStore(
+    (state) => state.deleteOwnerProject
+  );
+  const handleDelete = () => {
+    deleteOwnerProject(projectId);
+    setShowConfirmationModal(false);
+  };
+  return (
+    <Popover
+      title="Confirmation de supression"
+      visible={showConfirmationModal}
+      onClose={() => setShowConfirmationModal(false)}
+    >
+      <div className="p-8  text-center space-y-4">
+        <p className="text-xl ">
+          Êtes-vous sûr de vouloir supprimer ce projet ?
+        </p>
+        <p className="space-x-5">
+          <button
+            onClick={() => setShowConfirmationModal(false)}
+            className="bg-primary text-white px-6 py-2 rounded-md cursor-pointer"
+          >
+            Non
+          </button>
+          <button
+            onClick={handleDelete}
+            className="bg-secondary text-white px-6 py-2 rounded-md cursor-pointer"
+          >
+            Oui
+          </button>
+        </p>
+      </div>
+    </Popover>
+  );
+};

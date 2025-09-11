@@ -2,7 +2,7 @@ import Step1 from "@/app/(landing)/submit/forms/steps/Step1";
 import Step2 from "@/app/(landing)/submit/forms/steps/Step2";
 import Step3 from "@/app/(landing)/submit/forms/steps/Step3";
 import Step4 from "@/app/(landing)/submit/forms/steps/Step4";
-import { ProjectInfo } from "@/app/common/types/project";
+import { AdminProjectInfo, ProjectInfo } from "@/app/common/types/project";
 import Popover from "@/components/ui/Popover";
 import { authProjectSchema } from "@/frontendlib/schemas";
 import { projectService } from "@/frontendlib/services/projectService";
@@ -19,6 +19,7 @@ type Props = {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
   project?: ProjectInfo;
+  adminProject?: AdminProjectInfo;
 };
 
 type AuthProjectInput = z.infer<typeof authProjectSchema>;
@@ -27,6 +28,7 @@ export default function CreateNewAuthProjectModal({
   showModal,
   setShowModal,
   project,
+  adminProject,
 }: Props) {
   console.log(project, "projectsss");
   const methods = useForm<AuthProjectInput>({
