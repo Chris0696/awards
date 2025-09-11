@@ -1,10 +1,12 @@
 import TextField from "@/app/(landing)/submit/forms/TextField";
+import { AdminCategory, Category } from "@/app/common/types/category";
 import Popover from "@/components/ui/Popover";
 import { categorySchema } from "@/frontendlib/schemas";
 import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
 
 import { useCategoryStore } from "@/stores/useCategoryStore";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -12,11 +14,13 @@ import z from "zod";
 type Props = {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
+  category?: AdminCategory;
 };
 type CategoryForm = z.infer<typeof categorySchema>;
 export default function CreateCategoryModal({
   showModal,
   setShowModal,
+  category,
 }: Props) {
   const methods = useForm<CategoryForm>({
     resolver: zodResolver(categorySchema),
@@ -32,9 +36,15 @@ export default function CreateCategoryModal({
     formState: { isSubmitting },
   } = methods;
   const addCategory = useCategoryStore((state) => state.addCategory);
-  const onSubmit = async (data: CategoryForm) => {
+  const updateCategory = useCategoryStore((state) => state.updateCategory);
+  const onSubmit = (data: CategoryForm) => {
     try {
-      await addCategory(data.category_name);
+      if (category) {
+        updateCategory(data.category_name, category.category_id);
+      } else {
+        addCategory(data.category_name);
+      }
+
       setShowModal(false);
       reset();
     } catch (error) {
@@ -42,9 +52,16 @@ export default function CreateCategoryModal({
       toast.error(message);
     }
   };
+  useEffect(() => {
+    if (category) {
+      reset({
+        category_name: category.category_name,
+      });
+    }
+  }, [reset, category]);
   return (
     <Popover
-      title="Créer une catégorie"
+      title={`${category ? "Modification" : "Créer une catégorie"} `}
       visible={showModal}
       onClose={() => setShowModal(false)}
     >
