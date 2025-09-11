@@ -36,7 +36,7 @@ export const dashboardlinks = [
   {
     page: "Votes & statistiques",
     url: "/admin/statistics",
-    isRequireAdmin: true,
+    isRequireAdmin: false,
   },
   {
     page: "Catégories & Tags",

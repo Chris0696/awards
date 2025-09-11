@@ -1,5 +1,6 @@
 import { RequestOptions } from "@/app/common/types/common";
 import {
+  AdminProjectInfo,
   AuthProjectInput,
   ProjectInfo,
   ProjectInput,
@@ -43,6 +44,15 @@ export class ProjectService {
   getProjects(): Promise<ProjectInfo[]> {
     return this.request("/projects");
   }
+  deleteOwnerProject(project_id: string) {
+    return this.request("/projects", {
+      method: "DELETE",
+      body: JSON.stringify({ project_id }),
+    });
+  }
+  getAdminProjects(): Promise<AdminProjectInfo[]> {
+    return this.request("/projects/admin");
+  }
   addNewProject(project: AuthProjectInput) {
     return this.request(`/projects`, {
       method: "POST",
@@ -57,7 +67,13 @@ export class ProjectService {
   }
   updateProject(project: ProjectInput) {
     return this.request(`/projects`, {
-      method: "PUT",
+      method: "PATCH",
+      body: JSON.stringify(project),
+    });
+  }
+  adminPublishProject(project: ProjectInput) {
+    return this.request(`/projects/admin`, {
+      method: "PATCH",
       body: JSON.stringify(project),
     });
   }

@@ -13,11 +13,13 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import CreateNewAuthProjectModal from "./CreateNewAuthProjectModal";
 import { useState } from "react";
 import { useProjectStore } from "@/stores/useProjectStore";
+import AdminTable from "@/components/dashboard/AdminTable";
 
 export default function AdminProjectList() {
   const [showModal, setShowModal] = useState(false);
   const user = useAuthStore((state) => state.user);
   const projects = useProjectStore((state) => state.projects);
+  const adminProjects = useProjectStore((state) => state.adminProjects);
 
   return user?.user_type === "owner" ? (
     <section>
@@ -68,7 +70,7 @@ export default function AdminProjectList() {
           <FilterBtn text="Catégorie" />
         </div>
         <div className="overflow-x-auto">
-          <Table projects={projects} />
+          <AdminTable projects={adminProjects} />
         </div>
         <SwitchPageBtn />
       </div>

@@ -1,3 +1,4 @@
+"use client";
 import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
 import FilterBtn from "@/components/dashboard/FilterBtn";
 import SynthesisCard from "@/components/dashboard/project-owner/SynthesisCard";
@@ -10,10 +11,12 @@ import FacebookIcon from "@/assets/facebook.svg";
 import LinkIcon from "@/assets/linkIcon.svg";
 import WhatsappIcon from "@/assets/whatsapp.svg";
 import Image from "next/image";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function StatisticPage() {
   const isAdmin = false;
-  return !isAdmin ? (
+  const user = useAuthStore((state) => state.user);
+  return user?.user_type === "owner" ? (
     <section className="">
       <DashboardHeader pageTitle="Statistiques" />
       <div className=" grid grid-cols-4 ">
@@ -100,7 +103,7 @@ export default function StatisticPage() {
         <FilterBtn text="Catégorie" />
       </div>
       <div>
-        <Table />
+        <Table projects={[]} />
       </div>
       <SwitchPageBtn />
     </section>
