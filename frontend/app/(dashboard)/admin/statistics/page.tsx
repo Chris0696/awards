@@ -12,6 +12,7 @@ import LinkIcon from "@/assets/linkIcon.svg";
 import WhatsappIcon from "@/assets/whatsapp.svg";
 import Image from "next/image";
 import { useAuthStore } from "@/stores/useAuthStore";
+import StatsTable from "@/components/dashboard/StatsTable";
 
 export default function StatisticPage() {
   const isAdmin = false;
@@ -103,7 +104,7 @@ export default function StatisticPage() {
         <FilterBtn text="Catégorie" />
       </div>
       <div>
-        <Table projects={[]} />
+        <StatsTable />
       </div>
       <SwitchPageBtn />
     </section>

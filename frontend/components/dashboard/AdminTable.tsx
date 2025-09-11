@@ -119,7 +119,18 @@ export default function AdminTable({ projects }: Props) {
                         </button>
                       </DropdownMenuItem>
                       <DropdownMenuItem>
-                        <button className="cursor-pointer">Rejeter</button>
+                        <button
+                          onClick={() =>
+                            projectService.adminPublishProject({
+                              project_id: project.project_id,
+                              plateform_status: "desactive",
+                              category_id: "045EA7D2",
+                            })
+                          }
+                          className="cursor-pointer"
+                        >
+                          Rejeter
+                        </button>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
