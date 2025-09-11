@@ -20,8 +20,8 @@ class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('category_name',)}
 
 
-class VoteAdmin(admin.ModelAdmin):
-    list_display = ('user', 'project', 'vote_count', 'vote', 'active', 'created_at')
+# class VoteAdmin(admin.ModelAdmin):
+#     list_display = ('user', 'project', 'vote_count', 'vote', 'active', 'created_at')
 
 
 class VotePriceSettingsAdmin(admin.ModelAdmin):
@@ -46,7 +46,7 @@ admin.site.register(Project, ProjectAdmin)
 
 admin.site.register(Category, CategoryAdmin)
 
-admin.site.register(Vote, VoteAdmin)
+# admin.site.register(Vote, VoteAdmin)
 
 admin.site.register(Commercial, CommercialAdmin)
 

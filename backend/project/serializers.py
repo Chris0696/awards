@@ -298,7 +298,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
         model = Project
         fields = [
             'project_id', 'project_title', 'slug', 'description', 'image',
-            'estimated_budget', 'platform_status', 'owner_project_status',
+            'estimated_budget', 'target_audience', 'solution', 'progress_report', 'platform_status', 'owner_project_status',
             'featured', 'created_at', 'updated_at', 'validated_at',
             'category', 'owner', 'commercial', 'average_rating', 
             'vote_count', 'total_revenue'
