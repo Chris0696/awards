@@ -31,6 +31,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         
         return token
 
+
 class AdminRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,

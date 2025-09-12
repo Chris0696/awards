@@ -11,6 +11,7 @@ USER_TYPES = (
     ("user", _("Utilisateur")),
 )
 
+
 class User(AbstractUser):
     username = models.CharField(unique=True, max_length=100)
     email = models.EmailField(

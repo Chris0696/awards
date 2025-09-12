@@ -189,6 +189,10 @@ class Commercial(models.Model):
         """Commission gagnée par le commercial"""
         total_revenue = self.total_revenue_generated()
         return (total_revenue * self.commission_rate) / 100
+
+    class Meta:
+        verbose_name = _("Commercial")
+        verbose_name_plural = _("Commerciaux")
     
 
 class VotePriceSettings(models.Model):

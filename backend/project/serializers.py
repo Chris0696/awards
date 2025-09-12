@@ -37,10 +37,11 @@ class CategoryAdminSerializer(serializers.ModelSerializer):
 
 class ProjectAdminSerializer(serializers.ModelSerializer):
     """Serializer complet pour l'administration des projets"""
-    owner_name = serializers.CharField(source='owner.user.get_full_name', read_only=True)
+    owner_name = serializers.CharField(source='owner.user.full_name', read_only=True)
     owner_email = serializers.CharField(source='owner.user.email', read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
-    commercial_name = serializers.CharField(source='commercial.user.get_full_name', read_only=True, allow_null=True)
+    commercial_name = serializers.CharField(source='commercial.user.full_name', read_only=True, allow_null=True)
+    category_id = serializers.CharField(source='category.category_id', read_only=True,)
     
     # Statistiques calculées
     total_votes = serializers.SerializerMethodField()
@@ -57,7 +58,7 @@ class ProjectAdminSerializer(serializers.ModelSerializer):
             'platform_status', 'owner_project_status', 'featured',
             'created_at', 'updated_at', 'validated_at', 'admin_comment',
             # Relations
-            'category', 'category_name', 'owner', 'owner_name', 'owner_email',
+            'category', 'category_id', 'category_name', 'owner', 'owner_name', 'owner_email',
             'commercial', 'commercial_name',
             # Fichiers
             'file', 'image',

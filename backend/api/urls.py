@@ -10,7 +10,7 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register(r'admin/categories', ProjectViews.CategoryAdminViewSet, basename='admin-categories')
 router.register(r'admin/projects', ProjectViews.ProjectAdminViewSet, basename='admin-projects')
-
+router.register(r'admin/users', CommercialViews.AdminCommercialViewSet, basename='admin-users')
 
 
 urlpatterns = [
@@ -49,8 +49,8 @@ urlpatterns = [
     # path('categories/debug/', ProjectViews.CategoryListView.as_view(), name='categories-debug')
     
     # Commercials Endpoints
-    path('user/commercials/', CommercialViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
-    path('user/commercials/<int:pk>/', CommercialViews.CommercialDetailView.as_view(), name='commercial_detail'),
+    # path('user/commercials/', CommercialViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
+    # path('user/commercials/<int:pk>/', CommercialViews.CommercialDetailView.as_view(), name='commercial_detail'),
     
      # === STATISTIQUES ===
     path('stats/general/', ApiViews.general_stats_api, name='general_stats'),
