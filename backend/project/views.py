@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import action, api_view, permission_classes
 from datetime import datetime, timedelta
+# from django_filters.rest_framework import DjangoFilterBackend
 
 from userauths.permissions import IsAdminOrReadOnly
 from commercial.serializers import CommercialSerializer
@@ -17,7 +18,7 @@ from django.db.models import Count, Sum, Avg, Q
 
 from django.utils.translation import gettext_lazy as _
 from .models import Category, Commercial, Project, Vote, VotePayment, VotePriceSettings
-from .serializers import CategoryAdminSerializer, CategorySerializer, ProjectAdminSerializer, ProjectCreateUpdateSerializer, ProjectDetailSerializer, ProjectListSerializer, VoteAndPaymentSerializer, VotePriceSettingsSerializer
+from .serializers import CategoryAdminSerializer, CategorySerializer, ProjectAdminSerializer, ProjectCreateUpdateSerializer, ProjectDetailSerializer, ProjectListSerializer, VoteAndPaymentSerializer, VotePriceSettingsSerializer, PublicProjectListSerializer, ProjectAnalyticsVoteSerializer, PublicProjectSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.pagination import PageNumberPagination
@@ -291,6 +292,191 @@ class ProjectDeleteAPIView(generics.DestroyAPIView):
         except Owner.DoesNotExist:
             return Project.objects.none()
         
+# Affichage publique des projets ----------------------------------
+
+class PublicProjectsPagination(PageNumberPagination):
+    """Pagination pour les projets publics"""
+    page_size = 12
+    page_size_query_param = 'page_size'
+    max_page_size = 50
+
+
+class PublicProjectListAPIView(generics.ListAPIView):
+    """API publique pour lister les projets publiés"""
+    serializer_class = PublicProjectListSerializer
+    permission_classes = [AllowAny]
+    # pagination_class = PublicProjectsPagination
+    # filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    
+    # Filtres disponibles
+    filterset_fields = ['category', 'featured']
+    search_fields = ['project_title', 'description', 'target_audience', 'local_area_impact']
+    ordering_fields = ['created_at', 'validated_at', 'estimated_budget']
+    ordering = ['-featured', '-validated_at']  # Projets en vedette d'abord, puis les plus récents
+
+    def get_queryset(self):
+        """Récupère uniquement les projets publiés"""
+        queryset = Project.objects.filter(
+            platform_status='publie'
+        ).select_related(
+            'category', 'owner__user'
+        ).prefetch_related(
+            'vote_set'
+        )
+
+        # Filtre par budget minimum/maximum
+        min_budget = self.request.query_params.get('min_budget', None)
+        max_budget = self.request.query_params.get('max_budget', None)
+        
+        if min_budget:
+            try:
+                queryset = queryset.filter(estimated_budget__gte=float(min_budget))
+            except ValueError:
+                pass
+                
+        if max_budget:
+            try:
+                queryset = queryset.filter(estimated_budget__lte=float(max_budget))
+            except ValueError:
+                pass
+
+        # Filtre par note minimum
+        min_rating = self.request.query_params.get('min_rating', None)
+        if min_rating:
+            try:
+                min_rating = float(min_rating)
+                # Filtrer les projets avec une note moyenne >= min_rating
+                queryset = queryset.annotate(
+                    avg_rating=Avg('vote__vote', filter=Q(vote__active=True))
+                ).filter(avg_rating__gte=min_rating)
+            except ValueError:
+                pass
+
+        return queryset
+
+
+class PublicProjectDetailAPIView(generics.RetrieveAPIView):
+    """API publique pour voir le détail d'un projet publié"""
+    serializer_class = PublicProjectSerializer
+    permission_classes = [AllowAny]
+    lookup_field = 'slug'  # Utilise le slug pour une URL plus jolie
+
+    def get_queryset(self):
+        """Récupère uniquement les projets publiés"""
+        return Project.objects.filter(
+            platform_status='publie'
+        ).select_related(
+            'category', 'owner__user', 'commercial__user'
+        ).prefetch_related(
+            'vote_set__user'
+        )
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def public_projects_stats(request):
+    """Statistiques publiques des projets"""
+    published_projects = Project.objects.filter(platform_status='publie')
+    
+    total_projects = published_projects.count()
+    featured_projects = published_projects.filter(featured=True).count()
+    
+    # Statistiques par catégorie
+    categories_stats = published_projects.values(
+        'category__name'
+    ).annotate(
+        count=Count('id')
+    ).order_by('-count')[:5]
+    
+    # Budget total des projets
+    total_estimated_budget = published_projects.aggregate(
+        total=Sum('estimated_budget')
+    )['total'] or 0
+    
+    # Votes et revenus
+    total_active_votes = Vote.objects.filter(
+        project__platform_status='publie', 
+        active=True
+    ).count()
+    
+    total_revenue = VotePayment.objects.filter(
+        vote__project__platform_status='publie',
+        status='paye'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    return Response({
+        'projects': {
+            'total': total_projects,
+            'featured': featured_projects,
+            'total_estimated_budget': float(total_estimated_budget)
+        },
+        'categories': list(categories_stats),
+        'engagement': {
+            'total_votes': total_active_votes,
+            'total_revenue': float(total_revenue)
+        }
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def featured_projects(request):
+    """API pour récupérer uniquement les projets en vedette"""
+    featured_projects = Project.objects.filter(
+        platform_status='publie',
+        featured=True
+    ).select_related(
+        'category', 'owner__user'
+    ).order_by('-validated_at')[:6]  # Les 6 derniers projets en vedette
+    
+    serializer = PublicProjectListSerializer(
+        featured_projects, 
+        many=True, 
+        context={'request': request}
+    )
+    
+    return Response({
+        'count': featured_projects.count(),
+        'results': serializer.data
+    })
+
+
+@api_view(['GET']) 
+@permission_classes([AllowAny])
+def trending_projects(request):
+    """Projets tendances (les plus votés récemment)"""
+    from datetime import timedelta
+    from django.utils import timezone
+    
+    # Projets avec le plus de votes dans les 30 derniers jours
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    
+    trending = Project.objects.filter(
+        platform_status='publie'
+    ).annotate(
+        recent_votes=Count(
+            'vote',
+            filter=Q(
+                vote__active=True,
+                vote__created_at__gte=thirty_days_ago
+            )
+        )
+    ).filter(
+        recent_votes__gt=0
+    ).order_by('-recent_votes')[:10]
+    
+    serializer = PublicProjectListSerializer(
+        trending,
+        many=True,
+        context={'request': request}
+    )
+    
+    return Response({
+        'count': trending.count(),
+        'results': serializer.data
+    })
+
+
 
 # === VUES VOTE ===
         

@@ -141,8 +141,62 @@ class Project(models.Model):
             total=Sum('amount'))['total'] or 0
 
 
+# class Commercial(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='commercial')
+#     full_name = models.CharField(max_length=100, verbose_name=_("Nom et prénom"))
+#     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
+#     commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=10.00, verbose_name=_("Taux de commission (%)"))
+#     affiliate_link = models.CharField(max_length=200, unique=True, blank=True, verbose_name=_("Lien d'affiliation"))
+#     is_active = models.BooleanField(default=True, verbose_name=_("Est actif"))
+#     created_at = models.DateTimeField(auto_now_add=True)
+    
+#     def __str__(self):
+#         return f"Commercial: {self.full_name}"
+    
+#     def save(self, *args, **kwargs):
+#         if not self.affiliate_link:
+#             # Générer un identifiant unique pour le lien
+#             affiliate_id = f"COM_{uuid.uuid4().hex[:8].upper()}"
+#             # Construire le lien d'affiliation avec l'URL de base du site
+#             base_url = getattr(settings, 'BASE_URL', settings.BASE_URL)
+#             self.affiliate_link = f"{base_url}/api/v1/user/register/?affiliate={affiliate_id}"
+#         super().save(*args, **kwargs)
+    
+#     def total_projects_brought(self):
+#         """Nombre total de projets amenés par ce commercial"""
+#         return Project.objects.filter(commercial=self).count()
+    
+#     def total_published_projects(self):
+#         """Projets validés amenés par ce commercial"""
+#         return Project.objects.filter(commercial=self, platform_status='publie').count()
+    
+#     def total_rejected_projects(self):
+#         """Projets rejetés amenés par ce commercial"""
+#         return Project.objects.filter(commercial=self, platform_status='rejete').count()
+    
+#     def total_votes_generated(self):
+#         """Total des votes sur les projets amenés par ce commercial"""
+#         return Vote.objects.filter(project__commercial=self, active=True).count()
+    
+#     def total_revenue_generated(self):
+#         """Revenus générés par les votes sur ses projets"""
+#         return VotePayment.objects.filter(
+#             vote__project__commercial=self, 
+#             status='paye'
+#         ).aggregate(total=Sum('amount'))['total'] or 0
+    
+#     def commission_earned(self):
+#         """Commission gagnée par le commercial"""
+#         total_revenue = self.total_revenue_generated()
+#         return (total_revenue * self.commission_rate) / 100
+
+#     class Meta:
+#         verbose_name = _("Commercial")
+#         verbose_name_plural = _("Commerciaux")
+
+
 class Commercial(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='commercial')
     full_name = models.CharField(max_length=100, verbose_name=_("Nom et prénom"))
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
     commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=10.00, verbose_name=_("Taux de commission (%)"))
@@ -158,37 +212,66 @@ class Commercial(models.Model):
             # Générer un identifiant unique pour le lien
             affiliate_id = f"COM_{uuid.uuid4().hex[:8].upper()}"
             # Construire le lien d'affiliation avec l'URL de base du site
-            base_url = getattr(settings, 'BASE_URL', settings.BASE_URL)
-            self.affiliate_link = f"{base_url}/api/v1/user/register/?affiliate={affiliate_id}"
+            try:
+                base_url = getattr(settings, 'BASE_URL', settings.BASE_URL)
+                self.affiliate_link = f"{base_url}/api/v1/user/register/?affiliate={affiliate_id}"
+            except Exception:
+                base_url = getattr(settings, 'BASE_URL', 'http://localhost:8000')
+                self.affiliate_link = f"{base_url}/api/v1/user/register/?affiliate={affiliate_id}"
         super().save(*args, **kwargs)
     
     def total_projects_brought(self):
         """Nombre total de projets amenés par ce commercial"""
-        return Project.objects.filter(commercial=self).count()
+        try:
+            # Importation dynamique pour éviter les imports circulaires
+            
+            return Project.objects.filter(commercial=self).count()
+        except Exception:
+            return 0
     
     def total_published_projects(self):
         """Projets validés amenés par ce commercial"""
-        return Project.objects.filter(commercial=self, platform_status='publie').count()
+        try:
+            
+            return Project.objects.filter(commercial=self, platform_status='publie').count()
+        except Exception:
+            return 0
     
     def total_rejected_projects(self):
         """Projets rejetés amenés par ce commercial"""
-        return Project.objects.filter(commercial=self, platform_status='rejete').count()
+        try:
+            
+            return Project.objects.filter(commercial=self, platform_status='rejete').count()
+        except Exception:
+            return 0
     
     def total_votes_generated(self):
         """Total des votes sur les projets amenés par ce commercial"""
-        return Vote.objects.filter(project__commercial=self, active=True).count()
+        try:
+            
+            return Vote.objects.filter(project__commercial=self, active=True).count()
+        except Exception:
+            return 0
     
     def total_revenue_generated(self):
         """Revenus générés par les votes sur ses projets"""
-        return VotePayment.objects.filter(
-            vote__project__commercial=self, 
-            status='paye'
-        ).aggregate(total=Sum('amount'))['total'] or 0
+        try:
+            
+            result = VotePayment.objects.filter(
+                vote__project__commercial=self, 
+                status='paye'
+            ).aggregate(total=Sum('amount'))['total']
+            return result or 0
+        except Exception:
+            return 0
     
     def commission_earned(self):
         """Commission gagnée par le commercial"""
-        total_revenue = self.total_revenue_generated()
-        return (total_revenue * self.commission_rate) / 100
+        try:
+            total_revenue = self.total_revenue_generated()
+            return (total_revenue * self.commission_rate) / 100
+        except Exception:
+            return 0
 
     class Meta:
         verbose_name = _("Commercial")

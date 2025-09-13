@@ -124,6 +124,33 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = "__all__"
+
+
+class AdminUserUpdateSerializer(serializers.ModelSerializer):
+    """Serializer pour mettre à jour les utilisateurs admin"""
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'full_name', 'phone', 'is_active']
+
+    def validate_email(self, value):
+        # Vérifier que l'email n'est pas déjà utilisé par un autre utilisateur
+        if self.instance and self.instance.email != value:
+            if User.objects.filter(email=value).exists():
+                raise serializers.ValidationError(_("Cet email est déjà utilisé."))
+        return value
+
+    def validate_username(self, value):
+        # Vérifier que le username n'est pas déjà utilisé par un autre utilisateur
+        if self.instance and self.instance.username != value:
+            if value and User.objects.filter(username=value).exists():
+                raise serializers.ValidationError(_("Ce nom d'utilisateur existe déjà."))
+        return value
+
+    def validate_phone(self, value):
+        if value and not re.match(r'^\d{7,15}$', value):
+            raise serializers.ValidationError(_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres."))
+        return value
     
 
 # === SERIALIZERS STATISTIQUES ===

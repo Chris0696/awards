@@ -95,6 +95,84 @@ class ProjectAdminSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+class PublicProjectSerializer(serializers.ModelSerializer):
+    """Affichage public des projets"""
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    owner_name = serializers.CharField(source='owner.user.full_name', read_only=True)
+    
+    # Statistiques des votes
+    average_rating = serializers.SerializerMethodField()
+    total_votes = serializers.SerializerMethodField()
+    vote_count = serializers.SerializerMethodField()
+    total_revenue = serializers.SerializerMethodField()
+    
+    # URL de l'image optimisée
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = [
+            'project_id', 'slug', 'project_title', 'description',
+            'local_area_impact', 'main_objective', 'solution',
+            'estimated_budget', 'target_audience', 'progress_report',
+            'featured', 'created_at', 'validated_at',
+            # Relations
+            'category_name', 'owner_name',
+            # Fichiers
+            'image', 'image_url', 'file',
+            # Statistiques
+            'average_rating', 'total_votes', 'vote_count', 'total_revenue'
+        ]
+
+    def get_average_rating(self, obj):
+        return obj.average_rating()
+
+    def get_total_votes(self, obj):
+        return obj.vote_set.filter(active=True).count()
+
+    def get_vote_count(self, obj):
+        return obj.vote_count()
+
+    def get_total_revenue(self, obj):
+        return float(obj.total_votes_revenue())
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.image and hasattr(obj.image, 'url'):
+            return request.build_absolute_uri(obj.image.url) if request else obj.image.url
+        return None
+
+
+class PublicProjectListSerializer(serializers.ModelSerializer):
+    """Serializer léger pour la liste des projets (sans tous les détails)"""
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    owner_name = serializers.CharField(source='owner.user.full_name', read_only=True)
+    average_rating = serializers.SerializerMethodField()
+    total_votes = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = [
+            'project_id', 'slug', 'project_title', 'description',
+            'estimated_budget', 'featured', 'created_at', 'validated_at',
+            'category_name', 'owner_name', 'image', 'image_url',
+            'average_rating', 'total_votes'
+        ]
+
+    def get_average_rating(self, obj):
+        return obj.average_rating()
+
+    def get_total_votes(self, obj):
+        return obj.vote_set.filter(active=True).count()
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.image and hasattr(obj.image, 'url'):
+            return request.build_absolute_uri(obj.image.url) if request else obj.image.url
+        return None
+
+
 class ProjectAnalyticsVoteSerializer(serializers.ModelSerializer):
     """Serializer pour les votes dans les analytics"""
     user_display = serializers.SerializerMethodField()

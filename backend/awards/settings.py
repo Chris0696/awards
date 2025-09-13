@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     
     # Custom Apps
     # 'core',
+    # 'drf_spectacular',
     'userauths',
     'api',
     'projectowner',
@@ -317,6 +318,7 @@ SIMPLE_JWT = {
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'api.auth.CustomJWTAuthentication',
+        # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     ],
 }
 

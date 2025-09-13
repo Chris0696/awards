@@ -10,7 +10,7 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register(r'admin/categories', ProjectViews.CategoryAdminViewSet, basename='admin-categories')
 router.register(r'admin/projects', ProjectViews.ProjectAdminViewSet, basename='admin-projects')
-router.register(r'admin/users', CommercialViews.AdminCommercialViewSet, basename='admin-users')
+# router.register(r'admin/users', CommercialViews.AdminCommercialViewSet, basename='admin-users')
 
 
 urlpatterns = [
@@ -36,6 +36,19 @@ urlpatterns = [
     path('projects/<str:project_id>/update/', ProjectViews.ProjectUpdateAPIView.as_view(), name='project_update'),
     path('projects/<str:project_id>/delete/', ProjectViews.ProjectDeleteAPIView.as_view(), name='project_delete'),
     
+    # Liste publique des projets
+    path('public/projects/', ProjectViews.PublicProjectListAPIView.as_view(), name='public-projects'),
+    
+    # Détail d'un projet par slug
+    path('public/projects/<slug:slug>/', ProjectViews.PublicProjectDetailAPIView.as_view(), name='public-project-detail'),
+    
+    # Statistiques publiques
+    path('public/projects-stats/', ProjectViews.public_projects_stats, name='public-projects-stats'),
+    
+    # Projets spéciaux
+    path('public/projects/featured/', ProjectViews.featured_projects, name='featured-projects'),
+    path('public/projects/trending/', ProjectViews.trending_projects, name='trending-projects'),
+    
     # Analytics
     path('projects/<str:project_id>/analytics/', ApiViews.project_analytics, name='project-analytics'),
     
@@ -50,7 +63,10 @@ urlpatterns = [
     
     # Commercials Endpoints
     # path('user/commercials/', CommercialViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
-    # path('user/commercials/<int:pk>/', CommercialViews.CommercialDetailView.as_view(), name='commercial_detail'),
+    path('user/commercials/<int:pk>/', CommercialViews.CommercialDetailView.as_view(), name='commercial_detail'),
+    
+    path('admin/users/commercial/', CommercialViews.AdminCommercialView.as_view(), name='admin-commercial-list-create'),
+    path('admin/users/commercial/<int:pk>/', CommercialViews.AdminCommercialView.as_view(), name='admin-commercial-detail'),
     
      # === STATISTIQUES ===
     path('stats/general/', ApiViews.general_stats_api, name='general_stats'),
