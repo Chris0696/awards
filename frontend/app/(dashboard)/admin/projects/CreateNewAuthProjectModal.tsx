@@ -7,6 +7,7 @@ import Popover from "@/components/ui/Popover";
 import { authProjectSchema } from "@/frontendlib/schemas";
 import { projectService } from "@/frontendlib/services/projectService";
 import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
+import { useCategoryStore } from "@/stores/useCategoryStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft } from "lucide-react";
 
@@ -30,7 +31,6 @@ export default function CreateNewAuthProjectModal({
   project,
   adminProject,
 }: Props) {
-  console.log(project, "projectsss");
   const methods = useForm<AuthProjectInput>({
     resolver: zodResolver(authProjectSchema),
     mode: "onChange",
@@ -55,7 +55,7 @@ export default function CreateNewAuthProjectModal({
 
   const onSubmit = async (data: AuthProjectInput) => {
     const payload = {
-      project_id: project?.project_id,
+      project_id: project ? project?.project_id : adminProject?.project_id,
       affiliate: "",
       accept_project_reformulation: data.acceptReformulation,
       accept_terms_of_use: data.acceptTerms,
@@ -75,10 +75,15 @@ export default function CreateNewAuthProjectModal({
         await projectService.updateProject(payload);
         setShowModal(false);
         reset();
+      } else if (adminProject) {
+        await projectService.adminUpdateProject(payload);
+        setShowModal(false);
+        reset();
+      } else {
+        await projectService.addNewProject(payload);
+        setShowModal(false);
+        reset();
       }
-      await projectService.addNewProject(payload);
-      setShowModal(false);
-      reset();
     } catch (error) {
       const message = mapServerErrors(error, setError);
       toast.error(message);
@@ -103,6 +108,26 @@ export default function CreateNewAuthProjectModal({
       });
     }
   }, [project, reset]);
+
+  useEffect(() => {
+    if (adminProject) {
+      reset({
+        category_id: adminProject.category_id ?? "",
+        project_title: adminProject.project_title ?? "",
+        local_area_impact: adminProject.local_area_impact ?? "Agla",
+        estimated_budget: Number(adminProject.estimated_budget ?? undefined),
+        description: adminProject.description ?? "",
+        main_objective: adminProject.main_objective ?? "Main objective edited",
+        solution: adminProject.solution ?? "Solution edited",
+        target_audience: adminProject.target_audience ?? "Jeune edited",
+        progress_report: adminProject.progress_report ?? "Début edited",
+        affiliate: adminProject.affiliate ?? "",
+        owner_project_status: adminProject.owner_project_status ?? "publie",
+        acceptReformulation: true,
+        acceptTerms: true,
+      });
+    }
+  }, [adminProject, reset]);
 
   return (
     <Popover

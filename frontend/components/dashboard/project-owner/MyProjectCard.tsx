@@ -28,8 +28,16 @@ export default function MyProjectCard({ project }: Props) {
       </p>
       <p>
         <span className="font-semibold">Statut du projet:</span>{" "}
-        <span className="text-green-500 bg-green-100 py-1 text-xs px-5 rounded-full">
-          Validé
+        <span
+          className={`${
+            project.platform_status === "publie"
+              ? "text-green-500 bg-green-100"
+              : project.platform_status === "rejete"
+              ? "text-red-500 bg-red-100"
+              : "text-orange-500 bg-orange-100"
+          } py-1 text-xs px-5 rounded-full`}
+        >
+          {project.platform_status}
         </span>
       </p>
     </div>

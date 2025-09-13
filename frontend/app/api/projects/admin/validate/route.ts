@@ -1,45 +1,19 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
-  const access = (await cookies()).get("access_token")?.value;
-
-  if (!access) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
-
-  try {
-    const response = await fetch(`${process.env.API_URL}admin/projects/`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${access}`,
-      },
-    });
-
-    const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message ?? "Erreur serveur" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PATCH(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const access = (await cookies()).get("access_token")?.value;
   try {
     const body = await req.json();
 
     const response = await fetch(
-      `${process.env.API_URL}admin/projects/${body.project_id}/`,
+      `${process.env.API_URL}admin/projects/${body.project_id}/validate_project/`,
       {
-        method: "PATCH",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${access}`,
         },
-        body: JSON.stringify(body),
       }
     );
 

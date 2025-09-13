@@ -11,6 +11,7 @@ interface User {
 
 interface AuthState {
   accessToken: string | null;
+  //userInfo: UserInfo | null;
   user: User | null;
   login: (token: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -21,6 +22,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   user: null,
+  //userInfo: null,
 
   login: async (token: string) => {
     set({ accessToken: token });

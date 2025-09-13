@@ -84,7 +84,15 @@ export default function Table({ projects }: Props) {
                 {formatDate(project.created_at)}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                <span className="text-green-500 bg-green-100 px-10 py-0.5 rounded-full">
+                <span
+                  className={` ${
+                    project.platform_status === "publie"
+                      ? "text-green-500 bg-green-100"
+                      : project.platform_status === "rejete"
+                      ? "text-red-500 bg-red-100"
+                      : "text-orange-500 bg-orange-100"
+                  }   px-10 py-0.5 rounded-full`}
+                >
                   {project.platform_status}
                 </span>
               </td>
@@ -101,14 +109,16 @@ export default function Table({ projects }: Props) {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem>
-                      <button
-                        className="cursor-pointer"
-                        onClick={() => openEditModal(project)}
-                      >
-                        Reformuler et publier
-                      </button>
-                    </DropdownMenuItem>
+                    {project.platform_status !== "publie" && (
+                      <DropdownMenuItem>
+                        <button
+                          className="cursor-pointer"
+                          onClick={() => openEditModal(project)}
+                        >
+                          Reformuler et publier
+                        </button>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem>
                       <button
                         onClick={() =>
@@ -120,7 +130,7 @@ export default function Table({ projects }: Props) {
                         }
                         className="cursor-pointer"
                       >
-                        Publié
+                        Publier
                       </button>
                     </DropdownMenuItem>
                     <DropdownMenuItem>

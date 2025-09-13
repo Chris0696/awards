@@ -34,6 +34,11 @@ export const dashboardlinks = [
     isRequireAdmin: true,
   },
   {
+    page: "Équipe",
+    url: "/admin/team",
+    isRequireAdmin: true,
+  },
+  {
     page: "Votes & statistiques",
     url: "/admin/statistics",
     isRequireAdmin: false,

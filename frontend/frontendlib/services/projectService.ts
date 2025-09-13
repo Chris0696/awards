@@ -71,10 +71,34 @@ export class ProjectService {
       body: JSON.stringify(project),
     });
   }
-  adminPublishProject(project: ProjectInput) {
+  adminUpdateProject(project: ProjectInput) {
     return this.request(`/projects/admin`, {
       method: "PATCH",
       body: JSON.stringify(project),
+    });
+  }
+  adminPublishProject(project: AdminProjectInfo) {
+    return this.request(`/projects/admin`, {
+      method: "PATCH",
+      body: JSON.stringify(project),
+    });
+  }
+  rejectProject(project: AdminProjectInfo) {
+    return this.request(`/projects/admin/reject`, {
+      method: "POST",
+      body: JSON.stringify({
+        project_id: project.project_id,
+        admin_comment: "Raison de rejet",
+      }),
+    });
+  }
+  validateProject(project: AdminProjectInfo) {
+    return this.request(`/projects/admin/validate`, {
+      method: "POST",
+      body: JSON.stringify({
+        project_id: project.project_id,
+        category: project.category,
+      }),
     });
   }
 }
