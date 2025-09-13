@@ -105,6 +105,7 @@ export type AdminProjectInfo = {
   validated_at: string | null;
   admin_comment: string | null;
   category: number;
+  category_id: string;
   owner: number;
   owner_name: string;
   owner_email: string;

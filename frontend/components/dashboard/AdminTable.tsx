@@ -79,7 +79,15 @@ export default function AdminTable({ projects }: Props) {
                 {formatDate(project.created_at)}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                <span className="text-green-500 bg-green-100 px-10 py-0.5 rounded-full">
+                <span
+                  className={`${
+                    project.platform_status === "publie"
+                      ? "text-green-500 bg-green-100"
+                      : project.platform_status === "rejete"
+                      ? "bg-red-100 text-red-500"
+                      : "text-orange-500 bg-orange-100"
+                  }  px-10 py-0.5 rounded-full`}
+                >
                   {project.platform_status}
                 </span>
               </td>
@@ -96,37 +104,29 @@ export default function AdminTable({ projects }: Props) {
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
+                      {project.platform_status !== "rejete" && (
+                        <DropdownMenuItem>
+                          <button
+                            className="cursor-pointer"
+                            onClick={() => openEditModal(project)}
+                          >
+                            Reformuler
+                          </button>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem>
                         <button
+                          onClick={() =>
+                            projectService.validateProject(project)
+                          }
                           className="cursor-pointer"
-                          onClick={() => openEditModal(project)}
                         >
-                          Reformuler et publier
+                          Valider
                         </button>
                       </DropdownMenuItem>
                       <DropdownMenuItem>
                         <button
-                          onClick={() =>
-                            projectService.adminPublishProject({
-                              project_id: project.project_id,
-                              plateform_status: "publie",
-                              category_id: "045EA7D2",
-                            })
-                          }
-                          className="cursor-pointer"
-                        >
-                          Publié
-                        </button>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <button
-                          onClick={() =>
-                            projectService.adminPublishProject({
-                              project_id: project.project_id,
-                              plateform_status: "desactive",
-                              category_id: "045EA7D2",
-                            })
-                          }
+                          onClick={() => projectService.rejectProject(project)}
                           className="cursor-pointer"
                         >
                           Rejeter
@@ -143,6 +143,7 @@ export default function AdminTable({ projects }: Props) {
       <CreateNewAuthProjectModal
         showModal={showModal}
         setShowModal={setShowModal}
+        adminProject={project}
       />
     </div>
   );

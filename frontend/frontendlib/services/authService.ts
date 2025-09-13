@@ -1,3 +1,4 @@
+import { IUserInfo } from "@/app/(dashboard)/admin/account/page";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export async function login(email: string, password: string) {
@@ -34,4 +35,32 @@ export async function getCurrentUser() {
   }
 
   return res.json();
+}
+
+export async function getUserInfo(user_id: number) {
+  try {
+    const res = await fetch(`/api/auth/user-info?user_id=${user_id}`);
+    if (!res.ok) throw new Error("Failed to fetch user infos");
+    return res.json();
+  } catch (error) {
+    console.log("Error fetching categories:", error);
+  }
+}
+
+export async function updateUserInfo(formData: FormData) {
+  try {
+    const res = await fetch("/api/auth/user-info", {
+      method: "POST",
+
+      body: formData,
+    });
+    if (!res.ok) {
+      const errorBody = await res.json();
+      throw { message: "Erreur lors de la mise à jour", body: errorBody };
+    }
+
+    return res.json();
+  } catch (error) {
+    console.log(error);
+  }
 }

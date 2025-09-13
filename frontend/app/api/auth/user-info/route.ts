@@ -1,20 +1,25 @@
+import { useAuthStore } from "@/stores/useAuthStore";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const access = (await cookies()).get("access_token")?.value;
+  const userId = req.nextUrl.searchParams.get("user_id");
 
-  if (!access) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  if (!userId) {
+    return NextResponse.json({ error: "user_id manquant" }, { status: 400 });
   }
 
   try {
-    const response = await fetch(`${process.env.API_URL}admin/projects/`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${access}`,
-      },
-    });
+    const response = await fetch(
+      `${process.env.API_URL}auth/globalprofile/${userId}/`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${access}`,
+        },
+      }
+    );
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
@@ -26,20 +31,23 @@ export async function GET() {
   }
 }
 
-export async function PATCH(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const access = (await cookies()).get("access_token")?.value;
   try {
-    const body = await req.json();
+    const formData = await req.formData();
+    const body: any = {};
+    formData.forEach((value, key) => {
+      body[key] = value;
+    });
 
     const response = await fetch(
-      `${process.env.API_URL}admin/projects/${body.project_id}/`,
+      `${process.env.API_URL}auth/globalprofile/${body.user_id}/`,
       {
         method: "PATCH",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${access}`,
         },
-        body: JSON.stringify(body),
+        body: formData,
       }
     );
 

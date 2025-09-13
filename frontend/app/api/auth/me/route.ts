@@ -14,7 +14,7 @@ interface JwtPayload {
 }
 
 export async function GET() {
-  const access = await cookies().get("access_token")?.value;
+  const access = (await cookies()).get("access_token")?.value;
 
   if (!access) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -23,7 +23,6 @@ export async function GET() {
   try {
     const decoded = jwtDecode<JwtPayload>(access);
 
-    // Vérifier expiration
     if (decoded.exp && decoded.exp * 1000 < Date.now()) {
       return NextResponse.json({ error: "Token expired" }, { status: 401 });
     }
