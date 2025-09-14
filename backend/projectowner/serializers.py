@@ -18,7 +18,7 @@ class OwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Owner
         fields = [
-            'user', 'image', 'full_name', 'phone', 'country_code', 'profession', 'age', 'commercial',
+            'id', 'user', 'image', 'full_name', 'phone', 'country_code', 'profession', 'age', 'commercial',
             'created_at', 'total_projects', 'published_projects', 'rejected_projects', 'total_votes_received'
         ]
 
@@ -33,3 +33,8 @@ class OwnerSerializer(serializers.ModelSerializer):
     
     def get_total_votes_received(self, obj):
         return obj.total_votes_received()
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Formater les erreurs dans le style souhaité si nécessaire
+        return data

@@ -15,6 +15,8 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, Ou
 from rest_framework.views import APIView
 from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -140,9 +142,28 @@ class CustomTokenRefreshView(TokenRefreshView):
 class RegisterViewAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
     serializer_class = register_serializer.RegisterSerializer
     
+    
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     response_data = serializer.save()
+    #     return Response(response_data, status=status.HTTP_201_CREATED)
+    
     def create(self, request, *args, **kwargs):
+        # Si c'est du FormData, le projet sera stringifié
+        if request.content_type.startswith('multipart/'):
+            # Désérialiser le JSON du projet s'il est stringifié
+            if 'project' in request.data and isinstance(request.data['project'], str):
+                import json
+                try:
+                    request.data._mutable = True  # Permettre la modification
+                    request.data['project'] = json.loads(request.data['project'])
+                except json.JSONDecodeError:
+                    pass
+        
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         response_data = serializer.save()

@@ -319,6 +319,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'api.auth.CustomJWTAuthentication',
         # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+        # 'rest_framework.parsers.JSONParser',
+        # 'rest_framework.parsers.MultiPartParser',
+        # 'rest_framework.parsers.FormParser',
+
     ],
 }
 

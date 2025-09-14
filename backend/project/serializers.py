@@ -342,6 +342,17 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
                 custom_message = messages[0]
                 errors.setdefault("error", {}).setdefault("project", {})[field] = custom_message
             raise serializers.ValidationError(errors)
+    
+    def to_internal_value(self, data):
+        # Si data est un string (venant de FormData), le parser
+        if isinstance(data, str):
+            import json
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError:
+                raise serializers.ValidationError("Format JSON invalide pour le projet")
+        
+        return super().to_internal_value(data)
 
     def create(self, validated_data):
         # Retirer category_id après validation pour éviter un conflit avec le champ category
