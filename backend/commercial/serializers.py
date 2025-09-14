@@ -41,57 +41,149 @@ class CommercialSerializer(serializers.ModelSerializer):
         return value
 
 
+# class AdminCommercialRegisterSerializer(serializers.ModelSerializer):
+#     phone = serializers.CharField(max_length=25, required=True)
+#     user_type = serializers.ChoiceField(choices=USER_TYPES, required=True)
+#     password = serializers.CharField(
+#         write_only=True,
+#         required=True,
+#         min_length=8,
+#         validators=[validate_password],
+#         style={'input_type': 'password'}
+#     )
+#     username = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    
+#     class Meta:
+#         model = User
+#         fields = ['email', 'password', 'username', 'phone', 'user_type']
+
+#     def validate_phone(self, value):
+#         if not re.match(r'^\d{7,15}$', value):
+#             raise serializers.ValidationError("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")
+#         if User.objects.filter(phone=value).exists():
+#             raise serializers.ValidationError("Ce numéro de téléphone est déjà utilisé.")
+#         return value
+
+#     def validate_email(self, value):
+#         if User.objects.filter(email=value).exists():
+#             raise serializers.ValidationError({
+#                 "error" :{
+#                     "email": _("Cet email est déjà utilisé.")
+#                 }
+#                 })
+#         return value
+    
+#     def validate(self, attrs):
+#         # Autoriser les superusers ou les utilisateurs avec user_type='admin'
+#         request = self.context.get('request')
+#         if not request.user.is_authenticated or (request.user.user_type != 'admin' and not request.user.is_superuser):
+#             raise serializers.ValidationError({"user_type": _("Seul un administrateur ou un superuser peut créer un utilisateur de type admin ou commercial.")})
+        
+#         return attrs
+
+#     def validate_user_type(self, value):
+#         allowed_types = ['admin', 'commercial']  # Limiter aux types admin et commercial
+#         if value not in allowed_types:
+#             raise serializers.ValidationError("Le type d'utilisateur doit être 'admin' ou 'commercial'.")
+#         return value
+    
+#     def create(self, validated_data):
+#         user_type = validated_data.pop('user_type')
+#         password = validated_data.pop('password')
+#         # Créer l'utilisateur
+#         user = User.objects.create_user(
+#             email=validated_data['email'],
+#             username=validated_data.get('username', ''),
+#             password=password,
+#             phone=validated_data['phone'],
+#             user_type=user_type,
+#             is_active=True
+#         )
+
+#         # Si c'est un commercial, créer l'entrée correspondante dans le modèle Commercial
+#         if user_type == 'commercial':
+#             Commercial.objects.create(
+#                 user=user,
+#                 full_name=user.username or user.email.split('@')[0],
+#                 phone=validated_data['phone'],
+#                 commission_rate=10.00  # Valeur par défaut ou configurable
+#             )
+
+#         return user
+
 class AdminCommercialRegisterSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(max_length=25, required=True)
     user_type = serializers.ChoiceField(choices=USER_TYPES, required=True)
-    password = serializers.CharField(write_only=True, required=True)
-    full_name = serializers.CharField(max_length=100, required=True)
-
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        min_length=8,
+        validators=[validate_password],
+        style={'input_type': 'password'}
+    )
+    username = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    
     class Meta:
         model = User
-        fields = ['email', 'password', 'full_name', 'phone', 'user_type']
+        fields = ['email', 'password', 'username', 'phone', 'user_type']
 
     def validate_phone(self, value):
         if not re.match(r'^\d{7,15}$', value):
-            raise serializers.ValidationError("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")
+            raise serializers.ValidationError(_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres."))
         if User.objects.filter(phone=value).exists():
-            raise serializers.ValidationError("Ce numéro de téléphone est déjà utilisé.")
+            raise serializers.ValidationError(_("Ce numéro de téléphone est déjà utilisé."))
         return value
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Cet email est déjà utilisé.")
+            raise serializers.ValidationError(_("Cet email est déjà utilisé."))
         return value
+    
+    def validate(self, attrs):
+        # Autoriser les superusers ou les utilisateurs avec user_type='admin'
+        request = self.context.get('request')
+        if not request.user.is_authenticated or (request.user.user_type != 'admin' and not request.user.is_superuser):
+            raise serializers.ValidationError({
+                "permission": _("Seul un administrateur ou un superuser peut créer un utilisateur de type admin ou commercial.")
+            })
+        
+        return attrs
 
     def validate_user_type(self, value):
-        allowed_types = ['admin', 'commercial']  # Limiter aux types admin et commercial
+        allowed_types = ['admin', 'commercial']
         if value not in allowed_types:
-            raise serializers.ValidationError("Le type d'utilisateur doit être 'admin' ou 'commercial'.")
+            raise serializers.ValidationError(_("Le type d'utilisateur doit être 'admin' ou 'commercial'."))
         return value
-
+    
     def create(self, validated_data):
-        user_type = validated_data.pop('user_type')
-        password = validated_data.pop('password')
-        # Créer l'utilisateur
-        user = User.objects.create_user(
-            email=validated_data['email'],
-            password=password,
-            full_name=validated_data['full_name'],
-            phone=validated_data['phone'],
-            user_type=user_type,
-            is_active=True
-        )
-
-        # Si c'est un commercial, créer l'entrée correspondante dans le modèle Commercial
-        if user_type == 'commercial':
-            Commercial.objects.create(
-                user=user,
-                full_name=validated_data['full_name'],
+        try:
+            user_type = validated_data.pop('user_type')
+            password = validated_data.pop('password')
+            
+            # Créer l'utilisateur
+            user = User.objects.create_user(
+                email=validated_data['email'],
+                username=validated_data.get('username', ''),
+                password=password,
                 phone=validated_data['phone'],
-                commission_rate=10.00  # Valeur par défaut ou configurable
+                user_type=user_type,
+                is_active=True
             )
 
-        return user
+            # Si c'est un commercial, créer l'entrée correspondante dans le modèle Commercial
+            if user_type == 'commercial':
+                Commercial.objects.create(
+                    user=user,
+                    full_name=user.username or user.email.split('@')[0],
+                    phone=validated_data['phone'],
+                    commission_rate=10.00
+                )
+
+            return user
+        except Exception as e:
+            raise serializers.ValidationError({
+                "creation_error": _("Erreur lors de la création de l'utilisateur: {}").format(str(e))
+            })
     
 # class AdminCommercialCreateSerializer(serializers.ModelSerializer):
 #     """Serializer unifié pour créer admin et commerciaux"""

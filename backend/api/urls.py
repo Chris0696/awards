@@ -21,7 +21,7 @@ urlpatterns = [
     
     # Register Endpoints
     path("auth/register/authorproject", UserViews.RegisterViewAPIView.as_view(), name='register'),
-    path('auth/admin/register/commercial', UserViews.AdminRegisterViewAPIView.as_view(), name='admin_register'),
+    # path('auth/admin/register/commercial', UserViews.AdminRegisterViewAPIView.as_view(), name='admin_register'),
     
     path("auth/password-reset/<email>/", UserViews.PasswordResetEmailVerifyAPIView.as_view(), name='password_reset_email'),
     path("auth/password-change/", UserViews.PasswordChangeAPIView.as_view(), name='password_change'),
@@ -63,7 +63,7 @@ urlpatterns = [
     
     # Commercials Endpoints
     # path('user/commercials/', CommercialViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
-    path('user/commercials/<int:pk>/', CommercialViews.CommercialDetailView.as_view(), name='commercial_detail'),
+    # path('user/commercials/<int:pk>/', CommercialViews.CommercialDetailView.as_view(), name='commercial_detail'),
     
     path('admin/users/commercial/', CommercialViews.AdminCommercialView.as_view(), name='admin-commercial-list-create'),
     path('admin/users/commercial/<int:pk>/', CommercialViews.AdminCommercialView.as_view(), name='admin-commercial-detail'),
