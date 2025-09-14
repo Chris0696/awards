@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET() {
   const access = (await cookies()).get("access_token")?.value;
 
-  const res = await fetch(`${process.env.API_URL}user/commercials/`, {
+  const res = await fetch(`${process.env.API_URL}admin/users/commercial/`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

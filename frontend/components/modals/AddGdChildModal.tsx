@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Popover from "../ui/Popover";
 import TextField from "../../app/(landing)/submit/forms/TextField";
 import EmailField from "../../app/(landing)/submit/forms/EmailField";
@@ -8,35 +8,101 @@ import PasswordField from "@/app/(landing)/submit/forms/PasswordField";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAffiliateStore } from "@/stores/affiliateStore";
-import { affiliateSchema } from "@/frontendlib/schemas";
+import {
+  createAffiliateSchema,
+  updateAffiliateSchema,
+} from "@/frontendlib/schemas";
+import { useTeamStore } from "@/stores/useTeamStore";
+import { AffiliateInfo } from "@/app/common/types/affiliate";
 
 type Props = {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
+  title: string;
+  description: string;
+  user_type: "commercial" | "admin";
+  member?: AffiliateInfo;
 };
-type AffiliateForm = z.infer<typeof affiliateSchema>;
-export default function AddGdChildModal({ showModal, setShowModal }: Props) {
+export type CreateAffiliateForm = z.infer<typeof createAffiliateSchema>;
+export type UpdateAffiliateForm = z.infer<typeof updateAffiliateSchema>;
+export type AffiliateForm = CreateAffiliateForm | UpdateAffiliateForm;
+
+export type UpdateTeamMemberForm = {
+  id: number;
+  username: string;
+  email: string;
+  password: string;
+  user_type: "admin" | "commercial";
+  phone: string;
+};
+export default function AddGdChildModal({
+  showModal,
+  setShowModal,
+  title,
+  description,
+  user_type,
+  member,
+}: Props) {
   const methods = useForm<AffiliateForm>({
-    resolver: zodResolver(affiliateSchema),
+    resolver: zodResolver(
+      member ? updateAffiliateSchema : createAffiliateSchema
+    ),
     mode: "onChange",
     defaultValues: {
       username: "",
       email: "",
       password: "",
-      user_type: "commercial",
+      user_type: user_type,
+      phone: "",
     },
   });
+
   const addAfiiliate = useAffiliateStore((state) => state.addAffiliate);
+  const addTeamMember = useTeamStore((state) => state.addTeam);
+  const updateTeamMember = useTeamStore((state) => state.updateMember);
 
   const { handleSubmit, reset } = methods;
   const onSubmit = (data: AffiliateForm) => {
-    console.log(data);
     try {
-      addAfiiliate(data);
+      if (user_type === "commercial") {
+        if (member) {
+          const payload = {
+            id: member.id,
+            ...data,
+          };
+          updateTeamMember(payload);
+        } else {
+          addAfiiliate(data);
+        }
+      } else {
+        if (member) {
+          const payload = {
+            id: member.id,
+            ...data,
+          };
+          updateTeamMember(payload);
+        } else {
+          addTeamMember(data);
+        }
+      }
+
       setShowModal(false);
       reset();
-    } catch (error) {}
+    } catch (error) {
+      console.log(error, "error");
+    }
   };
+
+  useEffect(() => {
+    if (member) {
+      reset({
+        username: member?.full_name,
+        email: member?.email,
+        user_type: member.user_type,
+        phone: member?.phone ?? "",
+      });
+    }
+  }, [reset, member]);
   return (
     <Popover
       visible={showModal}
@@ -48,8 +114,8 @@ export default function AddGdChildModal({ showModal, setShowModal }: Props) {
         <form className="px-16 pb-16 pt-8" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex justify-center text-center mb-8">
             <div>
-              <h2 className="text-4xl font-bold">Affiliés</h2>
-              <p className="text-xl">Créer un affilié (Commerciaux)</p>
+              <h2 className="text-4xl font-bold">{title} </h2>
+              <p className="text-xl">{description} </p>
             </div>
           </div>
           <div className="space-y-4">
@@ -59,16 +125,18 @@ export default function AddGdChildModal({ showModal, setShowModal }: Props) {
               placeholder="Nom & prénoms"
             />
             <EmailField name="email" label="Adresse mail" placeholder="Email" />
-            <PasswordField
-              name="password"
-              label="Mot de passe"
-              placeholder="Mot de passe"
-            />
-            {/* <PhoneNumberField
-              name="affiliatePhoneNumber"
+            {!member && (
+              <PasswordField
+                name="password"
+                label="Mot de passe"
+                placeholder="Mot de passe"
+              />
+            )}
+            <PhoneNumberField
+              name="phone"
               label="Téléphone"
               placeholder="+229 01xxxxxxxx"
-            /> */}
+            />
           </div>
           <div className="mt-12">
             <button
@@ -76,7 +144,7 @@ export default function AddGdChildModal({ showModal, setShowModal }: Props) {
               className="bg-primary w-full py-4 px-4 text-white rounded-lg text-lg flex items-center justify-center cursor-pointer hover:bg-white hover:border hover:border-primary hover:text-primary
         "
             >
-              Créer
+              {member ? "Mettre à jour" : "Créer"}
             </button>
           </div>
         </form>

@@ -19,5 +19,6 @@ export type AffiliateInfo = {
   total_rejected_projects: number;
   total_revenue: string;
   total_votes: number;
-  user_email: string;
+  email: string;
+  user_type: string;
 };

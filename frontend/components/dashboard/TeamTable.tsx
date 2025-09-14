@@ -1,20 +1,19 @@
 "use client";
+import { Team } from "@/app/(dashboard)/admin/team/page";
 import { MoreVerticalIcon } from "lucide-react";
+import React, { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { AffiliateInfo } from "@/app/common/types/affiliate";
 import AddGdChildModal from "../modals/AddGdChildModal";
-import { useState } from "react";
 import ConfirmDeleteModal from "../modals/ConfirmDeleteModal";
+import { AffiliateInfo } from "@/app/common/types/affiliate";
 import { useTeamStore } from "@/stores/useTeamStore";
-interface Props {
-  affiliates: AffiliateInfo[];
-}
-export default function AffiliateTable({ affiliates }: Props) {
+
+export default function TeamTable({ teams }: { teams: AffiliateInfo[] }) {
   const [showModal, setShowModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<AffiliateInfo>();
@@ -37,66 +36,45 @@ export default function AffiliateTable({ affiliates }: Props) {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Téléphone
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Liens d'affiliation
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Candidats inscrit via le lien
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Montant gagné
-            </th>
+
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
         <tbody>
-          {affiliates?.map((affiliate, idx) => (
+          {teams?.map((team, idx) => (
             <tr
               key={idx}
               className="hover:bg-white hover:rounded-full transition-colors"
             >
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {affiliate?.full_name}
+                {team?.full_name}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {affiliate?.email}
+                {team?.email}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {affiliate.phone ? affiliate.phone : "-"}
+                {team.phone ? team.phone : "-"}
               </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {affiliate?.affiliate_link?.slice(0, 4)}
-                ...
-                {affiliate?.affiliate_link?.slice(-5)}
-              </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {affiliate?.total_projects}
-              </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {affiliate?.total_revenue}
-              </td>
+
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="cursor-pointer">
+                  <DropdownMenuTrigger>
                     <MoreVerticalIcon />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem
+                      className="cursor-pointer"
                       onClick={() => {
                         setShowModal(true);
-                        setSelectedMember(affiliate);
+                        setSelectedMember(team);
                       }}
-                      className="cursor-pointer"
                     >
                       Mettre à jour
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => {
-                        setShowConfirmModal(true);
-                        setSelectedMember(affiliate);
-                      }}
+                      onClick={() => setShowConfirmModal(true)}
                       className="cursor-pointer"
                     >
                       Supprimer
@@ -111,13 +89,13 @@ export default function AffiliateTable({ affiliates }: Props) {
       <AddGdChildModal
         user_type="commercial"
         title="Affiliés"
-        description="Mettre à jour un affilié (Commerciaux)"
+        description="Mettre à jour les infos du membre"
         showModal={showModal}
         setShowModal={setShowModal}
         member={selectedMember}
       />
       <ConfirmDeleteModal
-        title="Êtes-vous sûr de vouloir supprimer ce commercial ?"
+        title="Êtes-vous sûr de vouloir supprimer ce membre ?"
         showDeleteModal={showConfirmModal}
         setShowDeleteModal={setShowConfirmModal}
         handleDelete={handleDelete}

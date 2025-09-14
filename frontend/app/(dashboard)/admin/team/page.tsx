@@ -1,3 +1,64 @@
+"use client";
+import { useEffect, useState } from "react";
+import DashboardHeader from "../../DasboardHeader";
+import { getTeam } from "@/frontendlib/services/teamService";
+import TeamTable from "@/components/dashboard/TeamTable";
+import AddGdChildModal from "@/components/modals/AddGdChildModal";
+import { AffiliateInfo } from "@/app/common/types/affiliate";
+
+export type Team = {
+  id: number;
+  email: string;
+  full_name: string;
+  phone: string | null;
+  user_type: string;
+  is_active: boolean;
+  commission_rate: string;
+  affiliate_link: string;
+  total_projects: number;
+  total_published_projects: number;
+  total_rejected_projects: number;
+  total_votes: number;
+  total_revenue: string;
+  commission_earned: string;
+};
 export default function page() {
-  return <div>page</div>;
+  const [team, setTeam] = useState<AffiliateInfo[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  useEffect(() => {
+    async function getTeamInfo() {
+      try {
+        const users = await getTeam();
+        setTeam(users);
+      } catch (error) {
+        console.log(error, "errue teams");
+      }
+    }
+    getTeamInfo();
+  }, []);
+  const filteredList = team.filter(
+    (member) => member.user_type !== "commercial"
+  );
+  return (
+    <section>
+      <DashboardHeader pageTitle="Mon équipe" />
+      <div className="mb-8">
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-primary py-4 px-4 text-white rounded-lg text-lg flex items-center cursor-pointer hover:bg-white hover:border hover:border-primary hover:text-primary ml-auto
+        "
+        >
+          Ajouter un membre
+        </button>
+      </div>
+      <TeamTable teams={filteredList} />
+      <AddGdChildModal
+        user_type="admin"
+        title="Membre"
+        description="Ajouter un membre en tant qu'admin"
+        showModal={showModal}
+        setShowModal={setShowModal}
+      />
+    </section>
+  );
 }
