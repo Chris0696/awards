@@ -75,9 +75,14 @@ export const categorySchema = z.object({
   category_name: z.string().nonempty("Entrer le nom de la catégorie"),
 });
 
-export const affiliateSchema = z.object({
+export const createAffiliateSchema = z.object({
   username: z.string().nonempty("Entrer le nom d'utilisateur"),
   email: z.email("Email invalide").nonempty("Entrer l'email du commercial"),
-  password: z.string("Entrer le mot de passe"),
+  password: z.string("Entrer le mot de passe").nullable(),
   user_type: z.enum(["admin", "commercial"]),
+  phone: z.string().nonempty("Entrez le numéro de téléphone"),
+});
+
+export const updateAffiliateSchema = createAffiliateSchema.extend({
+  password: z.string().optional(),
 });

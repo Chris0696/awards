@@ -23,6 +23,10 @@ export default function page() {
     fetchAffiliates();
   }, []);
 
+  const filteredList = affiliates.filter(
+    (affiliate) => affiliate.user_type !== "admin"
+  );
+
   return user?.user_type === "user" ? (
     <section>
       <DashboardHeader pageTitle="Affiliation" />
@@ -36,12 +40,18 @@ export default function page() {
         </button>
       </div>
       <div>
-        <AffiliateTable affiliates={affiliates} />
+        <AffiliateTable affiliates={filteredList} />
       </div>
       <div>
         <SwitchPageBtn />
       </div>
-      <AddGdChildModal showModal={showModal} setShowModal={setShowModal} />
+      <AddGdChildModal
+        user_type="commercial"
+        title="Affiliés"
+        description="Créer un affilié (Commerciaux)"
+        showModal={showModal}
+        setShowModal={setShowModal}
+      />
     </section>
   ) : (
     <section className="w-full overflow-x-hidden">
