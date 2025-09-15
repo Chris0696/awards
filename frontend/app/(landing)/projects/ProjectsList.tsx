@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CategoryTag from "../../common/CategoryTag";
 import Link from "next/link";
 import ColoredLink from "../../../components/ui/ColoredLink";
@@ -7,10 +7,26 @@ import { ChevronRight } from "lucide-react";
 import HappymanImg from "@/assets/happyman.png";
 import Image from "next/image";
 import ProjectCard from "@/app/(landing)/projects/ProjectCard";
+import { useProjectStore } from "@/stores/useProjectStore";
 
 type Category = {
   tagname: string;
   title: string;
+};
+export type PublicProject = {
+  project_id: string;
+  slug: string;
+  project_title: string;
+  description: string;
+  estimated_budget: string;
+  featured: boolean;
+  created_at: string;
+  validated_at: string;
+  owner_name: string;
+  image: string | null;
+  image_url: string | null;
+  average_rating: number;
+  total_votes: number;
 };
 const categories: Category[] = [
   {
@@ -33,6 +49,13 @@ const categories: Category[] = [
 
 export default function ProjectsList() {
   const [activeTab, setActiveTab] = useState<string>("");
+  const getProjects = useProjectStore((state) => state.setPublicProjects);
+  const projects = useProjectStore((state) => state.publicProjects);
+  console.log(projects, "projects");
+
+  useEffect(() => {
+    getProjects();
+  }, []);
   return (
     <section className="py-16 bg-gray-100  ">
       <div className="flex justify-center px-8">
@@ -52,16 +75,9 @@ export default function ProjectsList() {
       </p>
       <div className="flex justify-center">
         <div className="flex flex-wrap gap-8 justify-center w-5/6">
-          <ProjectCard />
-          <ProjectCard />
-          <ProjectCard />
-          <ProjectCard />
-          <ProjectCard />
-          <ProjectCard />
-          <ProjectCard />
-          <ProjectCard />
-          <ProjectCard />
-          <ProjectCard />
+          {projects.map((project, idx) => (
+            <ProjectCard project={project} key={idx} />
+          ))}
         </div>
       </div>
       <div className="mt-16 flex justify-center">
