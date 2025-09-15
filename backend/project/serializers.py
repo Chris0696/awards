@@ -405,11 +405,21 @@ class ProjectListSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        user = self.context['request'].user
-        if user.user_type == 'owner':
-            representation.pop('commercial', None)
-        if not (user.is_staff or user.user_type == 'admin'):
-            representation.pop('admin_comment', None)
+        
+        # Vérifier si request existe dans le contexte avant de l'utiliser
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            user = request.user
+            if user.user_type == 'owner':
+                representation.pop('commercial', None)
+            if not (user.is_staff or user.user_type == 'admin'):
+                representation.pop('admin_comment', None)
+        else:
+            # Si pas de request dans le contexte, on peut soit:
+            # 1. Retourner toutes les données (pour admin par défaut)
+            # 2. Ou appliquer une logique par défaut
+            representation.pop('admin_comment', None)  # Masquer par défaut
+            
         return representation
 
 
@@ -423,44 +433,6 @@ class ProjectStatusUpdateSerializer(serializers.ModelSerializer):
         if value not in valid_statuses:
             raise serializers.ValidationError(_("Statut invalide. Les statuts valides sont : brouillon, désactivé, rejeté, publié."))
         return value
-    
-
-class ProjectDetailSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
-    owner = OwnerSerializer(read_only=True)
-    commercial = CommercialSerializer(read_only=True)
-    votes = serializers.SerializerMethodField()
-    average_rating = serializers.SerializerMethodField()
-    vote_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Project
-        fields = [
-            'project_id', 'project_title', 'slug', 'description', 'image',
-            'local_area_impact', 'main_objective', 'solution', 'estimated_budget',
-            'target_audience', 'progress_report', 'platform_status', 'owner_project_status',
-            'featured', 'created_at', 'updated_at', 'validated_at', 'admin_comment',
-            'category', 'owner', 'commercial', 'votes', 'average_rating', 'vote_count'
-        ]
-
-    def get_votes(self, obj):
-        votes = obj.vote_set.filter(active=True).select_related('user')
-        return VoteSerializer(votes, many=True).data
-    
-    def get_average_rating(self, obj):
-        return obj.average_rating()
-    
-    def get_vote_count(self, obj):
-        return obj.vote_count()
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        user = self.context['request'].user
-        if user.user_type == 'owner':
-            representation.pop('commercial', None)
-        if not (user.is_staff or user.user_type == 'admin'):
-            representation.pop('admin_comment', None)
-        return representation
     
 
 
@@ -760,6 +732,44 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
         return representation
 
 
+class ProjectDetailSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    owner = OwnerSerializer(read_only=True)
+    commercial = CommercialSerializer(read_only=True)
+    votes = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    vote_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = [
+            'project_id', 'project_title', 'slug', 'description', 'image',
+            'local_area_impact', 'main_objective', 'solution', 'estimated_budget',
+            'target_audience', 'progress_report', 'platform_status', 'owner_project_status',
+            'featured', 'created_at', 'updated_at', 'validated_at', 'admin_comment',
+            'category', 'owner', 'commercial', 'votes', 'average_rating', 'vote_count'
+        ]
+
+    def get_votes(self, obj):
+        votes = obj.vote_set.filter(active=True).select_related('user')
+        return VoteAndPaymentSerializer(votes, many=True).data
+    
+    def get_average_rating(self, obj):
+        return obj.average_rating()
+    
+    def get_vote_count(self, obj):
+        return obj.vote_count()
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        user = self.context['request'].user
+        if user.user_type == 'owner':
+            representation.pop('commercial', None)
+        if not (user.is_staff or user.user_type == 'admin'):
+            representation.pop('admin_comment', None)
+        return representation
+    
+    
 class VotePriceSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = VotePriceSettings

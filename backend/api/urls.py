@@ -2,6 +2,7 @@ from django.urls import path, include
 from userauths import views as UserViews
 from rest_framework_simplejwt.views import TokenRefreshView
 from project import views as ProjectViews
+
 from commercial import views as CommercialViews
 from api import views as ApiViews
 from projectowner import views as OwnerViews
@@ -30,6 +31,25 @@ urlpatterns = [
     path('auth/profile/<int:user_id>/', ApiViews.UserProfileAPIView.as_view(), name='user_profile'),
 
 
+    # ProjectOwner Endpoints
+    
+    path('admin/owners/', OwnerViews.OwnerListCreateAPIView.as_view(), name='admin-owner-list-create'),
+    
+    # Détail d'un Owner spécifique
+    path('admin/owners/<int:id>/', OwnerViews.OwnerDetailAPIView.as_view(), name='admin-owner-detail'),
+    
+    # Mise à jour d'un Owner
+    path('admin/owners/<int:id>/update/', OwnerViews.OwnerUpdateAPIView.as_view(), name='admin-owner-update'),
+    
+    # Suppression d'un Owner
+    path('admin/owners/<int:id>/delete/', OwnerViews.OwnerDeleteAPIView.as_view(), name='admin-owner-delete'),
+    
+    # Activer/Désactiver un Owner
+    path('admin/owners/<int:id>/toggle-active/', OwnerViews.OwnerToggleActiveAPIView.as_view(), name='admin-owner-toggle-active'),
+    
+    # Statistiques des Owner
+    path('admin/owners/statistics/', OwnerViews.OwnerStatisticsAPIView.as_view(), name='admin-owner-statistics'),
+    
     # Project Endpoints
     path('projects/', ProjectViews.ProjectListCreateAPIView.as_view(), name='project_list_create'),
     path('projects/<str:project_id>/', ProjectViews.ProjectDetailAPIView.as_view(), name='project_detail'),
