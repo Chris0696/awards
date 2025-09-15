@@ -6,6 +6,25 @@ export const projectSchema = z.object({
   country_code: z.string().nonempty("Entrez l'indicatif du pays").optional(),
   phone: z.string().nonempty("Entrez un numéro de téléphone"),
   profession: z.string().nonempty("Entrez votre profession"),
+  image: z
+    .any()
+    .refine(
+      (files) => !files || files instanceof FileList,
+      "L'image doit être un fichier valide"
+    )
+    .refine(
+      (files) =>
+        !files || files.length === 0 || files[0].size < 5 * 1024 * 1024,
+      "Image trop lourde (max 5Mo)"
+    )
+    .refine(
+      (files) =>
+        !files ||
+        files.length === 0 ||
+        ["image/jpeg", "image/png"].includes(files[0].type),
+      "Format invalide (JPEG/PNG uniquement)"
+    )
+    .optional(),
   password: z.string().nonempty("Entrez un mot de passe"),
   age: z.coerce
     .number<number>("Entrer votre age")

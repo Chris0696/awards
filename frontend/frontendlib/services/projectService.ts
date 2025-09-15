@@ -1,3 +1,4 @@
+import { PublicProject } from "@/app/(landing)/projects/ProjectsList";
 import { RequestOptions } from "@/app/common/types/common";
 import {
   AdminProjectInfo,
@@ -20,7 +21,6 @@ export class ProjectService {
     const res = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
       headers: {
-        "Content-Type": "application/json",
         ...(options.headers || {}),
       },
     });
@@ -53,16 +53,19 @@ export class ProjectService {
   getAdminProjects(): Promise<AdminProjectInfo[]> {
     return this.request("/projects/admin");
   }
+  getPublicProjects(): Promise<PublicProject[]> {
+    return this.request("/projects/publics");
+  }
   addNewProject(project: AuthProjectInput) {
     return this.request(`/projects`, {
       method: "POST",
       body: JSON.stringify(project),
     });
   }
-  createProject(project: ProjectInput) {
+  createProject(formData: FormData) {
     return this.request(`/auth/register`, {
       method: "POST",
-      body: JSON.stringify(project),
+      body: formData,
     });
   }
   updateProject(project: ProjectInput) {

@@ -4,16 +4,14 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   const access = (await cookies()).get("access_token")?.value;
   try {
-    const body = await req.json();
+    const formData = await req.formData();
 
     const response = await fetch(
       `${process.env.API_URL}auth/register/authorproject`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+
+        body: formData,
       }
     );
 

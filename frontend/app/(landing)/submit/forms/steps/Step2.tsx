@@ -6,11 +6,14 @@ import SelectField from "../SelectField";
 import TextField from "../TextField";
 import { useFormContext } from "react-hook-form";
 import { useAuthStore } from "@/stores/useAuthStore";
+import Image from "next/image";
 
 export default function Step2({
   setStep,
+  preview,
 }: {
   setStep: (step: number) => void;
+  preview: string | null;
 }) {
   const { trigger } = useFormContext();
   const user = useAuthStore((state) => state.user);
@@ -38,6 +41,9 @@ export default function Step2({
         </div>
       </div>
       <div className="mt-10">
+        {preview && (
+          <Image src={preview} alt="preview image" width={90} height={90} />
+        )}
         <FileInputField />
       </div>
       <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row justify-between items-center mt-6">

@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
 
@@ -22,6 +22,7 @@ import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {
   const [showModal, setShowModal] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const methods = useForm<ProjectForm>({
     resolver: zodResolver(projectSchema),
@@ -34,7 +35,6 @@ export default function SubmitProjectFormContainer() {
       password: "",
       age: undefined,
       category_id: "",
-      //category_name: "",
       project_title: "",
       local_area_impact: "",
       estimated_budget: undefined,
@@ -53,12 +53,66 @@ export default function SubmitProjectFormContainer() {
     setError,
     reset,
     handleSubmit,
+    watch,
     formState: { isSubmitting },
   } = methods;
 
+  const imageFile: FileList | undefined = watch("image");
+
+  useEffect(() => {
+    if (imageFile && imageFile.length > 0) {
+      const file = imageFile[0];
+      if (file instanceof File) {
+        const objectUrl = URL.createObjectURL(file);
+        setPreview(objectUrl);
+
+        return () => URL.revokeObjectURL(objectUrl);
+      }
+    } else {
+      setPreview(null);
+    }
+  }, [imageFile]);
+
   const [step, setStep] = useState(1);
   const onSubmit = async (data: ProjectForm) => {
-    const payload: ProjectInput = {
+    const formData = new FormData();
+    formData.append("full_name", data.full_name);
+    formData.append("email", data.email);
+    formData.append(
+      "country_code",
+      `+${parsePhoneNumber(data.phone)?.countryCallingCode}`
+    );
+    formData.append("phone", formatPhoneNumber(data.phone).replaceAll(" ", ""));
+    formData.append("profession", data.profession);
+    formData.append("password", data.password);
+    formData.append("age", String(data.age));
+    formData.append("affiliate", "");
+    formData.append(
+      "accept_project_reformulation",
+      data.acceptReformulation ? "1" : "0"
+    );
+    formData.append("accept_terms_of_use", data.acceptTerms ? "1" : "0");
+    formData.append(
+      "project",
+      JSON.stringify({
+        category_id: data.category_id,
+        project_title: data.project_title,
+        local_area_impact: data.local_area_impact,
+        main_objective: data.main_objective,
+        solution: data.solution,
+        description: data.description,
+        estimated_budget: data.estimated_budget,
+        target_audience: data.target_audience,
+        progress_report: data.progress_report,
+        owner_project_status: "brouillon",
+      })
+    );
+
+    if (data.image && data.image.length > 0) {
+      formData.append("image", data.image[0]);
+    }
+
+    /*  const payload: ProjectInput = {
       full_name: data.full_name,
       email: data.email,
       country_code: `+${parsePhoneNumber(data.phone)?.countryCallingCode}`,
@@ -82,9 +136,9 @@ export default function SubmitProjectFormContainer() {
         progress_report: data.progress_report,
         owner_project_status: "brouillon",
       },
-    };
+    }; */
     try {
-      await projectService.createProject(payload);
+      await projectService.createProject(formData);
       setShowModal(true);
       reset();
       setStep(1);
@@ -99,7 +153,7 @@ export default function SubmitProjectFormContainer() {
         <form onSubmit={handleSubmit(onSubmit)}>
           {step === 1 && <Step1 setStep={setStep} />}
 
-          {step === 2 && <Step2 setStep={setStep} />}
+          {step === 2 && <Step2 preview={preview} setStep={setStep} />}
           {step === 3 && <Step3 setStep={setStep} />}
 
           {step === 4 && (

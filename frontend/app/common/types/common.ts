@@ -5,3 +5,12 @@ export type RequestOptions = RequestInit & {
 export const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString("fr-FR");
 };
+
+export const dateToMonth = (date: string) => {
+  let formatted = new Date(date).toLocaleDateString("fr-FR", {
+    month: "long",
+    year: "numeric",
+  });
+
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+};
