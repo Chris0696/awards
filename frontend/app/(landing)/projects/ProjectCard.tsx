@@ -18,7 +18,7 @@ export default function ProjectCard({ project }: { project: PublicProject }) {
     <div className="bg-white rounded-2xl w-xl  p-12">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center">
         <div className="flex items-center space-x-3">
-          {project.image ? (
+          {project?.image ? (
             <Image
               src={ProfilImg}
               alt="Project owner profil image"
@@ -28,17 +28,17 @@ export default function ProjectCard({ project }: { project: PublicProject }) {
             <UserCircle2 size={52} />
           )}
 
-          <span className="text-xl text-gray-600">{project.owner_name} </span>
+          <span className="text-xl text-gray-600">{project?.owner_name} </span>
         </div>
         <p className="md:text-xl text-gray-600 ml-auto">
-          {dateToMonth(project.created_at)}{" "}
+          {dateToMonth(project?.created_at)}{" "}
         </p>
       </div>
       <div className="mt-8 mb-8 md:mb-16 space-y-3">
         <h2 className="font-semibold text-primary text-xl">
-          {project.project_title}{" "}
+          {project?.project_title}{" "}
         </h2>
-        <p className="text-gray-800 min-h-64">{project.description}</p>
+        <p className="text-gray-800 min-h-64">{project?.description}</p>
       </div>
       <div className="flex  flex-col space-y-3 md:space-y-0 md:flex-row md:justify-between">
         <ColoredOutlineBtn
@@ -46,7 +46,7 @@ export default function ProjectCard({ project }: { project: PublicProject }) {
           onClick={() => setShowModal(true)}
         />
         <Link
-          href={"/projects/1"}
+          href={`/projects/${project?.slug}`}
           className="flex items-center space-x-3 text-lg"
         >
           <span className="underline">En savoir plus</span>

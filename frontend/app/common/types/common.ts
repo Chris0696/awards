@@ -8,6 +8,7 @@ export const formatDate = (date: string) => {
 
 export const dateToMonth = (date: string) => {
   let formatted = new Date(date).toLocaleDateString("fr-FR", {
+    day: "2-digit",
     month: "long",
     year: "numeric",
   });
