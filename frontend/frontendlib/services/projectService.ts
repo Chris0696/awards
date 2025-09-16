@@ -44,6 +44,7 @@ export class ProjectService {
   getProjects(): Promise<ProjectInfo[]> {
     return this.request("/projects");
   }
+
   deleteOwnerProject(project_id: string) {
     return this.request("/projects", {
       method: "DELETE",
@@ -55,6 +56,9 @@ export class ProjectService {
   }
   getPublicProjects(): Promise<PublicProject[]> {
     return this.request("/projects/publics");
+  }
+  getPublicProject(slug: string) {
+    return this.request(`/projects/publics/${slug}`);
   }
   addNewProject(project: AuthProjectInput) {
     return this.request(`/projects`, {

@@ -5,8 +5,56 @@ import ShareLinkIcon from "@/assets/shareIcon.svg";
 import CopyLinkIcon from "@/assets/linkIcon.svg";
 import ProjectImg from "@/assets/artworklight.jpg";
 import Link from "next/link";
+import { projectService } from "@/frontendlib/services/projectService";
+import { dateToMonth, formatDate } from "@/app/common/types/common";
 
-export default function page() {
+export interface Project {
+  project_id: string;
+  slug: string;
+  project_title: string;
+  description: string;
+  local_area_impact: string;
+  main_objective: string;
+  solution: string;
+  estimated_budget: string;
+  target_audience: string;
+  progress_report: string;
+  featured: boolean;
+  created_at: string;
+  validated_at: string;
+  owner_name: string;
+  image: string | null;
+  image_url: string | null;
+  file: string | null;
+  average_rating: number;
+  total_votes: number;
+  vote_count: number;
+  total_revenue: number;
+}
+
+export default async function page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const response = await fetch(
+    `${process.env.API_URL}public/projects/${slug}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Impossible de charger le projet");
+  }
+  const project: Project = await response.json();
+  console.log(project, "project");
+
   return (
     <section className="pb-72">
       <div className="bg-primary text-white relative pb-56">
@@ -23,17 +71,13 @@ export default function page() {
               <ArrowDown className="md:hidden" size={16} />
             </span>
             <span className="block max-w-72 mx-auto">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis
-              itaque
+              {project.project_title}
             </span>
           </p>
         </div>
         <div className="w-[80%] md:w-2/5 mx-auto ">
           <div>
-            <h2 className="text-5xl font-bold">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis
-              itaque impedit molestiae, tenetur harum
-            </h2>
+            <h2 className="text-5xl font-bold">{project.project_title}</h2>
             <div className="flex  items-center justify-between my-7">
               <div className="flex items-center space-x-1">
                 <Image
@@ -41,25 +85,19 @@ export default function page() {
                   alt="Profil"
                   className="w-10 h-10 rounded-full"
                 />
-                <span className="text-gray-100">Mireille Assaba</span>
+                <span className="text-gray-100">{project.owner_name} </span>
               </div>
-              <p className="text-gray-400">14 Janvier 2025</p>
+              <p className="text-gray-400">
+                {dateToMonth(project.created_at)}{" "}
+              </p>
               <div>
                 <p className="px-2 text-center md:px-6 md:py-3 rounded-full bg-white text-primary">
-                  1500 votes
+                  {project.vote_count} votes
                 </p>
               </div>
             </div>
           </div>
-          <p className="text-gray-200">
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Culpa, qui
-            harum id eos earum eaque quibusdam, corrupti pariatur, ipsam nobis
-            laudantium voluptatem. Fugit placeat consequatur in suscipit nostrum
-            nesciunt reprehenderit magni culpa, quibusdam tempore, consequuntur
-            debitis repellendus minus itaque ipsa incidunt odio ex sunt maiores
-            vitae fuga! Maiores dolorem amet eveniet iusto praesentium ipsa
-            iste. Explicabo asperiores ratione ipsum tenetur.
-          </p>
+          <p className="text-gray-200">{project.description}</p>
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 items-center space-x-4 mt-8">
             <button className="border border-white px-6 py-2 rounded-md hover:bg-white hover:text-secondary transition-colors cursor-pointer">
               Voter pour ce projet-100 FCFA
@@ -102,16 +140,7 @@ export default function page() {
             <h3 className="text-3xl font-semibold text-gray-700 mb-6">
               Quel est l'objectif du projet ?
             </h3>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Non
-              accusantium quia vero a magnam vitae numquam quaerat, officia
-              velit corporis sit expedita reiciendis corrupti, obcaecati,
-              molestias asperiores quisquam! Neque deleniti inventore aperiam
-              vitae molestias rerum faire earum souvent commodi quo natus, ad
-              ipsum rem vel, assumenda cupiditate, exercitationem maiores quos
-              modi. Vitae, maxime accusamus natus culpa blanditiis asperiores
-              optio inventore impedit doloremque tempora dolores quasi.
-            </p>
+            <p>{project.main_objective}</p>
           </div>
           <div>
             <h3 className="text-3xl font-semibold text-gray-700 mb-6">
@@ -128,7 +157,7 @@ export default function page() {
             <h3 className="text-3xl font-semibold text-gray-700 mb-6">
               Budget estimatif
             </h3>
-            <p>100000000 FCFA</p>
+            <p>{project.estimated_budget} FCFA</p>
           </div>
           <div>
             <h3 className="text-3xl font-semibold text-gray-700 mb-6">
