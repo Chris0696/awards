@@ -11,6 +11,7 @@ from django.utils import timezone
 import uuid
 import re
 from django.core.validators import RegexValidator
+import json
 
 
 class CategoryAdminSerializer(serializers.ModelSerializer):
@@ -276,6 +277,46 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
             'owner_project_status'
         ]
         read_only_fields = ['project_id', 'owner_id']
+        
+        
+    def to_internal_value(self, data):
+        print(f"🔍 DEBUG ProjectSerializer - Type de data reçu: {type(data)}")
+        print(f"🔍 DEBUG ProjectSerializer - Data: {data}")
+        
+        # Si data est un string (venant de FormData), le parser
+        if isinstance(data, str):
+            print("🔍 DEBUG ProjectSerializer - Parsing JSON string")
+            try:
+                data = json.loads(data)
+                print("✅ DEBUG ProjectSerializer - JSON parsé avec succès")
+            except json.JSONDecodeError as e:
+                print(f"❌ DEBUG ProjectSerializer - Erreur JSON: {str(e)}")
+                raise serializers.ValidationError({
+                    "error": {
+                        "project": [f"Format JSON invalide pour le projet: {str(e)}"]
+                    }
+                })
+        
+        try:
+            result = super().to_internal_value(data)
+            print("✅ DEBUG ProjectSerializer - to_internal_value réussi")
+            return result
+        except serializers.ValidationError as e:
+            print(f"❌ DEBUG ProjectSerializer - Erreurs de validation: {e.detail}")
+            # Reformater les erreurs pour une meilleure lisibilité
+            formatted_errors = {}
+            for field, messages in e.detail.items():
+                if isinstance(messages, list):
+                    formatted_errors[field] = messages[0] if messages else "Erreur de validation"
+                else:
+                    formatted_errors[field] = str(messages)
+            
+            raise serializers.ValidationError({
+                "error": {
+                    "project": formatted_errors
+                }
+            })
+
 
     def validate(self, attrs):
         # Valider category_id (ShortUUIDField)
@@ -332,27 +373,27 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
 
         return attrs
     
-    def to_internal_value(self, data):
-        try:
-            return super().to_internal_value(data)
-        except serializers.ValidationError as e:
-            errors = {}
-            for field, messages in e.detail.items():
-                # On prend le premier message si plusieurs
-                custom_message = messages[0]
-                errors.setdefault("error", {}).setdefault("project", {})[field] = custom_message
-            raise serializers.ValidationError(errors)
+    # def to_internal_value(self, data):
+    #     try:
+    #         return super().to_internal_value(data)
+    #     except serializers.ValidationError as e:
+    #         errors = {}
+    #         for field, messages in e.detail.items():
+    #             # On prend le premier message si plusieurs
+    #             custom_message = messages[0]
+    #             errors.setdefault("error", {}).setdefault("project", {})[field] = custom_message
+    #         raise serializers.ValidationError(errors)
     
-    def to_internal_value(self, data):
-        # Si data est un string (venant de FormData), le parser
-        if isinstance(data, str):
-            import json
-            try:
-                data = json.loads(data)
-            except json.JSONDecodeError:
-                raise serializers.ValidationError("Format JSON invalide pour le projet")
+    # def to_internal_value(self, data):
+    #     # Si data est un string (venant de FormData), le parser
+    #     if isinstance(data, str):
+    #         import json
+    #         try:
+    #             data = json.loads(data)
+    #         except json.JSONDecodeError:
+    #             raise serializers.ValidationError("Format JSON invalide pour le projet")
         
-        return super().to_internal_value(data)
+    #     return super().to_internal_value(data)
 
     def create(self, validated_data):
         # Retirer category_id après validation pour éviter un conflit avec le champ category

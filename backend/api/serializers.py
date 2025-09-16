@@ -47,6 +47,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ('full_name', 'email', 'country_code', 'phone', 'profession', 'password', 'age', 'affiliate', 'project', 'accept_project_reformulation', 'accept_terms_of_use')
 
     def validate(self, attrs):
+        print(f"🔍 DEBUG RegisterSerializer.validate - Attrs: {list(attrs.keys())}")
         # Valider les cases à cocher
         if not attrs.get('accept_project_reformulation'):
             raise serializers.ValidationError({
@@ -116,7 +117,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Valider les données du projet
         project_data = attrs.get('project')
         if project_data:
-            print("Project data in RegisterSerializer:", project_data)  # Débogage
+            print(f"🔍 DEBUG RegisterSerializer - Project data reçu: {project_data}")
+            
             project_context = {
                 'skip_auth_validation': True,
                 'request': self.context.get('request')
@@ -184,12 +186,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Créer le projet si fourni
         project = None
         if project_data:
+            print("🔍 DEBUG - Création du projet en cours...")
             project_data['owner'] = owner
             if commercial:
                 project_data['commercial'] = commercial
             project_context = {'skip_auth_validation': True}
             project_serializer = ProjectCreateUpdateSerializer(context=project_context)
             project = project_serializer.create(project_data)
+            print(f"✅ DEBUG - Projet créé: {project.project_id}")
+
 
         # Retourner les données
         response_data = {

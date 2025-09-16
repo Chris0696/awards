@@ -17,12 +17,10 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 
+import json
 
 import logging
 logger = logging.getLogger(__name__)
-
-
-
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -139,37 +137,117 @@ class CustomTokenRefreshView(TokenRefreshView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+# class RegisterViewAPIView(generics.CreateAPIView):
+#     queryset = User.objects.all()
+#     permission_classes = [AllowAny]
+#     parser_classes = [JSONParser, MultiPartParser, FormParser]
+#     serializer_class = register_serializer.RegisterSerializer
+    
+    
+#     # def create(self, request, *args, **kwargs):
+#     #     serializer = self.get_serializer(data=request.data)
+#     #     serializer.is_valid(raise_exception=True)
+#     #     response_data = serializer.save()
+#     #     return Response(response_data, status=status.HTTP_201_CREATED)
+    
+#     def create(self, request, *args, **kwargs):
+#         # Si c'est du FormData, le projet sera stringifié
+#         if request.content_type.startswith('multipart/'):
+#             # Désérialiser le JSON du projet s'il est stringifié
+#             if 'project' in request.data and isinstance(request.data['project'], str):
+#                 import json
+#                 try:
+#                     request.data._mutable = True  # Permettre la modification
+#                     request.data['project'] = json.loads(request.data['project'])
+#                 except json.JSONDecodeError:
+#                     pass
+        
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         response_data = serializer.save()
+#         return Response(response_data, status=status.HTTP_201_CREATED)
+    
+
 class RegisterViewAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
     serializer_class = register_serializer.RegisterSerializer
     
-    
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     response_data = serializer.save()
-    #     return Response(response_data, status=status.HTTP_201_CREATED)
-    
     def create(self, request, *args, **kwargs):
-        # Si c'est du FormData, le projet sera stringifié
-        if request.content_type.startswith('multipart/'):
-            # Désérialiser le JSON du projet s'il est stringifié
-            if 'project' in request.data and isinstance(request.data['project'], str):
-                import json
-                try:
-                    request.data._mutable = True  # Permettre la modification
-                    request.data['project'] = json.loads(request.data['project'])
-                except json.JSONDecodeError:
-                    pass
+        print(f"🔍 DEBUG - Content-Type: {request.content_type}")
+        print(f"🔍 DEBUG - Request data keys: {list(request.data.keys())}")
         
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        response_data = serializer.save()
-        return Response(response_data, status=status.HTTP_201_CREATED)
-    
-
+        try:
+            # Gérer le FormData avec fichiers
+            if request.content_type.startswith('multipart/'):
+                print("🔍 DEBUG - Traitement FormData détecté")
+                
+                # Créer une copie mutable des données
+                data_copy = request.data.copy()
+                
+                # Désérialiser le JSON du projet s'il est stringifié
+                if 'project' in data_copy and isinstance(data_copy['project'], str):
+                    print(f"🔍 DEBUG - Project data brut: {data_copy['project'][:200]}...")
+                    try:
+                        project_data = json.loads(data_copy['project'])
+                        data_copy['project'] = project_data
+                        print("✅ DEBUG - Project JSON désérialisé avec succès")
+                        print(f"🔍 DEBUG - Project data après parsing: {project_data}")
+                    except json.JSONDecodeError as e:
+                        print(f"❌ DEBUG - Erreur JSON: {str(e)}")
+                        return Response({
+                            "error": {
+                                "project": [f"Format JSON invalide pour le projet: {str(e)}"]
+                            }
+                        }, status=status.HTTP_400_BAD_REQUEST)
+                
+                # Vérifier la présence des fichiers
+                files_info = {}
+                if 'image' in request.FILES:
+                    files_info['image'] = {
+                        'name': request.FILES['image'].name,
+                        'size': request.FILES['image'].size,
+                        'content_type': request.FILES['image'].content_type
+                    }
+                if 'file' in request.FILES:
+                    files_info['file'] = {
+                        'name': request.FILES['file'].name,
+                        'size': request.FILES['file'].size,
+                        'content_type': request.FILES['file'].content_type
+                    }
+                print(f"🔍 DEBUG - Fichiers reçus: {files_info}")
+                
+                # Remplacer les données de la requête
+                request._full_data = data_copy
+                
+            else:
+                print("🔍 DEBUG - Traitement JSON standard")
+                
+            serializer = self.get_serializer(data=request.data)
+            
+            if not serializer.is_valid():
+                print(f"❌ DEBUG - Erreurs de validation: {serializer.errors}")
+                return Response({
+                    "error": serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            print("✅ DEBUG - Validation réussie, création en cours...")
+            response_data = serializer.save()
+            print("✅ DEBUG - Création terminée avec succès")
+            
+            return Response(response_data, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            print(f"❌ DEBUG - Erreur inattendue: {str(e)}")
+            logger.exception("Erreur lors de la création du compte")
+            return Response({
+                "error": {
+                    "non_field_errors": [f"Erreur interne: {str(e)}"]
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            
 class AdminRegisterViewAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
