@@ -282,20 +282,22 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         print(f"🔍 DEBUG ProjectSerializer - Type de data reçu: {type(data)}")
         print(f"🔍 DEBUG ProjectSerializer - Data: {data}")
+        print(f"🔍 DEBUG ProjectSerializer - Fichiers image/file: {data.get('image')} / {data.get('file')}")
+
         
         # Si data est un string (venant de FormData), le parser
-        if isinstance(data, str):
-            print("🔍 DEBUG ProjectSerializer - Parsing JSON string")
-            try:
-                data = json.loads(data)
-                print("✅ DEBUG ProjectSerializer - JSON parsé avec succès")
-            except json.JSONDecodeError as e:
-                print(f"❌ DEBUG ProjectSerializer - Erreur JSON: {str(e)}")
-                raise serializers.ValidationError({
-                    "error": {
-                        "project": [f"Format JSON invalide pour le projet: {str(e)}"]
-                    }
-                })
+        # if isinstance(data, str):
+        #     print("🔍 DEBUG ProjectSerializer - Parsing JSON string")
+        #     try:
+        #         data = json.loads(data)
+        #         print("✅ DEBUG ProjectSerializer - JSON parsé avec succès")
+        #     except json.JSONDecodeError as e:
+        #         print(f"❌ DEBUG ProjectSerializer - Erreur JSON: {str(e)}")
+        #         raise serializers.ValidationError({
+        #             "error": {
+        #                 "project": [f"Format JSON invalide pour le projet: {str(e)}"]
+        #             }
+        #         })
         
         try:
             result = super().to_internal_value(data)
@@ -320,9 +322,11 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         # Valider category_id (ShortUUIDField)
+        
+        print(f"🔍 DEBUG ProjectSerializer.validate - Attrs reçus: {attrs}")
         category_id = attrs.get('category_id')
-        print("Validating attrs:", attrs)  # Débogage
         if not category_id:
+            print("❌ DEBUG - Category_id manquant")
             raise serializers.ValidationError({
                 "error": {
                     "project" :{
@@ -336,6 +340,7 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
             attrs['category'] = category
             print("Found category:", category.category_name)  # Débogage
         except Category.DoesNotExist:
+            print(f"❌ DEBUG - Catégorie non trouvée: {category_id}")
             raise serializers.ValidationError({
                 "error": {
                     "project" :{
@@ -354,6 +359,7 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
         if not skip_auth and request and hasattr(request, 'user') and request.user.is_authenticated:
             user = request.user
             if user.user_type != 'owner':
+                print(f"❌ DEBUG - Type utilisateur incorrect: {user.user_type}")
                 raise serializers.ValidationError({
                     "error": {
                         "non_field_errors": [_("Seul un utilisateur de type 'owner' peut créer ou modifier un projet.")]
@@ -364,13 +370,16 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
                 attrs['owner'] = owner
                 if owner.commercial:
                     attrs['commercial'] = owner.commercial
+                print("✅ DEBUG - Owner validé")
             except Owner.DoesNotExist:
+                print("❌ DEBUG - Profil Owner non trouvé")
                 raise serializers.ValidationError({
                     "error": {
                         "non_field_errors": [_("Aucun profil Owner associé à cet utilisateur.")]
                     }
                 })
-
+                
+        print("✅ DEBUG ProjectSerializer.validate - Validation terminée")
         return attrs
     
     # def to_internal_value(self, data):
@@ -396,12 +405,17 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
     #     return super().to_internal_value(data)
 
     def create(self, validated_data):
+        print("🔍 DEBUG ProjectSerializer.create - Début création")
         # Retirer category_id après validation pour éviter un conflit avec le champ category
         validated_data.pop('category_id', None)
+        print(f"🔍 DEBUG - Données validées pour création: {list(validated_data.keys())}")
         project = super().create(validated_data)
         if not project.slug:
             project.slug = slugify(f"{project.project_title}-{project.project_id}")
             project.save()
+            
+        print(f"✅ DEBUG - Projet créé avec ID: {project.project_id}")
+
         return project
 
     def update(self, instance, validated_data):
@@ -415,6 +429,14 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
         if instance.category:
             representation['category'] = CategorySerializer(instance.category).data
         return representation
+    
+    def __init__(self, *args, **kwargs):
+        super(ProjectCreateUpdateSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
     
 
 class ProjectListSerializer(serializers.ModelSerializer):

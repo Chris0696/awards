@@ -78,8 +78,8 @@ class Project(models.Model):
     
     # Fichiers du projet
     
-    file = models.FileField(upload_to="project-files", default="projectfile.jpg", blank=True, null=True)
-    image = models.FileField(upload_to="project-images", default="project.jpg", blank=True, null=True)
+    file = models.FileField(upload_to="project-files", blank=True, null=True)
+    image = models.FileField(upload_to="project-images", blank=True, null=True)
     
     # Informations du projet
     project_title = models.CharField(max_length=200, verbose_name=_("Nom du projet"))

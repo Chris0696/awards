@@ -96,3 +96,56 @@
   "password": "Pass12345!",
   "user_type": "commercial"
 }
+
+{
+  "full_name": "Marie2 Durand",
+  "email": "marie2.durand@example.com",
+  "country_code": "+229",
+  "phone": "0166301056",
+  "profession": "Éducatrice",
+  "password": "Motdepasse123",
+  "age": 30,
+  "affiliate": "http://localhost:8000/api/v1/user/register/?affiliate=COM_0A7A5B0C",
+  "project": {
+    "category_id": "55C6F480",
+    "project_title": "École verte",
+    "local_area_impact": "string",
+    "main_objective": "Région de Porto-Novo",
+    "solution": "Construction d'écoles durables",
+    "description": "Projet pour des écoles écologiques",
+    "estimated_budget": "800000",
+    "target_audience": "Enfants",
+    "progress_report": "Planification initiale",
+    "owner_project_status": "brouillon"
+  },
+  "accept_project_reformulation": true,
+  "accept_terms_of_use": true
+}
+
+
+{
+    "full_name": Jean Dupont,
+    "email": jean.dupont@example.com,
+    "country_code": +229,
+    "phone": 535865535853,
+    "profession": Entrepreneur,
+    "password": Motdepasse123!,
+    "age": 25,
+    "affiliate": http://localhost:8000/api/v1/user/register/?affiliate=COM_0A7A5B0C,
+    "project": {
+        "category_id": 55C6F480,
+        "file": null,
+        "image": null,
+        "project_title": École verte,
+        "local_area_impact": Tototot,
+        "main_objective": totototo,
+        "solution": totott,
+        "description": totot,
+        "estimated_budget": 2500,
+        "target_audience": tototot,
+        "progress_report": tototot,
+        "owner_project_status": publie
+    },
+    "accept_project_reformulation": true,
+    "accept_terms_of_use": true
+}

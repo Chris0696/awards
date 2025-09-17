@@ -128,6 +128,7 @@ class RegisterSerializer(serializers.ModelSerializer):
                 print("Project serializer errors:", project_serializer.errors)  # Débogage
                 raise serializers.ValidationError({"project": project_serializer.errors})
             attrs['project'] = project_serializer.validated_data
+            print("✅ DEBUG RegisterSerializer - Projet validé")
 
         return attrs
 
@@ -142,6 +143,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
+        print("🔍 DEBUG RegisterSerializer.create - Début création utilisateur")
         # Extraire les champs
         phone = validated_data.pop('phone', None)
         country_code = validated_data.pop('country_code', None)
@@ -207,6 +209,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             },
             'project': ProjectCreateUpdateSerializer(project).data if project else None
         }
+        
+        print("✅ DEBUG RegisterSerializer.create - Création terminée avec succès")
         return response_data
     
 
