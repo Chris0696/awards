@@ -14,19 +14,42 @@ from django.core.validators import RegexValidator
 import json
 
 
+# class CategoryAdminSerializer(serializers.ModelSerializer):
+#     project_count = serializers.SerializerMethodField()
+    
+#     class Meta:
+#         model = Category
+#         fields = ['id', 'category_id', 'category_name', 'image', 'active', 'slug', 'project_count', 'created_at']
+#         read_only_fields = ['id', 'slug', 'category_id', 'project_count', 'created_at']
+    
+#     def get_project_count(self, obj):
+#         return obj.project_count()
+    
+#     def validate_category_name(self, value):
+#         # Vérifier l'unicité (en excluant l'instance actuelle pour la modification)
+#         queryset = Category.objects.filter(category_name__iexact=value)
+#         if self.instance:
+#             queryset = queryset.exclude(pk=self.instance.pk)
+        
+#         if queryset.exists():
+#             raise serializers.ValidationError("Une catégorie avec ce nom existe déjà.")
+#         return value
+
 class CategoryAdminSerializer(serializers.ModelSerializer):
     project_count = serializers.SerializerMethodField()
     
     class Meta:
         model = Category
         fields = ['id', 'category_id', 'category_name', 'image', 'active', 'slug', 'project_count', 'created_at']
-        read_only_fields = ['id', 'slug', 'category_id', 'project_count', 'created_at']
+        read_only_fields = ['id', 'category_id', 'slug', 'project_count', 'created_at']
     
     def get_project_count(self, obj):
         return obj.project_count()
     
     def validate_category_name(self, value):
-        # Vérifier l'unicité (en excluant l'instance actuelle pour la modification)
+        # Normaliser le nom de la catégorie
+        value = value.strip().capitalize()
+        # Vérifier l'unicité (en excluant l'instance actuelle pour les mises à jour)
         queryset = Category.objects.filter(category_name__iexact=value)
         if self.instance:
             queryset = queryset.exclude(pk=self.instance.pk)
@@ -34,7 +57,6 @@ class CategoryAdminSerializer(serializers.ModelSerializer):
         if queryset.exists():
             raise serializers.ValidationError("Une catégorie avec ce nom existe déjà.")
         return value
-
 
 class ProjectAdminSerializer(serializers.ModelSerializer):
     """Serializer complet pour l'administration des projets"""

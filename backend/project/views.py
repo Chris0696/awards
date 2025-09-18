@@ -2,7 +2,8 @@ from django.shortcuts import render
 from rest_framework.decorators import action, api_view, permission_classes
 from datetime import datetime, timedelta
 # from django_filters.rest_framework import DjangoFilterBackend
-
+from django.core.exceptions import ValidationError
+import logging
 from userauths.permissions import IsAdminOrReadOnly
 from commercial.serializers import CommercialSerializer
 from projectowner.models import Owner
@@ -24,6 +25,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import serializers
 from rest_framework.permissions import BasePermission
+
+
+logger = logging.getLogger(__name__)
 
 
 class IsProjectOwnerOrAdmin(BasePermission):
@@ -75,6 +79,98 @@ class CategoryAdminViewSet(viewsets.ModelViewSet):
     serializer_class = CategoryAdminSerializer
     queryset = Category.objects.all().order_by('category_name')
     permission_classes = [IsAdminUser]  # Seuls les admins peuvent gérer les catégories
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response({
+                'message': 'Catégorie créée avec succès.',
+                'data': serializer.data
+            }, status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            logger.error(f"Erreur lors de la création de la catégorie : {str(e)}")
+            return Response({
+                'message': 'Erreur lors de la création de la catégorie.',
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Erreur inattendue lors de la création : {str(e)}")
+            return Response({
+                'message': 'Une erreur inattendue s\'est produite.',
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        try:
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            action = 'mise à jour partielle' if partial else 'mise à jour complète'
+            return Response({
+                'message': f'Catégorie {action} avec succès.',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+        except ValidationError as e:
+            logger.error(f"Erreur lors de la mise à jour de la catégorie : {str(e)}")
+            return Response({
+                'message': 'Erreur lors de la mise à jour de la catégorie.',
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Erreur inattendue lors de la mise à jour : {str(e)}")
+            return Response({
+                'message': "Une erreur inattendue s'est produite.",
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            category_name = instance.category_name
+            self.perform_destroy(instance)
+            return Response({
+                'message': f"Catégorie '{category_name}' supprimée avec succès."
+            }, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            logger.error(f"Erreur lors de la suppression de la catégorie : {str(e)}")
+            return Response({
+                'message': 'Erreur lors de la suppression de la catégorie.',
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response({
+                'message': 'Catégorie récupérée avec succès.',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Erreur lors de la récupération de la catégorie : {str(e)}")
+            return Response({
+                'message': 'Erreur lors de la récupération de la catégorie.',
+                'error': str(e)
+            }, status=status.HTTP_404_NOT_FOUND)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+            return Response({
+                'message': 'Liste des catégories récupérée avec succès.',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Erreur lors de la récupération de la liste des catégories : {str(e)}")
+            return Response({
+                'message': 'Erreur lors de la récupération de la liste des catégories.',
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
 class ProjectAdminViewSet(viewsets.ModelViewSet):
