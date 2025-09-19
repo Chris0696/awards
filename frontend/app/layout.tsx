@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import AppInitialiser from "./(dashboard)/AppInitialiser";
 import { AuthWatcher } from "./(dashboard)/admin/AuthWatcher";
+import Script from "next/script";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -28,6 +29,10 @@ export default function RootLayout({
         </main>
         <Toaster richColors position="top-right" />
         <AuthWatcher />
+        <Script
+          src="https://cdn.fedapay.com/checkout.js?v=1.1.7"
+          strategy="beforeInteractive"
+        />
       </body>
     </html>
   );

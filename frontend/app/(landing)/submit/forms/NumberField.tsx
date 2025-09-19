@@ -21,6 +21,7 @@ export default function NumberField({ label, placeholder, name }: Props) {
             <input
               {...field}
               type="number"
+              value={field.value ?? ""}
               placeholder={placeholder}
               className="border-none outline-none bg-gray-100 px-2 py-3 rounded-md w-full"
             />

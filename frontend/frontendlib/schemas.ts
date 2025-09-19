@@ -105,3 +105,10 @@ export const createAffiliateSchema = z.object({
 export const updateAffiliateSchema = createAffiliateSchema.extend({
   password: z.string().optional(),
 });
+
+export const voteFormSchema = z.object({
+  vote_count: z.coerce.number().min(1, "Entrez le nombre de vote. Ex:1,2,3..."),
+  full_name: z.string().nonempty("Entrer votre nom complet"),
+  amount: z.coerce.number("Entrer le montant correspondant au nombre de vote"),
+  email: z.email("Email invalide").nonempty("Entrer votre email"),
+});
