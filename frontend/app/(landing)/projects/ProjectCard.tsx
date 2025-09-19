@@ -53,7 +53,11 @@ export default function ProjectCard({ project }: { project: PublicProject }) {
           <Image src={ArrowRightIcon} alt="Arrow Right" />
         </Link>
       </div>
-      <MakeVoteModal showModal={showModal} setShowModal={setShowModal} />
+      <MakeVoteModal
+        project={project}
+        showModal={showModal}
+        setShowModal={setShowModal}
+      />
     </div>
   );
 }

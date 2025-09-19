@@ -109,34 +109,9 @@ export default function SubmitProjectFormContainer() {
     );
 
     if (data.image && data.image.length > 0) {
-      formData.append("image", data.image[0]);
+      formData.append("project.image", data.image[0]);
     }
 
-    /*  const payload: ProjectInput = {
-      full_name: data.full_name,
-      email: data.email,
-      country_code: `+${parsePhoneNumber(data.phone)?.countryCallingCode}`,
-      phone: formatPhoneNumber(data.phone).replaceAll(" ", ""),
-      profession: data.profession,
-      password: data.password,
-      age: data.age,
-      affiliate: "",
-      accept_project_reformulation: data.acceptReformulation,
-      accept_terms_of_use: data.acceptTerms,
-      project: {
-        category_id: data.category_id,
-        //category_name: data.category_name,
-        project_title: data.project_title,
-        local_area_impact: data.local_area_impact,
-        main_objective: data.main_objective,
-        solution: data.solution,
-        description: data.description,
-        estimated_budget: data.estimated_budget,
-        target_audience: data.target_audience,
-        progress_report: data.progress_report,
-        owner_project_status: "brouillon",
-      },
-    }; */
     try {
       await projectService.createProject(formData);
       setShowModal(true);
