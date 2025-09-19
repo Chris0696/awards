@@ -1,7 +1,7 @@
 from commercial.serializers import CommercialSerializer
 from projectowner.serializers import OwnerSerializer
 from rest_framework import serializers
-from .models import Project, Category, User, Vote, VotePayment, VotePriceSettings
+from .models import PAYMENT_STATUS, Project, Category, User, Vote, VotePayment, VotePriceSettings
 
 from projectowner.models import Owner
 from django.utils.translation import gettext_lazy as _
@@ -680,8 +680,185 @@ class ProjectStatusUpdateSerializer(serializers.ModelSerializer):
 
 #         return payment
     
+# class VoteAndPaymentSerializer(serializers.ModelSerializer):
+#     """Serializer pour créer un vote et son paiement en une seule fois"""
+#     phone = serializers.CharField(
+#         max_length=20,
+#         required=True,
+#         validators=[RegexValidator(r'^\d{7,15}$', message=_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres."))]
+#     )
+#     country_code = serializers.CharField(
+#         max_length=5,
+#         required=True,
+#         validators=[RegexValidator(r'^\+\d{1,3}$', message=_("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33)."))]
+#     )
+#     project_id = serializers.PrimaryKeyRelatedField(queryset=Project.objects.all(), source='project', write_only=True)
+#     vote_count = serializers.IntegerField(min_value=1, write_only=True)
+#     payment_method_id = serializers.CharField(write_only=True, required=True, help_text="ID de la méthode de paiement (Orange Money, etc.)")
+    
+#     # NOUVEAUX CHAMPS OBLIGATOIRES
+#     voter_name = serializers.CharField(max_length=100, required=True, help_text="Nom complet du votant")
+#     voter_email = serializers.EmailField(required=True, help_text="Email du votant")
+#     payment_reference = serializers.CharField(max_length=50, required=True, help_text="Référence de paiement fournie par le votant")
+    
+#     # Champs de lecture
+#     total_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+#     payment_status = serializers.CharField(read_only=True)
+#     transaction_id = serializers.CharField(read_only=True)
+
+#     class Meta:
+#         model = Vote
+#         fields = [
+#             'id', 'project_id', 'vote', 'vote_count', 'phone', 'country_code', 
+#             'voter_name', 'voter_email', 'payment_reference',
+#             'payment_method_id', 'total_price', 'payment_status', 'transaction_id',
+#             'created_at', 'updated_at'
+#         ]
+#         read_only_fields = ['created_at', 'updated_at']
+        
+#     def validate_voter_email(self, value):
+#         """Valider que l'email est dans un format correct"""
+#         if not value:
+#             raise serializers.ValidationError(_("L'email du votant est obligatoire."))
+#         return value.lower()
+
+#     def validate_voter_name(self, value):
+#         """Valider le nom du votant"""
+#         if not value or len(value.strip()) < 2:
+#             raise serializers.ValidationError(_("Le nom du votant doit contenir au moins 2 caractères."))
+#         return value.strip()
+
+#     def validate_payment_reference(self, value):
+#         """Valider la référence de paiement"""
+#         if not value or len(value.strip()) < 3:
+#             raise serializers.ValidationError(_("La référence de paiement doit contenir au moins 3 caractères."))
+        
+#         # Vérifier l'unicité de la référence (optionnel)
+#         if Vote.objects.filter(payment_reference=value).exists():
+#             raise serializers.ValidationError(_("Cette référence de paiement a déjà été utilisée."))
+        
+#         return value.strip()
+
+#     def validate(self, attrs):
+#         request = self.context.get('request')
+#         project = attrs.get('project')
+#         vote_count = attrs.get('vote_count', 1)
+
+#         # Vérifier si le projet est en statut "publie"
+#         if project.platform_status != 'publie':
+#             raise serializers.ValidationError({"project_id": _("Ce projet n'est pas ouvert aux votes.")})
+
+#          # Gestion des utilisateurs
+#         voter_email = attrs.get('voter_email')
+#         voter_name = attrs.get('voter_name')
+#         phone = attrs.get('phone')
+#         country_code = attrs.get('country_code')
+        
+#         # Si l'utilisateur est authentifié
+#         if request.user.is_authenticated:
+#             attrs['user'] = request.user
+#         else:
+#             # Chercher un utilisateur existant avec l'email
+#             try:
+#                 user = User.objects.get(email=voter_email)
+#                 attrs['user'] = user
+#             except User.DoesNotExist:
+#                 # Créer un utilisateur avec les nouvelles informations
+#                 full_phone = f"{country_code}{phone}"
+#                 username = f"voter_{phone}_{uuid.uuid4().hex[:8]}"
+                
+#                 user = User.objects.create(
+#                     username=username,
+#                     email=voter_email,
+#                     phone=full_phone,
+#                     full_name=voter_name,
+#                     user_type='user',
+#                     is_active=True  # Activé car on a plus d'infos
+#                 )
+#                 attrs['user'] = user
+
+#         return attrs
+
+#     def create(self, validated_data):
+#         payment_method_id = validated_data.pop('payment_method_id')
+#         phone = validated_data.pop('phone')
+#         country_code = validated_data.pop('country_code')
+#         vote_count = validated_data.pop('vote_count', 1)
+#         voter_name = validated_data.pop('voter_name')
+#         voter_email = validated_data.pop('voter_email')
+#         payment_reference = validated_data.pop('payment_reference')
+
+#         # Créer le vote, non actif jusqu'au paiement
+#         vote = Vote.objects.create(
+#             **validated_data,
+#             active=False,
+#             vote_count=vote_count,
+#             phone=phone,
+#             country_code=country_code,
+#             voter_name=voter_name,
+#             voter_email=voter_email,
+#             payment_reference=payment_reference
+#         )
+
+#         # Calculer le montant total
+#         vote_price = VotePriceSettings.get_vote_price()
+#         total_amount = vote_price * vote_count
+
+#         # Créer le paiement
+#         payment = VotePayment.objects.create(
+#             user=vote.user,
+#             vote=vote,
+#             amount=total_amount,
+#             status='pending',
+#             payment_method='orange_money'  # À ajuster selon votre système
+#         )
+
+#         # Simuler le processus de paiement
+#         # Dans un vrai système, vous intégreriez ici l'API de paiement
+#         try:
+#             # Simuler un paiement réussi (remplacer par une vraie intégration)
+#             payment.status = 'approved'
+#             payment.paid_at = timezone.now()
+#             payment.transaction_id = f"TXN_{uuid.uuid4().hex[:10].upper()}"
+#             payment.save()
+
+#             # Activer le vote après paiement réussi
+#             vote.active = True
+#             vote.save()
+
+#         except Exception as e:
+#             # En cas d'échec du paiement
+#             payment.status = 'cancel'
+#             payment.save()
+#             raise serializers.ValidationError({
+#                 "payment": _("Erreur lors du traitement du paiement.")
+#             })
+
+#         return vote
+
+#     def to_representation(self, instance):
+#         representation = super().to_representation(instance)
+        
+#         # Ajouter les informations de paiement
+#         try:
+#             payment = VotePayment.objects.get(vote=instance)
+#             representation['total_price'] = payment.amount
+#             representation['payment_status'] = payment.status
+#             representation['transaction_id'] = payment.transaction_id
+#         except VotePayment.DoesNotExist:
+#             representation['total_price'] = instance.total_price
+#             representation['payment_status'] = None
+#             representation['transaction_id'] = None
+
+#         # Ajouter les informations du projet
+#         representation['project_title'] = instance.project.project_title
+#         representation['project_slug'] = instance.project.slug
+
+#         return representation
+
+
 class VoteAndPaymentSerializer(serializers.ModelSerializer):
-    """Serializer pour créer un vote et son paiement en une seule fois"""
+    """Serializer pour créer un vote avec les informations de paiement"""
     phone = serializers.CharField(
         max_length=20,
         required=True,
@@ -694,105 +871,160 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
     )
     project_id = serializers.PrimaryKeyRelatedField(queryset=Project.objects.all(), source='project', write_only=True)
     vote_count = serializers.IntegerField(min_value=1, write_only=True)
-    payment_method_id = serializers.CharField(write_only=True, required=True, help_text="ID de la méthode de paiement (Orange Money, etc.)")
     
-    # Champs de lecture
+    # Informations du votant
+    voter_name = serializers.CharField(max_length=100, required=True, help_text="Nom complet du votant")
+    voter_email = serializers.EmailField(required=True, help_text="Email du votant")
+    payment_reference = serializers.CharField(max_length=50, required=True, help_text="Référence de paiement")
+    
+    # Informations de paiement envoyées par le frontend
+    payment_method = serializers.CharField(max_length=50, required=True, help_text="Méthode de paiement utilisée")
+    payment_status = serializers.ChoiceField(
+        choices=PAYMENT_STATUS, 
+        required=True, 
+        help_text="Statut du paiement retourné par l'API externe"
+    )
+    external_transaction_id = serializers.CharField(
+        max_length=100, 
+        required=False, 
+        allow_blank=True,
+        help_text="ID de transaction de l'API externe"
+    )
+    
+    # Champs de lecture seulement
     total_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-    payment_status = serializers.CharField(read_only=True)
-    transaction_id = serializers.CharField(read_only=True)
+    internal_transaction_id = serializers.CharField(read_only=True)
 
     class Meta:
         model = Vote
         fields = [
             'id', 'project_id', 'vote', 'vote_count', 'phone', 'country_code', 
-            'payment_method_id', 'total_price', 'payment_status', 'transaction_id',
+            'voter_name', 'voter_email', 'payment_reference',
+            'payment_method', 'payment_status', 'external_transaction_id',
+            'total_price', 'internal_transaction_id',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
 
+    def validate_voter_email(self, value):
+        if not value:
+            raise serializers.ValidationError(_("L'email du votant est obligatoire."))
+        return value.lower()
+
+    def validate_voter_name(self, value):
+        if not value or len(value.strip()) < 2:
+            raise serializers.ValidationError(_("Le nom du votant doit contenir au moins 2 caractères."))
+        return value.strip()
+
+    def validate_payment_reference(self, value):
+        if not value or len(value.strip()) < 3:
+            raise serializers.ValidationError(_("La référence de paiement doit contenir au moins 3 caractères."))
+        
+        # Vérifier l'unicité de la référence
+        if Vote.objects.filter(payment_reference=value).exists():
+            raise serializers.ValidationError(_("Cette référence de paiement a déjà été utilisée."))
+        
+        return value.strip()
+
+    def validate_payment_status(self, value):
+        """Valider le statut de paiement envoyé par le frontend"""
+        if value not in ['approved', 'pending', 'declined', 'cancel']:
+            raise serializers.ValidationError(_("Statut de paiement invalide."))
+        return value
+
     def validate(self, attrs):
         request = self.context.get('request')
         project = attrs.get('project')
-        vote_count = attrs.get('vote_count', 1)
+        payment_status = attrs.get('payment_status')
 
-        # Vérifier si le projet est en statut "publie"
+        # Vérifier si le projet est ouvert aux votes
         if project.platform_status != 'publie':
             raise serializers.ValidationError({"project_id": _("Ce projet n'est pas ouvert aux votes.")})
 
-        # Si l'utilisateur est authentifié
+        # Validation logique : si le paiement est approuvé, l'external_transaction_id devrait être fourni
+        if payment_status == 'approved' and not attrs.get('external_transaction_id'):
+            raise serializers.ValidationError({
+                "external_transaction_id": _("L'ID de transaction externe est requis pour un paiement approuvé.")
+            })
+
+        # Gestion des utilisateurs
+        voter_email = attrs.get('voter_email')
+        voter_name = attrs.get('voter_name')
+        phone = attrs.get('phone')
+        country_code = attrs.get('country_code')
+        
         if request.user.is_authenticated:
             attrs['user'] = request.user
         else:
-            # Chercher un utilisateur existant avec le numéro de téléphone
-            phone = attrs['phone']
-            country_code = attrs['country_code']
-            full_phone = f"{country_code}{phone}"
+            # Chercher ou créer un utilisateur avec l'email
             try:
-                user = User.objects.get(phone=full_phone)
+                user = User.objects.get(email=voter_email)
                 attrs['user'] = user
             except User.DoesNotExist:
-                # Créer un utilisateur temporaire
+                full_phone = f"{country_code}{phone}"
                 username = f"voter_{phone}_{uuid.uuid4().hex[:8]}"
+                
                 user = User.objects.create(
                     username=username,
-                    email=f"{username}@temp.com",
+                    email=voter_email,
                     phone=full_phone,
-                    full_name=phone,
+                    full_name=voter_name,
                     user_type='user',
-                    is_active=False
+                    is_active=True
                 )
                 attrs['user'] = user
 
         return attrs
 
     def create(self, validated_data):
-        payment_method_id = validated_data.pop('payment_method_id')
+        # Extraire les données de paiement
+        payment_method = validated_data.pop('payment_method')
+        payment_status = validated_data.pop('payment_status')
+        external_transaction_id = validated_data.pop('external_transaction_id', '')
+        
+        # Extraire les autres données
         phone = validated_data.pop('phone')
         country_code = validated_data.pop('country_code')
         vote_count = validated_data.pop('vote_count', 1)
-
-        # Créer le vote, non actif jusqu'au paiement
-        vote = Vote.objects.create(
-            **validated_data,
-            active=False,
-            vote_count=vote_count,
-            phone=phone,
-            country_code=country_code
-        )
+        voter_name = validated_data.pop('voter_name')
+        voter_email = validated_data.pop('voter_email')
+        payment_reference = validated_data.pop('payment_reference')
 
         # Calculer le montant total
         vote_price = VotePriceSettings.get_vote_price()
         total_amount = vote_price * vote_count
 
-        # Créer le paiement
+        # Créer le vote avec le statut basé sur le paiement
+        vote_active = payment_status == 'approved'
+        
+        vote = Vote.objects.create(
+            **validated_data,
+            active=vote_active,
+            vote_count=vote_count,
+            phone=phone,
+            country_code=country_code,
+            voter_name=voter_name,
+            voter_email=voter_email,
+            payment_reference=payment_reference
+        )
+
+        # Générer un ID de transaction interne
+        internal_transaction_id = f"TXN_{uuid.uuid4().hex[:10].upper()}"
+
+        # Créer l'enregistrement de paiement
         payment = VotePayment.objects.create(
             user=vote.user,
             vote=vote,
             amount=total_amount,
-            status='en_attente',
-            payment_method='orange_money'  # À ajuster selon votre système
+            status=payment_status,
+            payment_method=payment_method,
+            transaction_id=external_transaction_id or internal_transaction_id
         )
 
-        # Simuler le processus de paiement
-        # Dans un vrai système, vous intégreriez ici l'API de paiement
-        try:
-            # Simuler un paiement réussi (remplacer par une vraie intégration)
-            payment.status = 'paye'
+        # Si le paiement est approuvé, marquer comme payé
+        if payment_status == 'approved':
             payment.paid_at = timezone.now()
-            payment.transaction_id = f"TXN_{uuid.uuid4().hex[:10].upper()}"
             payment.save()
-
-            # Activer le vote après paiement réussi
-            vote.active = True
-            vote.save()
-
-        except Exception as e:
-            # En cas d'échec du paiement
-            payment.status = 'echec'
-            payment.save()
-            raise serializers.ValidationError({
-                "payment": _("Erreur lors du traitement du paiement.")
-            })
 
         return vote
 
@@ -804,11 +1036,11 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
             payment = VotePayment.objects.get(vote=instance)
             representation['total_price'] = payment.amount
             representation['payment_status'] = payment.status
-            representation['transaction_id'] = payment.transaction_id
+            representation['internal_transaction_id'] = payment.transaction_id
         except VotePayment.DoesNotExist:
             representation['total_price'] = instance.total_price
             representation['payment_status'] = None
-            representation['transaction_id'] = None
+            representation['internal_transaction_id'] = None
 
         # Ajouter les informations du projet
         representation['project_title'] = instance.project.project_title

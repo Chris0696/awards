@@ -29,9 +29,10 @@ PLATFORM_STATUS = (
 )
 
 PAYMENT_STATUS = (
-    ("en_attente", _("En attente")),
-    ("paye", _("Payé")),
-    ("echec", _("Échec")),
+    ("pending", _("En attente")),
+    ("approved", _("Payé")),
+    ("declined", _("Déclinée")),
+    ("cancel", _("Échec")),
 )
 
 VOTE_CHOICES = (
@@ -313,6 +314,12 @@ class Vote(models.Model):
     vote = models.IntegerField(choices=VOTE_CHOICES, blank=True, null=True, verbose_name=_("Nombre d'étoile"))
     country_code = models.CharField(max_length=5, blank=True, null=True, verbose_name=_("Code pays")) 
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
+    
+    voter_name = models.CharField(max_length=100, verbose_name=_("Nom du votant"))
+    voter_email = models.EmailField(verbose_name=_("Email du votant"))
+    payment_reference = models.CharField(max_length=50, verbose_name=_("Référence de paiement"))
+    payment_method = models.CharField(max_length=50, blank=True)
+    
     active = models.BooleanField(default=False)  # Activé après paiement
     vote_count = models.IntegerField(default=1, verbose_name=_("Nombre de votes achetés"))
     created_at = models.DateTimeField(default=timezone.now)
@@ -322,7 +329,9 @@ class Vote(models.Model):
         ordering = ['-created_at']
         
     def __str__(self):
-        return f"Vote de {self.user or self.phone} pour {self.project.project_title} ({self.vote_count} votes, note: {self.vote})"
+        return f"Vote de {self.voter_name} ({self.voter_email}) pour {self.project.project_title} ({self.vote_count} votes, note: {self.vote})"
+
+        # return f"Vote de {self.user or self.phone} pour {self.project.project_title} ({self.vote_count} votes, note: {self.vote})"
 
     def clean(self):
         import re
@@ -368,7 +377,7 @@ class VotePayment(models.Model):
         return f"Paiement {self.amount} - {self.status}"
     
     def save(self, *args, **kwargs):
-        if self.status == 'paye' and not self.paid_at:
+        if self.status == 'approved' and not self.paid_at:
             self.paid_at = timezone.now()
         super().save(*args, **kwargs)
 

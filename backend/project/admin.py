@@ -26,6 +26,9 @@ class CategoryAdmin(admin.ModelAdmin):
 
 class VotePriceSettingsAdmin(admin.ModelAdmin):
     list_display = ('vote_price', 'created_at', 'updated_at')
+
+class VoteAdmin(admin.ModelAdmin):
+    list_display = ('vote', 'voter_name', 'voter_email', 'project', 'payment_reference', 'vote_count', 'phone', 'created_at', 'updated_at')
     
 
 class VotePaymentAdmin(admin.ModelAdmin):
@@ -46,7 +49,7 @@ admin.site.register(Project, ProjectAdmin)
 
 admin.site.register(Category, CategoryAdmin)
 
-# admin.site.register(Vote, VoteAdmin)
+admin.site.register(Vote, VoteAdmin)
 
 admin.site.register(Commercial, CommercialAdmin)
 
