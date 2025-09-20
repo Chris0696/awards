@@ -12,8 +12,8 @@ interface CategoryStore {
   categories: AdminCategory[];
   fetchCategories: () => Promise<void>;
   addCategory: (name: string) => Promise<void>;
-  deleteCategory: (category_id: string) => Promise<void>;
-  updateCategory: (category_name: string, category_id: string) => Promise<void>;
+  deleteCategory: (category_id: number) => Promise<void>;
+  updateCategory: (category_name: string, id: number) => Promise<void>;
 }
 
 export const useCategoryStore = create<CategoryStore>((set, get) => ({
@@ -28,12 +28,12 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
     await createCategory(name);
     await get().fetchCategories();
   },
-  deleteCategory: async (category_id: string) => {
+  deleteCategory: async (category_id: number) => {
     await deleteCategory(category_id);
     await get().fetchCategories();
   },
-  updateCategory: async (category_name, category_id) => {
-    await updateCategory(category_name, category_id);
+  updateCategory: async (category_name, id) => {
+    await updateCategory(category_name, id);
     await get().fetchCategories();
   },
 }));

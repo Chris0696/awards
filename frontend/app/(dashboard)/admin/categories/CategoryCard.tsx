@@ -22,7 +22,7 @@ export default function CategoryCard({
 }) {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<string>("");
+  const [categoryToDelete, setCategoryToDelete] = useState<number>();
   return (
     <div className="bg-gray-200/50 p-4 rounded-xl space-y-8 w-full md:max-w-[220px]">
       <div className="flex justify-between">
@@ -50,7 +50,7 @@ export default function CategoryCard({
               <button
                 onClick={() => {
                   setShowDeleteModal(true);
-                  setCategoryToDelete(category.category_id);
+                  setCategoryToDelete(category.id);
                 }}
                 className="cursor-pointer"
               >
@@ -84,11 +84,11 @@ const DeleteCategoryModal = ({
 }: {
   showDeleteModal: boolean;
   setShowDeleteModal: (show: boolean) => void;
-  categoryId: string;
+  categoryId: number | undefined;
 }) => {
   const deleteCategory = useCategoryStore((state) => state.deleteCategory);
   const handleDelete = () => {
-    deleteCategory(categoryId);
+    if (categoryId) deleteCategory(categoryId);
   };
   return (
     <Popover

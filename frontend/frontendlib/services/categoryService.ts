@@ -34,17 +34,14 @@ export async function createCategory(category_name: string) {
   }
 }
 
-export async function updateCategory(
-  category_name: string,
-  category_id: string
-) {
+export async function updateCategory(category_name: string, id: number) {
   try {
     const res = await fetch("/api/categories/privates", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ category_name, category_id }),
+      body: JSON.stringify({ category_name, id }),
     });
     if (!res.ok) {
       const errorBody = await res.json();
@@ -57,7 +54,7 @@ export async function updateCategory(
   }
 }
 
-export async function deleteCategory(category_id: string) {
+export async function deleteCategory(category_id: number) {
   try {
     const res = await fetch("/api/categories/privates", {
       method: "DELETE",

@@ -14,7 +14,7 @@ export async function GET() {
   });
 
   const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+  return NextResponse.json(data.data, { status: res.status });
 }
 
 export async function PATCH(req: NextRequest) {
@@ -23,14 +23,14 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
 
     const response = await fetch(
-      `${process.env.API_URL}admin/categories/${body.category_id}/`,
+      `${process.env.API_URL}admin/categories/${body.id}/`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${access}`,
         },
-        body: JSON.stringify(body.category_name),
+        body: JSON.stringify({ category_name: body.category_name }),
       }
     );
 
