@@ -40,7 +40,7 @@ export default function CreateCategoryModal({
   const onSubmit = (data: CategoryForm) => {
     try {
       if (category) {
-        updateCategory(data.category_name, category.category_id);
+        updateCategory(data.category_name, category.id);
       } else {
         addCategory(data.category_name);
       }
