@@ -269,3 +269,61 @@ class OwnerCreateSerializer(serializers.ModelSerializer):
         )
         
         return owner
+
+
+# class OwnerProfileSerializer(serializers.ModelSerializer):
+   
+#     # Champs liés à Profile
+#     full_name = serializers.CharField(source='profile.full_name', required=True)
+#     image = serializers.ImageField(source='profile.image', required=False)
+#     profession = serializers.CharField(source='profile.profession', required=False)
+#     phone = serializers.CharField(source='profile.phone', required=False)
+#     age = serializers.IntegerField(required=False)
+
+
+
+#     class Meta:
+#         model = Owner
+#         fields = [
+#             # Champs Profile
+#             'full_name', 'image', 'profession', 'phone', 'age',
+#         ]
+
+#     def update(self, instance, validated_data):
+#         # Gestion des données liées à Profile
+#         profile_data = validated_data.pop('profile', {})
+#         if profile_data and instance.profile:
+#             for attr, value in profile_data.items():
+#                 setattr(instance.profile, attr, value)
+#             instance.profile.save()
+        
+#         # Gestion des données Owner
+#         for attr, value in validated_data.items():
+#             setattr(instance, attr, value)
+
+#         instance.save()
+#         return instance
+
+
+class OwnerProfileSerializer(serializers.ModelSerializer):
+    # Utiliser les champs directement du modèle Owner
+    full_name = serializers.CharField(required=True)
+    image = serializers.ImageField(required=False)
+    profession = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    phone = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    age = serializers.IntegerField(required=False, allow_null=True)
+
+    class Meta:
+        model = Owner
+        fields = [
+            'full_name', 'image', 'profession', 'phone', 'age', 
+            
+        ]
+
+    def update(self, instance, validated_data):
+        # Mise à jour directe des champs Owner
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        instance.save()
+        return instance

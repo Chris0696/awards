@@ -1,6 +1,6 @@
 from django.db import models
 from project.models import Commercial, Vote
-from userauths.models import User
+from userauths.models import Profile, User
 from django.utils.translation import gettext_lazy as _
 import re
 
@@ -8,6 +8,7 @@ import re
 class Owner(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to="owner-files", blank=True, null=True, default="default.jpg")
+    profile = models.OneToOneField(Profile, related_name='profile', on_delete=models.CASCADE, null=True, blank=True)
     full_name = models.CharField(max_length=100, verbose_name=_("Nom complet"))
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
     country_code = models.CharField(max_length=5, blank=True, null=True, verbose_name=_("Code pays"))
@@ -25,7 +26,8 @@ class Owner(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.full_name
+        return self.profile.full_name if self.profile else self.user.full_name
+
     
     def clean(self):
         # Valider le format du code pays (ex. + suivi de 1 à 3 chiffres)

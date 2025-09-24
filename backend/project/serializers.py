@@ -170,6 +170,7 @@ class PublicProjectListSerializer(serializers.ModelSerializer):
     """Serializer léger pour la liste des projets (sans tous les détails)"""
     category_name = serializers.CharField(source='category.name', read_only=True)
     owner_name = serializers.CharField(source='owner.user.full_name', read_only=True)
+    owner_image = serializers.CharField(source='owner.image', read_only=True)
     average_rating = serializers.SerializerMethodField()
     total_votes = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
@@ -179,7 +180,7 @@ class PublicProjectListSerializer(serializers.ModelSerializer):
         fields = [
             'project_id', 'slug', 'project_title', 'description',
             'estimated_budget', 'featured', 'created_at', 'validated_at',
-            'category_name', 'owner_name', 'image', 'image_url',
+            'category_name', 'owner_name', 'owner_image', 'image', 'image_url',
             'average_rating', 'total_votes'
         ]
 
@@ -862,14 +863,15 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(
         max_length=20,
         required=True,
-        validators=[RegexValidator(r'^\d{7,15}$', message=_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres."))]
+        # validators=[RegexValidator(r'^\d{7,15}$', message=_("Le numéro de téléphone doit être au format +XXXXXXX avec le code pays."))]
     )
-    country_code = serializers.CharField(
-        max_length=5,
-        required=True,
-        validators=[RegexValidator(r'^\+\d{1,3}$', message=_("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33)."))]
-    )
-    project_id = serializers.PrimaryKeyRelatedField(queryset=Project.objects.all(), source='project', write_only=True)
+    # country_code = serializers.CharField(
+    #     max_length=5,
+    #     required=True,
+    #     validators=[RegexValidator(r'^\+\d{1,3}$', message=_("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33)."))]
+    # )
+    # project_id = serializers.PrimaryKeyRelatedField(queryset=Project.objects.all(), source='project', write_only=True)
+    project_id = serializers.CharField(write_only=True, help_text="ID string du projet")
     vote_count = serializers.IntegerField(min_value=1, write_only=True)
     
     # Informations du votant
@@ -905,6 +907,24 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
+        
+    
+    def validate_phone(self, value):
+        """Valider le numéro de téléphone avec code pays inclus"""
+        if not value.startswith('+'):
+            raise serializers.ValidationError(_("Le numéro de téléphone doit commencer par + (ex: +2290155662555)."))
+        if len(value) < 8 or len(value) > 20:
+            raise serializers.ValidationError(_("Le numéro de téléphone doit contenir entre 8 et 20 caractères."))
+        return value
+
+    def validate_project_id(self, value):
+        """Valider que le project_id string correspond à un projet existant"""
+        try:
+            project = Project.objects.get(project_id=value)
+            return project  # Retourner l'objet projet pour l'utiliser dans create()
+        except Project.DoesNotExist:
+            raise serializers.ValidationError(_("Aucun projet trouvé avec cet ID."))
+        
 
     def validate_voter_email(self, value):
         if not value:
@@ -934,7 +954,8 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         request = self.context.get('request')
-        project = attrs.get('project')
+        # project = attrs.get('project')
+        project = attrs.get('project_id')  # Maintenant c'est l'objet Project grâce à validate_project_id
         payment_status = attrs.get('payment_status')
 
         # Vérifier si le projet est ouvert aux votes
@@ -951,7 +972,7 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
         voter_email = attrs.get('voter_email')
         voter_name = attrs.get('voter_name')
         phone = attrs.get('phone')
-        country_code = attrs.get('country_code')
+        # country_code = attrs.get('country_code')
         
         if request.user.is_authenticated:
             attrs['user'] = request.user
@@ -961,13 +982,14 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
                 user = User.objects.get(email=voter_email)
                 attrs['user'] = user
             except User.DoesNotExist:
-                full_phone = f"{country_code}{phone}"
-                username = f"voter_{phone}_{uuid.uuid4().hex[:8]}"
+                # full_phone = f"{phone}"
+                # username = f"voter_{phone}_{uuid.uuid4().hex[:8]}"
+                username = f"voter_{phone.replace('+', '')}_{uuid.uuid4().hex[:8]}"
                 
                 user = User.objects.create(
                     username=username,
                     email=voter_email,
-                    phone=full_phone,
+                    phone=phone,
                     full_name=voter_name,
                     user_type='user',
                     is_active=True
@@ -984,11 +1006,12 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
         
         # Extraire les autres données
         phone = validated_data.pop('phone')
-        country_code = validated_data.pop('country_code')
+        # country_code = validated_data.pop('country_code')
         vote_count = validated_data.pop('vote_count', 1)
         voter_name = validated_data.pop('voter_name')
         voter_email = validated_data.pop('voter_email')
         payment_reference = validated_data.pop('payment_reference')
+        project = validated_data.pop('project_id')  # C'est maintenant l'objet Project
 
         # Calculer le montant total
         vote_price = VotePriceSettings.get_vote_price()
@@ -999,10 +1022,11 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
         
         vote = Vote.objects.create(
             **validated_data,
+            project=project,
             active=vote_active,
             vote_count=vote_count,
             phone=phone,
-            country_code=country_code,
+            # country_code=country_code,
             voter_name=voter_name,
             voter_email=voter_email,
             payment_reference=payment_reference
@@ -1028,25 +1052,56 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
 
         return vote
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
+    # def to_representation(self, instance):
+    #     representation = super().to_representation(instance)
         
-        # Ajouter les informations de paiement
+    #     # Ajouter les informations de paiement
+    #     try:
+    #         payment = VotePayment.objects.get(vote=instance)
+    #         representation['total_price'] = payment.amount
+    #         representation['payment_status'] = payment.status
+    #         representation['internal_transaction_id'] = payment.transaction_id
+    #     except VotePayment.DoesNotExist:
+    #         representation['total_price'] = instance.total_price
+    #         representation['payment_status'] = None
+    #         representation['internal_transaction_id'] = None
+
+    #     # Ajouter les informations du projet
+    #     representation['project_title'] = instance.project.project_title
+    #     representation['project_slug'] = instance.project.slug
+
+    #     return representation
+    
+    def to_representation(self, instance):
+        # Récupérer seulement les champs qui existent sur le modèle Vote
+        data = {
+            'id': instance.id,
+            'vote': instance.vote,
+            'vote_count': instance.vote_count,
+            'phone': instance.phone,
+            'voter_name': instance.voter_name,
+            'voter_email': instance.voter_email,
+            'payment_reference': instance.payment_reference,
+            'created_at': instance.created_at,
+            'updated_at': instance.updated_at,
+        }
+        
+        # Ajouter les informations de paiement depuis VotePayment
         try:
             payment = VotePayment.objects.get(vote=instance)
-            representation['total_price'] = payment.amount
-            representation['payment_status'] = payment.status
-            representation['internal_transaction_id'] = payment.transaction_id
+            data['total_price'] = str(payment.amount)
+            data['payment_status'] = payment.status
+            data['internal_transaction_id'] = payment.transaction_id
         except VotePayment.DoesNotExist:
-            representation['total_price'] = instance.total_price
-            representation['payment_status'] = None
-            representation['internal_transaction_id'] = None
+            data['total_price'] = str(instance.total_price)
+            data['payment_status'] = None
+            data['internal_transaction_id'] = None
 
         # Ajouter les informations du projet
-        representation['project_title'] = instance.project.project_title
-        representation['project_slug'] = instance.project.slug
-
-        return representation
+        data['project_title'] = instance.project.project_title
+        data['project_slug'] = instance.project.slug
+        
+        return data
 
 
 class ProjectDetailSerializer(serializers.ModelSerializer):

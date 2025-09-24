@@ -31,6 +31,9 @@ urlpatterns = [
     path('auth/profile/<int:user_id>/', ApiViews.UserProfileAPIView.as_view(), name='user_profile'),
 
 
+    
+    path('owner/profile/update/<int:user_id>/', OwnerViews.UpdateOwnerProfileAPIView.as_view(), name='update-owner-profile'),
+
     # ProjectOwner Endpoints
     
     path('admin/owners/', OwnerViews.OwnerListCreateAPIView.as_view(), name='admin-owner-list-create'),

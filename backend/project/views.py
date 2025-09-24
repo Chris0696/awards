@@ -593,9 +593,16 @@ class VoteAndPaymentCreateAPIView(generics.CreateAPIView):
             with transaction.atomic():
                 vote = serializer.save()
                 
+            # Message selon le statut du paiement
+            if vote.active:
+                message = _('Vote créé et validé avec succès')
+            else:
+                message = _('Vote créé, en attente de validation du paiement')
+                
+                
             return Response({
                 'success': True,
-                'message': _('Vote créé et payé avec succès'),
+                'message': message,
                 'data': serializer.data
             }, status=status.HTTP_201_CREATED)
             

@@ -1,11 +1,13 @@
 
 from rest_framework import generics, status, permissions
+from userauths.permissions import IsOwnerOrReadOnly
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from .models import Owner, User
-from .serializers import OwnerListSerializer, OwnerDetailSerializer, OwnerUpdateSerializer
+from .serializers import OwnerListSerializer, OwnerDetailSerializer, OwnerProfileSerializer, OwnerUpdateSerializer
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 
@@ -291,3 +293,39 @@ class OwnerStatisticsAPIView(generics.GenericAPIView):
         }
         
         return Response(stats)
+    
+    
+class UpdateOwnerProfileAPIView(APIView):
+    
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_owner_object(self, user_id):
+        """Récupère l'objet Owner basé sur l'user_id."""
+        try:
+            user = User.objects.get(id=user_id)
+            return Owner.objects.get(user=user)
+        except (User.DoesNotExist, Owner.DoesNotExist):
+            return None
+
+    def get(self, request, user_id):
+        """Retourne le profil de l'owner correspondant à l'user_id."""
+        owner = self.get_owner_object(user_id)
+        if not owner:
+            return Response({"error": "L'auteur n'est pas retrouvé"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = OwnerProfileSerializer(owner)
+        return Response(serializer.data)
+
+    def put(self, request, user_id):
+        """Met à jour le profil de l'auteur correspondant à l'user_id."""
+        owner = self.get_owner_object(user_id)
+        if not owner:
+            return Response({"error": "L'auteur n'est pas retrouvé"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = OwnerProfileSerializer(owner, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

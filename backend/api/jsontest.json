@@ -105,7 +105,7 @@
   "profession": "Éducatrice",
   "password": "Motdepasse123",
   "age": 30,
-  "affiliate": "http://localhost:8000/api/v1/user/register/?affiliate=COM_0A7A5B0C",
+  "affiliate": "http://localhost:8000/api/v1/user/register/?affiliate=COM_0625B5AF",
   "project": {
     "category_id": "55C6F480",
     "project_title": "École verte",
