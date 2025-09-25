@@ -19,6 +19,7 @@ import { projectSchema } from "@/frontendlib/schemas";
 import { projectService } from "@/frontendlib/services/projectService";
 import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
 import { useImagePreview } from "@/hooks/useImagePreview";
+import Step5 from "./steps/Step5";
 
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {
@@ -117,24 +118,25 @@ export default function SubmitProjectFormContainer() {
 
           {step === 2 && <Step2 preview={preview} setStep={setStep} />}
           {step === 3 && <Step3 setStep={setStep} />}
+          {step === 4 && <Step4 setStep={setStep} />}
 
-          {step === 4 && (
+          {step === 5 && (
             <div>
-              <Step4 />
+              <Step5 />
               <div className="w-full px-5 max-w-3xl mx-auto">
                 <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 justify-between items-center mt-20">
                   <button
-                    onClick={() => setStep(3)}
+                    onClick={() => setStep(4)}
                     className="border w-full md:w-auto border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
                   >
                     <ChevronLeft /> <span>Retourner</span>
                   </button>
                   <button
-                    type="submit"
+                    type="button"
                     disabled={isSubmitting}
                     className="bg-secondary w-full md:w-auto px-10  py-2.5 cursor-pointer text-lg rounded-md text-white disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? "En cours..." : "Soumettre maintenant"}
+                    {isSubmitting ? "En cours..." : "Payer pour valider"}
                   </button>
                 </div>
               </div>

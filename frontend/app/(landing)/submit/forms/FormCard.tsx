@@ -25,12 +25,17 @@ const steps: StepProps[] = [
   {
     id: 4,
     title: "Derniers détails avant envoi ",
-    desc: "Avant de valider, confirmez que vous êtes d'accord avec nos conditions",
+    desc: "Pour continuer, confirmez que vous êtes d'accord avec nos conditions",
+  },
+  {
+    id: 5,
+    title: "Payer les frais de soumission ",
+    desc: "Avant de valider, payez les frais de soumission de projet qui s'élèvent à 5000 FCFA",
   },
 ];
 
 type Props = {
-  step: 1 | 2 | 3 | 4;
+  step: 1 | 2 | 3 | 4 | 5;
   children: React.ReactNode;
 };
 
@@ -41,7 +46,7 @@ export default function FormCard({ step = 1, children }: Props) {
       <div>
         <h2 className="flex  items-center text-xl md:text-4xl font-bold mb-3 space-x-20">
           <span className="flex items-center space-x-1">
-            <span className="text-[#0026B0] font-medium">{step}/4</span>
+            <span className="text-[#0026B0] font-medium">{step}/5</span>
             <ArrowRight size={20} />
           </span>
           <span>{currentStep?.title} </span>
