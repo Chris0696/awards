@@ -111,6 +111,12 @@ urlpatterns = [
     path('dashboard/commercial/', ApiViews.CommercialDashboardAPIView.as_view(), name='commercial_dashboard'),
     
     
+    # APIs pour graphiques d'évolution
+    path('analytics/votes-evolution/', ApiViews.votes_evolution_analytics, name='votes-evolution'),
+    path('analytics/projects-evolution/', ApiViews.projects_evolution_analytics, name='projects-evolution'),
+    path('analytics/dashboard-summary/', ApiViews.dashboard_summary_stats, name='dashboard-summary'),
+    
+    
     # Vote Endpoints
     
     # path('votes/', ProjectViews.VoteListAPIView.as_view(), name='vote_list'),

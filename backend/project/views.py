@@ -270,7 +270,7 @@ class ProjectAdminViewSet(viewsets.ModelViewSet):
         
         # Statistiques des votes
         total_votes = Vote.objects.filter(active=True).count()
-        total_revenue = VotePayment.objects.filter(status='paye').aggregate(
+        total_revenue = VotePayment.objects.filter(status='approved').aggregate(
             total=Sum('amount'))['total'] or 0
         
         # Projets récents (7 derniers jours)

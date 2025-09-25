@@ -268,13 +268,14 @@ class RecentVoteSerializer(serializers.ModelSerializer):
     project_title = serializers.CharField(source='project.project_title')
     user = serializers.CharField(source='user.full_name', allow_null=True, default='Anonyme')
     review = serializers.SerializerMethodField()
+    vote_count = serializers.CharField(source='vote.vote_count')
     
     class Meta:
         model = Vote
-        fields = ['project_title', 'user', 'vote', 'review', 'created_at']
+        fields = ['project_title', 'user', 'vote_count', 'review', 'created_at']
     
     def get_review(self, obj):
-        return obj.vote[:100] + "..." if len(obj.vote) > 100 else obj.vote
+        return obj.vote_count[:100] + "..." if len(obj.vote_count) > 100 else obj.vote_count
 
 
 class ProjectCreateUpdateSerializer(serializers.ModelSerializer):

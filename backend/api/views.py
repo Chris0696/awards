@@ -7,19 +7,21 @@ from projectowner.serializers import OwnerSerializer
 from userauths.permissions import IsAdminOrReadOnly
 # from project.serializers import ProjectDetailSerializer, ProjectListSerializer, VoteSerializer
 from commercial.serializers import CommercialSerializer
-from project.models import Commercial, Project, Category, User, Vote, VotePayment, VotePriceSettings
+from project.models import Commercial, Project, Category, ProjectSubmissionPayment, User, Vote, VotePayment, VotePriceSettings
 from django.db.models.expressions import Window
 # from django.db.models.functions import Avg
 from django.db.models.functions import Rank
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework import generics, permissions
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from datetime import timedelta
-from django.db.models import Q, Sum, Count, Avg, Count, Sum, Q, F
+from django.db.models import Q, Sum, Count, Avg, F
+from collections import defaultdict
+import calendar
 
 
 class IsProfileOwnerOrAdmin(permissions.BasePermission):
@@ -374,7 +376,7 @@ class AdminDashboardAPIView(generics.RetrieveAPIView):
         # Statistiques générales
         project_stats = Project.objects.aggregate(
             total=Count('id'),
-            validated=Count('id', filter=Q(platform_status='valide')),
+            validated=Count('id', filter=Q(platform_status='publie')),
             rejected=Count('id', filter=Q(platform_status='rejete')),
             pending=Count('id', filter=Q(platform_status='vote')),
             draft=Count('id', filter=Q(platform_status='brouillon'))
@@ -391,7 +393,7 @@ class AdminDashboardAPIView(generics.RetrieveAPIView):
         # Statistiques votes
         vote_stats = {
             'total_votes': Vote.objects.filter(active=True).count(),
-            'total_revenue': float(VotePayment.objects.filter(status='paye').aggregate(total=Sum('amount'))['total'] or 0),
+            'total_revenue': float(VotePayment.objects.filter(status='approved').aggregate(total=Sum('amount'))['total'] or 0),
             'pending_payments': VotePayment.objects.filter(status='en_attente').count(),
             'recent_votes': Vote.objects.filter(created_at__gte=timezone.now() - timedelta(days=30), active=True).count(),
         }
@@ -447,7 +449,7 @@ class OwnerDashboardAPIView(generics.RetrieveAPIView):
         # Statistiques des projets
         project_stats = owner.project_set.aggregate(
             total=Count('id'),
-            validated=Count('id', filter=Q(platform_status='valide')),
+            validated=Count('id', filter=Q(platform_status='publie')),
             rejected=Count('id', filter=Q(platform_status='rejete')),
             pending=Count('id', filter=Q(platform_status='vote')),
             draft=Count('id', filter=Q(platform_status='brouillon'))
@@ -458,7 +460,7 @@ class OwnerDashboardAPIView(generics.RetrieveAPIView):
         vote_stats = {
             'total_votes': Vote.objects.filter(project__owner=owner, active=True).count(),
             'average_rating': round(Vote.objects.filter(project__owner=owner, active=True).aggregate(avg=Avg('vote'))['avg'] or 0, 2),
-            'total_revenue_generated': float(VotePayment.objects.filter(vote__project__owner=owner, status='paye').aggregate(total=Sum('amount'))['total'] or 0)
+            'total_revenue_generated': float(VotePayment.objects.filter(vote__project__owner=owner, status='approved').aggregate(total=Sum('amount'))['total'] or 0)
         }
         
         # Classement de l'Owner
@@ -656,3 +658,309 @@ class ProjectValidationAPIView(generics.UpdateAPIView):
             "project_id": project.project_id,
             "new_status": new_status
         }, status=status.HTTP_200_OK)
+
+#===========================LES GTRAPHIQUES ADMIN=================
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def votes_evolution_analytics(request):
+    """
+    API pour récupérer l'évolution des votes et revenus par année/mois/semaine
+    Structure : {année: {mois: {semaines: [...], total_mois}, total_année}}
+    """
+    
+    # Récupérer tous les votes actifs avec paiements approuvés
+    votes_query = Vote.objects.filter(
+        active=True,
+        votepayment__status='approved'
+    ).select_related('votepayment')
+    
+    # Structure de données pour organiser par année > mois > semaine
+    analytics_data = defaultdict(lambda: {
+        'months': defaultdict(lambda: {
+            'weeks': [],
+            'total_votes': 0,
+            'total_revenue': 0
+        }),
+        'total_votes': 0,
+        'total_revenue': 0
+    })
+    
+    # Traiter chaque vote
+    for vote in votes_query:
+        created_date = vote.created_at
+        year = created_date.year
+        month = created_date.month
+        
+        # Calculer le numéro de la semaine dans le mois
+        first_day_of_month = created_date.replace(day=1)
+        week_in_month = ((created_date.day - 1) // 7) + 1
+        
+        # Ajouter aux totaux annuels
+        analytics_data[year]['total_votes'] += vote.vote_count
+        analytics_data[year]['total_revenue'] += float(vote.votepayment.amount)
+        
+        # Ajouter aux totaux mensuels
+        analytics_data[year]['months'][month]['total_votes'] += vote.vote_count
+        analytics_data[year]['months'][month]['total_revenue'] += float(vote.votepayment.amount)
+        
+        # Initialiser les semaines si nécessaire
+        month_data = analytics_data[year]['months'][month]
+        while len(month_data['weeks']) < week_in_month:
+            month_data['weeks'].append({
+                'week': len(month_data['weeks']) + 1,
+                'total_votes': 0,
+                'total_revenue': 0,
+                'start_date': None,
+                'end_date': None
+            })
+        
+        # Ajouter aux données de la semaine
+        week_index = week_in_month - 1
+        month_data['weeks'][week_index]['total_votes'] += vote.vote_count
+        month_data['weeks'][week_index]['total_revenue'] += float(vote.votepayment.amount)
+        
+        # Calculer les dates de début et fin de semaine
+        if month_data['weeks'][week_index]['start_date'] is None:
+            week_start = created_date - timedelta(days=created_date.weekday())
+            week_start = max(week_start, first_day_of_month)  # Ne pas dépasser le début du mois
+            
+            # Fin de semaine : 6 jours après le début ou fin du mois
+            week_end = week_start + timedelta(days=6)
+            last_day_of_month = first_day_of_month.replace(
+                day=calendar.monthrange(year, month)[1]
+            )
+            week_end = min(week_end, last_day_of_month)
+            
+            month_data['weeks'][week_index]['start_date'] = week_start.strftime('%Y-%m-%d')
+            month_data['weeks'][week_index]['end_date'] = week_end.strftime('%Y-%m-%d')
+    
+    # Convertir en format JSON avec noms des mois
+    formatted_data = {}
+    for year, year_data in analytics_data.items():
+        formatted_data[str(year)] = {
+            'total_votes': year_data['total_votes'],
+            'total_revenue': year_data['total_revenue'],
+            'months': {}
+        }
+        
+        for month, month_data in year_data['months'].items():
+            month_name = calendar.month_name[month]
+            formatted_data[str(year)]['months'][f"{month:02d}_{month_name}"] = {
+                'month_number': month,
+                'month_name': month_name,
+                'total_votes': month_data['total_votes'],
+                'total_revenue': month_data['total_revenue'],
+                'weeks': month_data['weeks']
+            }
+    
+    return Response({
+        'success': True,
+        'data': formatted_data,
+        'summary': {
+            'total_years': len(formatted_data),
+            'total_votes_platform': sum(year['total_votes'] for year in formatted_data.values()),
+            'total_revenue_platform': sum(year['total_revenue'] for year in formatted_data.values())
+        }
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def projects_evolution_analytics(request):
+    """
+    API pour récupérer l'évolution des projets publiés par semaine et mois
+    avec le nombre total de votes obtenus
+    """
+    
+    # Récupérer tous les projets publiés
+    projects_query = Project.objects.filter(
+        platform_status='publie',
+        validated_at__isnull=False
+    ).prefetch_related('vote_set')
+    
+    # Structure pour organiser par année > mois > semaine
+    projects_data = defaultdict(lambda: {
+        'months': defaultdict(lambda: {
+            'weeks': [],
+            'total_projects': 0,
+            'total_votes_received': 0
+        }),
+        'total_projects': 0,
+        'total_votes_received': 0
+    })
+    
+    # Traiter chaque projet
+    for project in projects_query:
+        validated_date = project.validated_at
+        year = validated_date.year
+        month = validated_date.month
+        
+        # Calculer le numéro de la semaine dans le mois
+        week_in_month = ((validated_date.day - 1) // 7) + 1
+        
+        # Compter les votes reçus par ce projet
+        project_votes = project.vote_set.filter(active=True).aggregate(
+            total=Sum('vote_count')
+        )['total'] or 0
+        
+        # Ajouter aux totaux annuels
+        projects_data[year]['total_projects'] += 1
+        projects_data[year]['total_votes_received'] += project_votes
+        
+        # Ajouter aux totaux mensuels
+        projects_data[year]['months'][month]['total_projects'] += 1
+        projects_data[year]['months'][month]['total_votes_received'] += project_votes
+        
+        # Initialiser les semaines si nécessaire
+        month_data = projects_data[year]['months'][month]
+        while len(month_data['weeks']) < week_in_month:
+            month_data['weeks'].append({
+                'week': len(month_data['weeks']) + 1,
+                'total_projects': 0,
+                'total_votes_received': 0,
+                'average_votes_per_project': 0,
+                'start_date': None,
+                'end_date': None
+            })
+        
+        # Ajouter aux données de la semaine
+        week_index = week_in_month - 1
+        month_data['weeks'][week_index]['total_projects'] += 1
+        month_data['weeks'][week_index]['total_votes_received'] += project_votes
+        
+        # Calculer les dates de début et fin de semaine
+        if month_data['weeks'][week_index]['start_date'] is None:
+            first_day_of_month = validated_date.replace(day=1)
+            week_start = validated_date - timedelta(days=validated_date.weekday())
+            week_start = max(week_start, first_day_of_month)
+            
+            week_end = week_start + timedelta(days=6)
+            last_day_of_month = first_day_of_month.replace(
+                day=calendar.monthrange(year, month)[1]
+            )
+            week_end = min(week_end, last_day_of_month)
+            
+            month_data['weeks'][week_index]['start_date'] = week_start.strftime('%Y-%m-%d')
+            month_data['weeks'][week_index]['end_date'] = week_end.strftime('%Y-%m-%d')
+    
+    # Calculer les moyennes pour chaque semaine et mois
+    for year, year_data in projects_data.items():
+        for month, month_data in year_data['months'].items():
+            # Moyenne mensuelle
+            if month_data['total_projects'] > 0:
+                month_data['average_votes_per_project'] = round(
+                    month_data['total_votes_received'] / month_data['total_projects'], 2
+                )
+            else:
+                month_data['average_votes_per_project'] = 0
+            
+            # Moyennes hebdomadaires
+            for week in month_data['weeks']:
+                if week['total_projects'] > 0:
+                    week['average_votes_per_project'] = round(
+                        week['total_votes_received'] / week['total_projects'], 2
+                    )
+    
+    # Formater les données
+    formatted_data = {}
+    for year, year_data in projects_data.items():
+        # Moyenne annuelle
+        year_average = 0
+        if year_data['total_projects'] > 0:
+            year_average = round(year_data['total_votes_received'] / year_data['total_projects'], 2)
+        
+        formatted_data[str(year)] = {
+            'total_projects': year_data['total_projects'],
+            'total_votes_received': year_data['total_votes_received'],
+            'average_votes_per_project': year_average,
+            'months': {}
+        }
+        
+        for month, month_data in year_data['months'].items():
+            month_name = calendar.month_name[month]
+            formatted_data[str(year)]['months'][f"{month:02d}_{month_name}"] = {
+                'month_number': month,
+                'month_name': month_name,
+                'total_projects': month_data['total_projects'],
+                'total_votes_received': month_data['total_votes_received'],
+                'average_votes_per_project': month_data['average_votes_per_project'],
+                'weeks': month_data['weeks']
+            }
+    
+    return Response({
+        'success': True,
+        'data': formatted_data,
+        'summary': {
+            'total_years': len(formatted_data),
+            'total_projects_platform': sum(year['total_projects'] for year in formatted_data.values()),
+            'total_votes_platform': sum(year['total_votes_received'] for year in formatted_data.values()),
+            'platform_average': round(
+                sum(year['total_votes_received'] for year in formatted_data.values()) /
+                max(sum(year['total_projects'] for year in formatted_data.values()), 1), 2
+            )
+        }
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def dashboard_summary_stats(request):
+    """
+    API pour les statistiques générales du tableau de bord
+    """
+    # Statistiques générales
+    total_projects = Project.objects.filter(platform_status='publie').count()
+    total_votes = Vote.objects.filter(active=True).count()
+    total_vote_count = Vote.objects.filter(active=True).aggregate(
+        total=Sum('vote_count')
+    )['total'] or 0
+    
+    total_revenue_votes = VotePayment.objects.filter(
+        status='approved'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    total_revenue_projects = ProjectSubmissionPayment.objects.filter(
+        status='approved'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    total_users = User.objects.filter(user_type='owner').count()
+    
+    # Statistiques des 30 derniers jours
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    
+    recent_projects = Project.objects.filter(
+        platform_status='publie',
+        validated_at__gte=thirty_days_ago
+    ).count()
+    
+    recent_votes = Vote.objects.filter(
+        active=True,
+        created_at__gte=thirty_days_ago
+    ).aggregate(total=Sum('vote_count'))['total'] or 0
+    
+    recent_revenue = VotePayment.objects.filter(
+        status='approved',
+        created_at__gte=thirty_days_ago
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    return Response({
+        'success': True,
+        'data': {
+            'global_stats': {
+                'total_projects_published': total_projects,
+                'total_vote_transactions': total_votes,
+                'total_votes_purchased': total_vote_count,
+                'total_revenue_votes': float(total_revenue_votes),
+                'total_revenue_projects': float(total_revenue_projects),
+                'total_revenue': float(total_revenue_votes + total_revenue_projects),
+                'total_users': total_users,
+                'average_votes_per_project': round(total_vote_count / max(total_projects, 1), 2)
+            },
+            'last_30_days': {
+                'new_projects': recent_projects,
+                'new_votes': recent_votes,
+                'revenue': float(recent_revenue)
+            }
+        }
+    })
