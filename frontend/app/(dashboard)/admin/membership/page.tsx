@@ -39,12 +39,16 @@ export default function page() {
           <span>Créer un affilié (Commerciaux)</span> <ChevronRightIcon />
         </button>
       </div>
-      <div>
-        <AffiliateTable affiliates={filteredList} />
-      </div>
-      <div>
-        <SwitchPageBtn />
-      </div>
+      {filteredList.length > 0 ? (
+        <div>
+          <AffiliateTable affiliates={filteredList} />
+          <SwitchPageBtn />
+        </div>
+      ) : (
+        <p className="text-center text-primary text-3xl font-medium">
+          Vous n'avez ajouté aucun commercial pour le moment
+        </p>
+      )}
       <AddGdChildModal
         user_type="commercial"
         title="Affiliés"

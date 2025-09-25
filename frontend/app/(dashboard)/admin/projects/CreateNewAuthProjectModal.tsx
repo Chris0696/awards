@@ -7,7 +7,9 @@ import Popover from "@/components/ui/Popover";
 import { authProjectSchema } from "@/frontendlib/schemas";
 import { projectService } from "@/frontendlib/services/projectService";
 import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
+import { useImagePreview } from "@/hooks/useImagePreview";
 import { useCategoryStore } from "@/stores/useCategoryStore";
+import { useProjectStore } from "@/stores/useProjectStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft } from "lucide-react";
 
@@ -50,10 +52,38 @@ export default function CreateNewAuthProjectModal({
       acceptTerms: false,
     },
   });
-  const { handleSubmit, reset, setError } = methods;
+  const { handleSubmit, reset, setError, watch } = methods;
   const [step, setStep] = useState(2);
+  const imageFile: FileList | null = watch("image");
+  const preview = useImagePreview(imageFile);
+  const addNewProject = useProjectStore((state) => state.addNewProject);
 
   const onSubmit = async (data: AuthProjectInput) => {
+    /*  const formData = new FormData();
+    formData.append(
+      "accept_project_reformulation",
+      data.acceptReformulation ? "1" : "0"
+    );
+    formData.append("accept_terms_of_use", data.acceptTerms ? "1" : "0");
+    formData.append(
+      "project",
+      JSON.stringify({
+        category_id: data.category_id,
+        project_title: data.project_title,
+        local_area_impact: data.local_area_impact,
+        main_objective: data.main_objective,
+        solution: data.solution,
+        description: data.description,
+        estimated_budget: data.estimated_budget,
+        target_audience: data.target_audience,
+        progress_report: data.progress_report,
+        owner_project_status: "brouillon",
+      })
+    );
+
+    if (data.image && data.image.length > 0) {
+      formData.append("project.image", data.image[0]);
+    } */
     const payload = {
       project_id: project ? project?.project_id : adminProject?.project_id,
       affiliate: "",
@@ -80,8 +110,9 @@ export default function CreateNewAuthProjectModal({
         setShowModal(false);
         reset();
       } else {
-        await projectService.addNewProject(payload);
+        addNewProject(payload);
         setShowModal(false);
+        setStep(2);
         reset();
       }
     } catch (error) {
@@ -138,7 +169,7 @@ export default function CreateNewAuthProjectModal({
       <div className="p-6">
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)}>
-            {step === 2 && <Step2 setStep={setStep} />}
+            {step === 2 && <Step2 preview={preview} setStep={setStep} />}
             {step === 3 && <Step3 setStep={setStep} />}
             {step === 4 && (
               <>

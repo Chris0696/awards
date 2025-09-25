@@ -5,6 +5,7 @@ import {
   updateUserInfo,
 } from "@/frontendlib/services/authService";
 import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
+import { useImagePreview } from "@/hooks/useImagePreview";
 import { useAuthStore } from "@/stores/useAuthStore";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -12,7 +13,7 @@ import { useForm } from "react-hook-form";
 
 export type UserForms = {
   full_name: string;
-  image?: FileList;
+  image: FileList | null;
   phone: string | null;
   profession: string | null;
 };
@@ -28,29 +29,19 @@ export interface IUserInfo {
 
 export default function page() {
   const user = useAuthStore((state) => state.user);
-  const [userInfo, setUserInfo] = useState<IUserInfo | null>(null);
+
+  const userInfo = useAuthStore((state) => state.userInfo);
+
   const methods = useForm<UserForms>({
     defaultValues: {
       full_name: "",
-      image: "",
       phone: "",
       profession: "",
     },
   });
-  const { register, handleSubmit, setValue } = methods;
-  useEffect(() => {
-    if (!user?.user_id) return;
-
-    async function getUserInfos() {
-      try {
-        const data = await getUserInfo(user.user_id);
-        setUserInfo(data);
-      } catch (error) {
-        console.log(error, "userinfo error");
-      }
-    }
-    getUserInfos();
-  }, [user?.user_id]);
+  const { register, handleSubmit, setValue, watch } = methods;
+  const image: FileList | null = watch("image");
+  const preview = useImagePreview(image);
 
   useEffect(() => {
     if (userInfo) {
@@ -90,13 +81,23 @@ export default function page() {
         </h3>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-10">
           <div className="flex items-center space-x-3">
-            <Image
-              src={fixBackendUrl(userInfo?.image) ?? ProfilImg}
-              alt="Photo de profil"
-              width={100}
-              height={100}
-              className="w-20 h-20 rounded-full"
-            />
+            {!preview ? (
+              <Image
+                src={fixBackendUrl(userInfo?.image) ?? ProfilImg}
+                alt="Photo de profil"
+                width={100}
+                height={100}
+                className="w-20 h-20 rounded-full"
+              />
+            ) : (
+              <Image
+                src={preview}
+                alt="Photo de profil"
+                width={100}
+                height={100}
+                className="w-20 h-20 rounded-full"
+              />
+            )}
             <div className="space-y-1">
               <h4 className="text-xl text-gray-800">{userInfo?.full_name} </h4>
               <label htmlFor="profil" className="underline">

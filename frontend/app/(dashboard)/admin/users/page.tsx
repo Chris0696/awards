@@ -22,10 +22,16 @@ export default function page() {
         <FilterBtn text="Date" />
         <FilterBtn text="Statut" />
       </div>
-      <div>
-        <UserTable users={users} />
-      </div>
-      <SwitchPageBtn />
+      {users.length > 0 ? (
+        <div>
+          <UserTable users={users} />
+          <SwitchPageBtn />
+        </div>
+      ) : (
+        <p className="text-center text-primary text-3xl font-medium">
+          Vous n'avez ajouté personne pour le moment
+        </p>
+      )}
     </div>
   );
 }

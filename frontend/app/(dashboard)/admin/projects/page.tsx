@@ -69,10 +69,16 @@ export default function AdminProjectList() {
           <FilterBtn text="Statut" />
           <FilterBtn text="Catégorie" />
         </div>
-        <div className="overflow-x-auto">
-          <AdminTable projects={adminProjects} />
-        </div>
-        <SwitchPageBtn />
+        {adminProjects.length > 0 ? (
+          <div className="overflow-x-auto">
+            <AdminTable projects={adminProjects} />
+            <SwitchPageBtn />
+          </div>
+        ) : (
+          <p className="text-center text-primary text-3xl font-medium">
+            Vous n'avez ajouté personne pour le moment
+          </p>
+        )}
       </div>
     </section>
   );

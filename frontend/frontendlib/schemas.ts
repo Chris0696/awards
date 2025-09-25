@@ -64,7 +64,25 @@ export const authProjectSchema = z.object({
     .string()
     .nonempty("Entrez la zone d'intervention du projet"),
   description: z.string().nonempty("Donnez une brève description du projet"),
-
+  image: z
+    .any()
+    .refine(
+      (files) => !files || files instanceof FileList,
+      "L'image doit être un fichier valide"
+    )
+    .refine(
+      (files) =>
+        !files || files.length === 0 || files[0].size < 5 * 1024 * 1024,
+      "Image trop lourde (max 5Mo)"
+    )
+    .refine(
+      (files) =>
+        !files ||
+        files.length === 0 ||
+        ["image/jpeg", "image/png"].includes(files[0].type),
+      "Format invalide (JPEG/PNG uniquement)"
+    )
+    .optional(),
   solution: z.string().nonempty("Quel est le but du projet ?"),
   estimated_budget: z.coerce.number<number>(
     "Entrez le budget prévu pour le projet"
@@ -109,6 +127,8 @@ export const updateAffiliateSchema = createAffiliateSchema.extend({
 export const voteFormSchema = z.object({
   vote_count: z.coerce.number().min(1, "Entrez le nombre de vote. Ex:1,2,3..."),
   full_name: z.string().nonempty("Entrer votre nom complet"),
-  amount: z.coerce.number("Entrer le montant correspondant au nombre de vote"),
+  amount: z.coerce.number<number>(
+    "Entrer le montant correspondant au nombre de vote"
+  ),
   email: z.email("Email invalide").nonempty("Entrer votre email"),
 });

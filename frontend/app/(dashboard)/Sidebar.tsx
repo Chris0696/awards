@@ -3,7 +3,7 @@ import Link from "next/link";
 import { dashboardlinks } from "../common/navigationlinks";
 import NavLink from "../common/NavLink";
 import { useAuthStore } from "@/stores/useAuthStore";
-import ProfilImg from "@/assets/profil.png";
+import ProfilImg from "@/assets/defaultProfil.png";
 import { MoreVerticalIcon } from "lucide-react";
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
+import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
 
 export default function Sidebar({
   open,
@@ -20,8 +21,9 @@ export default function Sidebar({
   open?: boolean;
   onClose?: () => void;
 }) {
-  const { user, logout } = useAuthStore();
+  const { user, logout, userInfo } = useAuthStore();
   const router = useRouter();
+  console.log(userInfo, "sideabar userinfo");
 
   const filteredLinks = dashboardlinks.filter((link) => {
     if (user?.user_type === "owner") {
@@ -39,7 +41,7 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`bg-primary text-white pt-24 h-full rounded-lg min-w-72 max-w-72
+      className={`bg-primary text-white pt-24 h-full rounded-xl  min-w-72 max-w-72
         fixed top-0 left-0 z-50 transition-transform duration-300
         ${open ? "translate-x-0" : "-translate-x-full"}
         md:static md:translate-x-0`}
@@ -50,7 +52,7 @@ export default function Sidebar({
       >
         &times;
       </button>
-      <nav className="flex flex-col space-y-8 px-6">
+      <nav className="flex flex-col h-7/8 mt-auto space-y-8 px-6">
         <Link href="/" className="p-3">
           <Image
             src={"/LOGO.svg"}
@@ -65,15 +67,15 @@ export default function Sidebar({
           ))}
         </div>
         <div className="flex justify-between mt-auto">
-          <div>
+          <div className="flex space-x-2 items-center">
             <Image
-              src={ProfilImg}
+              src={fixBackendUrl(userInfo?.image) ?? ProfilImg}
               alt="Profil image"
               className=" rounded-full"
               width={50}
               height={50}
             />
-            <p>{user?.full_name}</p>
+            <p className="inline-block w-min text-xl">{user?.full_name}</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
