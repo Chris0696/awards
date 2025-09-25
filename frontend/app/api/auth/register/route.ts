@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
 
     const response = await fetch(
-      `${process.env.API_URL}auth/register/authorproject`,
+      `${process.env.API_URL}auth/register-with-payment/`,
       {
         method: "POST",
 
