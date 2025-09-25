@@ -143,60 +143,78 @@ class Project(models.Model):
             total=Sum('amount'))['total'] or 0
 
 
-# class Commercial(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='commercial')
-#     full_name = models.CharField(max_length=100, verbose_name=_("Nom et prénom"))
-#     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
-#     commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=10.00, verbose_name=_("Taux de commission (%)"))
-#     affiliate_link = models.CharField(max_length=200, unique=True, blank=True, verbose_name=_("Lien d'affiliation"))
-#     is_active = models.BooleanField(default=True, verbose_name=_("Est actif"))
-#     created_at = models.DateTimeField(auto_now_add=True)
-    
-#     def __str__(self):
-#         return f"Commercial: {self.full_name}"
-    
-#     def save(self, *args, **kwargs):
-#         if not self.affiliate_link:
-#             # Générer un identifiant unique pour le lien
-#             affiliate_id = f"COM_{uuid.uuid4().hex[:8].upper()}"
-#             # Construire le lien d'affiliation avec l'URL de base du site
-#             base_url = getattr(settings, 'BASE_URL', settings.BASE_URL)
-#             self.affiliate_link = f"{base_url}/api/v1/user/register/?affiliate={affiliate_id}"
-#         super().save(*args, **kwargs)
-    
-#     def total_projects_brought(self):
-#         """Nombre total de projets amenés par ce commercial"""
-#         return Project.objects.filter(commercial=self).count()
-    
-#     def total_published_projects(self):
-#         """Projets validés amenés par ce commercial"""
-#         return Project.objects.filter(commercial=self, platform_status='publie').count()
-    
-#     def total_rejected_projects(self):
-#         """Projets rejetés amenés par ce commercial"""
-#         return Project.objects.filter(commercial=self, platform_status='rejete').count()
-    
-#     def total_votes_generated(self):
-#         """Total des votes sur les projets amenés par ce commercial"""
-#         return Vote.objects.filter(project__commercial=self, active=True).count()
-    
-#     def total_revenue_generated(self):
-#         """Revenus générés par les votes sur ses projets"""
-#         return VotePayment.objects.filter(
-#             vote__project__commercial=self, 
-#             status='paye'
-#         ).aggregate(total=Sum('amount'))['total'] or 0
-    
-#     def commission_earned(self):
-#         """Commission gagnée par le commercial"""
-#         total_revenue = self.total_revenue_generated()
-#         return (total_revenue * self.commission_rate) / 100
 
-#     class Meta:
-#         verbose_name = _("Commercial")
-#         verbose_name_plural = _("Commerciaux")
+class ProjectSubmissionPayment(models.Model):
+    """Paiements pour les soumissions de projets"""
+    SUBMISSION_PAYMENT_STATUS = (
+        ("pending", _("En attente")),
+        ("approved", _("Payé")),
+        ("declined", _("Déclinée")),
+        ("cancel", _("Échec")),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name='submission_payment')
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=5000.00)
+    status = models.CharField(max_length=20, choices=SUBMISSION_PAYMENT_STATUS, default='pending')
+    payment_method = models.CharField(max_length=50, blank=True)
+    external_transaction_id = models.CharField(max_length=100, blank=True)
+    payment_reference = models.CharField(max_length=50, unique=True, verbose_name=_("Référence de paiement"))
+    
+    # Informations du payeur
+    payer_name = models.CharField(max_length=100, verbose_name=_("Nom du payeur"))
+    payer_email = models.EmailField(verbose_name=_("Email du payeur"))
+    payer_phone = models.CharField(max_length=20, verbose_name=_("Téléphone du payeur"))
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        verbose_name = _("Paiement de soumission")
+        verbose_name_plural = _("Paiements de soumissions")
+    
+    def __str__(self):
+        return f"Paiement {self.amount}F pour {self.project.project_title} - {self.status}"
+    
+    def save(self, *args, **kwargs):
+        if self.status == 'approved' and not self.paid_at:
+            self.paid_at = timezone.now()
+        super().save(*args, **kwargs)
 
+    @classmethod
+    def get_submission_price(cls):
+        """Prix fixe pour la soumission d'un projet"""
+        return 5000.00
+    
 
+class ProjectSubmissionSettings(models.Model):
+    """Configuration globale des prix de soumission"""
+    submission_price = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=5000.00,
+        verbose_name=_("Prix par soumission de projet")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Configuration soumission")
+        verbose_name_plural = _("Configurations soumissions")
+    
+    def __str__(self):
+        return f"Prix soumission: {self.submission_price}F"
+    
+    @classmethod
+    def get_submission_price(cls):
+        """Récupère le prix actuel de soumission"""
+        try:
+            settings = cls.objects.first()
+            return settings.submission_price if settings else 5000.00
+        except cls.DoesNotExist:
+            return 5000.00
+        
+        
 class Commercial(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='commercial')
     full_name = models.CharField(max_length=100, verbose_name=_("Nom et prénom"))
@@ -348,19 +366,6 @@ class Vote(models.Model):
         """Calcule le prix total basé sur le nombre de votes"""
         return VotePriceSettings.get_vote_price() * self.vote_count
     
-
-# class VotePrice(models.Model):
-#     """Configuration des prix des votes"""
-#     vote_count = models.IntegerField(unique=True, verbose_name=_("Nombre de votes"))
-#     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Prix"))
-#     active = models.BooleanField(default=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-    
-#     class Meta:
-#         ordering = ['vote_count']
-    
-#     def __str__(self):
-#         return f"{self.vote_count} vote(s) - {self.price}€"
     
 class VotePayment(models.Model):
     """Paiements pour les votes"""

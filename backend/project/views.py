@@ -18,8 +18,8 @@ from django.utils import timezone
 from django.db.models import Count, Sum, Avg, Q
 
 from django.utils.translation import gettext_lazy as _
-from .models import Category, Commercial, Project, Vote, VotePayment, VotePriceSettings
-from .serializers import CategoryAdminSerializer, CategorySerializer, ProjectAdminSerializer, ProjectCreateUpdateSerializer, ProjectDetailSerializer, ProjectListSerializer, VoteAndPaymentSerializer, VotePriceSettingsSerializer, PublicProjectListSerializer, ProjectAnalyticsVoteSerializer, PublicProjectSerializer
+from .models import Category, Commercial, Project, ProjectSubmissionSettings, Vote, VotePayment, VotePriceSettings
+from .serializers import CategoryAdminSerializer, CategorySerializer, ProjectAdminSerializer, ProjectCreateUpdateSerializer, ProjectDetailSerializer, ProjectListSerializer, ProjectSubmissionWithPaymentSerializer, VoteAndPaymentSerializer, VotePriceSettingsSerializer, PublicProjectListSerializer, ProjectAnalyticsVoteSerializer, PublicProjectSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.pagination import PageNumberPagination
@@ -328,6 +328,46 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
         else:
             # Utilisateurs normaux voient seulement les projets publiés
             return Project.objects.filter(platform_status='publie').select_related('category', 'owner')
+
+
+class ProjectSubmissionWithPaymentAPIView(generics.CreateAPIView):
+    """API pour soumettre un nouveau projet avec paiement"""
+    serializer_class = ProjectSubmissionWithPaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            with transaction.atomic():
+                result = serializer.save()
+                
+            return Response({
+                'success': True,
+                'message': _('Projet soumis avec succès'),
+                'data': result
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': _('Erreur lors de la soumission du projet'),
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# views.py - API utilitaires
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_submission_price(request):
+    """Récupérer le prix de soumission actuel"""
+    price = ProjectSubmissionSettings.get_submission_price()
+    return Response({
+        'submission_price': price,
+        'currency': 'F'
+    })
 
 
 class ProjectDetailAPIView(generics.RetrieveAPIView):

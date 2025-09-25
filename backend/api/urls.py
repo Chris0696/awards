@@ -21,8 +21,12 @@ urlpatterns = [
     path('auth/refresh/', UserViews.CustomTokenRefreshView.as_view(), name='token_refresh'),
     
     # Register Endpoints
-    path("auth/register/authorproject", UserViews.RegisterViewAPIView.as_view(), name='register'),
+    # path("auth/register/authorproject", UserViews.RegisterViewAPIView.as_view(), name='register'),
     # path('auth/admin/register/commercial', UserViews.AdminRegisterViewAPIView.as_view(), name='admin_register'),
+    
+    # Enregistrement avec paiement
+    path('register-with-payment/', UserViews.RegisterWithPaymentViewAPIView.as_view(), name='register-with-payment'),
+
     
     path("auth/password-reset/<email>/", UserViews.PasswordResetEmailVerifyAPIView.as_view(), name='password_reset_email'),
     path("auth/password-change/", UserViews.PasswordChangeAPIView.as_view(), name='password_change'),
@@ -54,10 +58,16 @@ urlpatterns = [
     path('admin/owners/statistics/', OwnerViews.OwnerStatisticsAPIView.as_view(), name='admin-owner-statistics'),
     
     # Project Endpoints
+    # Soumission de projet avec paiement
+    path('projects/submit-with-payment/', ProjectViews.ProjectSubmissionWithPaymentAPIView.as_view(), name='project-submit-with-payment'),
+    
     path('projects/', ProjectViews.ProjectListCreateAPIView.as_view(), name='project_list_create'),
     path('projects/<str:project_id>/', ProjectViews.ProjectDetailAPIView.as_view(), name='project_detail'),
     path('projects/<str:project_id>/update/', ProjectViews.ProjectUpdateAPIView.as_view(), name='project_update'),
     path('projects/<str:project_id>/delete/', ProjectViews.ProjectDeleteAPIView.as_view(), name='project_delete'),
+    
+     # Prix de soumission
+    path('projects/submission-price/', ProjectViews.get_submission_price, name='submission-price'),
     
     # Liste publique des projets
     path('public/projects/', ProjectViews.PublicProjectListAPIView.as_view(), name='public-projects'),
