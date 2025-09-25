@@ -128,8 +128,8 @@ class AdminCommercialRegisterSerializer(serializers.ModelSerializer):
         fields = ['email', 'password', 'username', 'phone', 'user_type']
 
     def validate_phone(self, value):
-        if not re.match(r'^\d{7,15}$', value):
-            raise serializers.ValidationError(_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres."))
+        # if not re.match(r'^\d{7,15}$', value):
+        #     raise serializers.ValidationError(_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres."))
         if User.objects.filter(phone=value).exists():
             raise serializers.ValidationError(_("Ce numéro de téléphone est déjà utilisé."))
         return value

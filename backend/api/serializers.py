@@ -278,21 +278,21 @@ class RegisterOwnerWithPaymentSerializer(serializers.ModelSerializer):
         # Valider le code pays
         print("RegisterSerializer attrs:", attrs)
         country_code = attrs.get('country_code')
-        if country_code and not re.match(r'^\+\d{1,3}$', country_code):
-            raise serializers.ValidationError({
-                "error": {
-                    "country_code": [_("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33).")]
-                }
-                })
+        # if country_code and not re.match(r'^\+\d{1,3}$', country_code):
+        #     raise serializers.ValidationError({
+        #         "error": {
+        #             "country_code": [_("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33).")]
+        #         }
+        #         })
 
         # Valider le numéro de téléphone
         phone = attrs.get('phone')
-        if phone and not re.match(r'^\d{7,15}$', phone):
-            raise serializers.ValidationError({
-                "error": {
-                    "phone": [_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")]
-                }
-                })
+        # if phone and not re.match(r'^\d{7,15}$', phone):
+        #     raise serializers.ValidationError({
+        #         "error": {
+        #             "phone": [_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")]
+        #         }
+        #         })
 
         # Valider l'âge
         age = attrs.get('age')
