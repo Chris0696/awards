@@ -1,5 +1,5 @@
 "use client";
-import ProfilImg from "@/assets/profil.png";
+import ProfilImg from "@/assets/defaultProfil.png";
 import ArrowRightIcon from "@/assets/arrowRight.svg";
 import Image from "next/image";
 
@@ -25,7 +25,11 @@ export default function ProjectCard({ project }: { project: PublicProject }) {
               className="w-12 h-12 rounded-full object-cover border border-gray-400"
             />
           ) : (
-            <UserCircle2 size={52} />
+            <Image
+              src={ProfilImg}
+              alt="Project owner profil image"
+              className="w-12 h-12 rounded-full object-cover border border-gray-400"
+            />
           )}
 
           <span className="text-xl text-gray-600">{project?.owner_name} </span>

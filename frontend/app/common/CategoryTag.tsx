@@ -1,13 +1,15 @@
 export default function CategoryTag({
-  tagname,
+  handleClick,
   title,
+  isActive,
 }: {
-  tagname: string;
+  handleClick: () => void;
   title: string;
+  isActive: boolean;
 }) {
-  const isActive = tagname == "education";
   return (
     <button
+      onClick={handleClick}
       className={` ${
         isActive
           ? "bg-primary text-white"

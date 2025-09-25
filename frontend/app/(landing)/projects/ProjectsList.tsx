@@ -8,6 +8,7 @@ import HappymanImg from "@/assets/happyman.png";
 import Image from "next/image";
 import ProjectCard from "@/app/(landing)/projects/ProjectCard";
 import { useProjectStore } from "@/stores/useProjectStore";
+import { useCategories } from "@/hooks/useCategories";
 
 type Category = {
   tagname: string;
@@ -28,7 +29,7 @@ export type PublicProject = {
   average_rating: number;
   total_votes: number;
 };
-const categories: Category[] = [
+/* const categories: Category[] = [
   {
     tagname: "education",
     title: "Éducation & Formation",
@@ -45,13 +46,14 @@ const categories: Category[] = [
     tagname: "agro",
     title: "Agriculture & Agroalimentaire",
   },
-];
+]; */
 
 export default function ProjectsList() {
-  const [activeTab, setActiveTab] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("all");
   const getProjects = useProjectStore((state) => state.setPublicProjects);
   const projects = useProjectStore((state) => state.publicProjects);
-  console.log(projects, "projects");
+
+  const { categories, loading } = useCategories();
 
   useEffect(() => {
     getProjects();
@@ -60,11 +62,22 @@ export default function ProjectsList() {
     <section className="py-16 bg-gray-100  ">
       <div className="flex justify-center px-8">
         <div className=" mx-auto space-x-3">
+          <button
+            onClick={() => setActiveTab("all")}
+            className={` ${
+              activeTab === "all"
+                ? "bg-primary text-white"
+                : "border border-primary text-primary hover:bg-primary hover:text-white"
+            }  px-5 py-2.5 rounded-full  cursor-pointer transition-colors mt-6 md:mt-0`}
+          >
+            Tout
+          </button>
           {categories.map((category, idx) => (
             <CategoryTag
+              isActive={activeTab === category.category_name}
               key={idx}
-              tagname={category.tagname}
-              title={category.title}
+              title={category.category_name}
+              handleClick={() => setActiveTab(category.category_name)}
             />
           ))}
         </div>

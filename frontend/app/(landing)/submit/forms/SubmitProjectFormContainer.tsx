@@ -18,11 +18,11 @@ import { formatPhoneNumber, parsePhoneNumber } from "react-phone-number-input";
 import { projectSchema } from "@/frontendlib/schemas";
 import { projectService } from "@/frontendlib/services/projectService";
 import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
+import { useImagePreview } from "@/hooks/useImagePreview";
 
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {
   const [showModal, setShowModal] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
 
   const methods = useForm<ProjectForm>({
     resolver: zodResolver(projectSchema),
@@ -57,21 +57,8 @@ export default function SubmitProjectFormContainer() {
     formState: { isSubmitting },
   } = methods;
 
-  const imageFile: FileList | undefined = watch("image");
-
-  useEffect(() => {
-    if (imageFile && imageFile.length > 0) {
-      const file = imageFile[0];
-      if (file instanceof File) {
-        const objectUrl = URL.createObjectURL(file);
-        setPreview(objectUrl);
-
-        return () => URL.revokeObjectURL(objectUrl);
-      }
-    } else {
-      setPreview(null);
-    }
-  }, [imageFile]);
+  const imageFile: FileList | null = watch("image");
+  const preview = useImagePreview(imageFile);
 
   const [step, setStep] = useState(1);
   const onSubmit = async (data: ProjectForm) => {

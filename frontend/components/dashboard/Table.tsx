@@ -97,7 +97,7 @@ export default function Table({ projects }: Props) {
                 </span>
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {project.owner.total_votes_received}
+                {project.owner?.total_votes_received}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">1</td>
 
@@ -115,7 +115,7 @@ export default function Table({ projects }: Props) {
                           className="cursor-pointer"
                           onClick={() => openEditModal(project)}
                         >
-                          Reformuler et publier
+                          Reformuler
                         </button>
                       </DropdownMenuItem>
                     )}

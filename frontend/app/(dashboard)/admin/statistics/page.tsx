@@ -6,17 +6,27 @@ import { VotesChart } from "@/components/dashboard/project-owner/VotesChart";
 import Table from "@/components/dashboard/Table";
 import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import FacebookIcon from "@/assets/facebook.svg";
 import LinkIcon from "@/assets/linkIcon.svg";
 import WhatsappIcon from "@/assets/whatsapp.svg";
 import Image from "next/image";
 import { useAuthStore } from "@/stores/useAuthStore";
 import StatsTable from "@/components/dashboard/StatsTable";
+import { useStatsStore } from "@/stores/useStatsStore";
 
 export default function StatisticPage() {
-  const isAdmin = false;
   const user = useAuthStore((state) => state.user);
+  const ownerStats = useStatsStore((state) => state.ownerStats);
+  console.log(ownerStats, "ownerstats");
+  const fetchOwnerStats = useStatsStore((state) => state.getOwnerStats);
+
+  useEffect(() => {
+    if (user?.user_type === "owner") {
+      fetchOwnerStats();
+    }
+  }, [fetchOwnerStats, user]);
+
   return user?.user_type === "owner" ? (
     <section className="">
       <DashboardHeader pageTitle="Statistiques" />
@@ -27,9 +37,18 @@ export default function StatisticPage() {
               Synthèse globale
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 md:pl-5 gap-2">
-              <SynthesisCard />
-              <SynthesisCard />
-              <SynthesisCard />
+              <SynthesisCard
+                title="Total des votes reçus"
+                data={`${ownerStats?.vote_stats.total_votes}`}
+              />
+              <SynthesisCard
+                title="Classement actuel"
+                data={`${ownerStats?.owner_ranking.rank}/${ownerStats?.owner_ranking.total_owners} projets`}
+              />
+              <SynthesisCard
+                title="1er actuel"
+                data={`${ownerStats?.vote_stats.average_rating}`}
+              />
             </div>
           </div>
           <div className=" flex flex-col space-y-3 bg-gray-200/50 px-4 py-8 rounded-xl">
@@ -58,7 +77,8 @@ export default function StatisticPage() {
             </p>
             <div className="space-y-6 pt-3">
               <Link
-                href={""}
+                href={"https://www.facebook.com/"}
+                target="_blank"
                 className="text-lg border border-primary text-primary p-2 rounded-lg w-full flex items-center justify-center space-x-3"
               >
                 <span>Partages facebook</span>{" "}
@@ -71,7 +91,8 @@ export default function StatisticPage() {
                 </span>
               </Link>
               <Link
-                href={""}
+                href={"https://www.whatsapp.com/"}
+                target="_blank"
                 className="text-lg border border-green-500 text-green-500 p-2 rounded-lg w-full flex items-center justify-center space-x-3"
               >
                 <span>Partages whatsapp</span>
@@ -100,13 +121,17 @@ export default function StatisticPage() {
   ) : (
     <section>
       <DashboardHeader pageTitle="Votes & Statistiques" />
-      <div className=" flex justify-end space-x-3  mb-5">
-        <FilterBtn text="Catégorie" />
-      </div>
-      <div>
-        <StatsTable />
-      </div>
-      <SwitchPageBtn />
+      {
+        <div>
+          <div className=" flex justify-end space-x-3  mb-5">
+            <FilterBtn text="Catégorie" />
+          </div>
+          <div>
+            <StatsTable />
+            <SwitchPageBtn />
+          </div>
+        </div>
+      }
     </section>
   );
 }

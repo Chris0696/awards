@@ -51,7 +51,14 @@ export default function page() {
           Ajouter un membre
         </button>
       </div>
-      <TeamTable teams={filteredList} />
+      {filteredList.length > 0 ? (
+        <TeamTable teams={filteredList} />
+      ) : (
+        <p className="text-center text-primary text-3xl font-medium">
+          Vous n'avez ajouté personne pour le moment
+        </p>
+      )}
+
       <AddGdChildModal
         user_type="admin"
         title="Membre"

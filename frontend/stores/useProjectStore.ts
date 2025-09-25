@@ -1,6 +1,7 @@
 import { PublicProject } from "@/app/(landing)/projects/ProjectsList";
 import {
   AdminProjectInfo,
+  AuthProjectInput,
   ProjectInfo,
   ProjectInput,
 } from "@/app/common/types/project";
@@ -18,6 +19,7 @@ interface ProjectStore {
   setPublicProjects: () => Promise<void>;
   setPublicProjectDetails: (slug: string) => Promise<void>;
   deleteOwnerProject: (id: string) => Promise<void>;
+  addNewProject: (project: AuthProjectInput) => Promise<void>;
 }
 export const useProjectStore = create<ProjectStore>((set, get) => ({
   projects: [],
@@ -42,11 +44,16 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   },
   updateProject: async (project: ProjectInput) => {
     await projectService.updateProject(project);
+    await get().setProjects();
   },
   adminPublishProject: async (project: ProjectInput) => {
     await projectService.adminPublishProject(project);
   },
   deleteOwnerProject: async (project_id: string) => {
     await projectService.deleteOwnerProject(project_id);
+  },
+  addNewProject: async (payload: AuthProjectInput) => {
+    await projectService.addNewProject(payload);
+    await get().setProjects();
   },
 }));
