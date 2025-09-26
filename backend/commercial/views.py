@@ -117,6 +117,20 @@ class AdminCommercialView(generics.GenericAPIView):
 
     def get_queryset(self):
         return User.objects.filter(user_type__in=['admin', 'commercial'])
+    
+    def format_validation_errors(self, detail):
+        errors = []
+        if isinstance(detail, dict):
+            for _, messages in detail.items():
+                if isinstance(messages, list):
+                    errors.extend(messages)
+                else:
+                    errors.append(str(messages))
+        elif isinstance(detail, list):
+            errors = detail
+        else:
+            errors = [str(detail)]
+        return errors
 
     # GET: Lister tous les admins et commerciaux
     def get(self, request, *args, **kwargs):
@@ -158,11 +172,7 @@ class AdminCommercialView(generics.GenericAPIView):
                 'count': len(users_data)
             })
         except Exception as e:
-            return Response({
-                'success': False,
-                'message': _("Erreur lors de la récupération des données"),
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # POST: Créer un nouvel admin ou commercial
     def post(self, request, *args, **kwargs):
@@ -183,17 +193,9 @@ class AdminCommercialView(generics.GenericAPIView):
                 }
             }, status=status.HTTP_201_CREATED)
         except serializers.ValidationError as e:
-            return Response({
-                'success': False,
-                'message': _("Erreur de validation"),
-                'errors': e.detail
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({
-                'success': False,
-                'message': _("Erreur lors de la création de l'utilisateur"),
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # PUT: Mettre à jour complètement un utilisateur
     def put(self, request, pk, *args, **kwargs):
@@ -209,22 +211,11 @@ class AdminCommercialView(generics.GenericAPIView):
                 'data': serializer.data
             })
         except User.DoesNotExist:
-            return Response({
-                'success': False,
-                'message': _("Utilisateur non trouvé")
-            }, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_404_NOT_FOUND)
         except serializers.ValidationError as e:
-            return Response({
-                'success': False,
-                'message': _("Erreur de validation"),
-                'errors': e.detail
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({
-                'success': False,
-                'message': _("Erreur lors de la mise à jour"),
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # PATCH: Mettre à jour partiellement un utilisateur
     def patch(self, request, pk, *args, **kwargs):
@@ -240,22 +231,11 @@ class AdminCommercialView(generics.GenericAPIView):
                 'data': serializer.data
             })
         except User.DoesNotExist:
-            return Response({
-                'success': False,
-                'message': _("Utilisateur non trouvé")
-            }, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_404_NOT_FOUND)
         except serializers.ValidationError as e:
-            return Response({
-                'success': False,
-                'message': _("Erreur de validation"),
-                'errors': e.detail
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({
-                'success': False,
-                'message': _("Erreur lors de la modification"),
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # DELETE: Supprimer un utilisateur
     def delete(self, request, pk, *args, **kwargs):
@@ -269,16 +249,9 @@ class AdminCommercialView(generics.GenericAPIView):
                 'message': _("Utilisateur '{}' supprimé avec succès").format(user_email)
             }, status=status.HTTP_200_OK)
         except User.DoesNotExist:
-            return Response({
-                'success': False,
-                'message': _("Utilisateur non trouvé")
-            }, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({
-                'success': False,
-                'message': _("Erreur lors de la suppression"),
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     
 # Ajoutez ces imports au début de votre fichier

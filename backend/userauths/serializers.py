@@ -2,6 +2,7 @@ from django.contrib.auth.password_validation import validate_password
 from project.models import Commercial, Category, Project
 # from project.serializers import ProjectCreateUpdateSerializer
 from rest_framework.validators import UniqueValidator
+from django.contrib.auth import authenticate
 
 from rest_framework import serializers
 from .models import Profile, User
@@ -30,6 +31,40 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['user_type'] = user.user_type
         
         return token
+    
+    def validate(self, attrs):
+        # Récupérer les données d'authentification
+        email = attrs.get('email')
+        password = attrs.get('password')
+        
+        if email and password:
+            # Authentifier l'utilisateur
+            user = authenticate(
+                request=self.context.get('request'),
+                email=email,
+                password=password
+            )
+            
+            print("user=====", user)
+            
+            if not user:
+                # Si l'authentification échoue, lever une exception personnalisée
+                raise serializers.ValidationError(
+                    "Aucun compte actif avec les informations de connexion fournies"
+                )
+            
+            if not user.is_active:
+                raise serializers.ValidationError(
+                    "Le compte utilisateur est désactivé"
+                )
+        else:
+            raise serializers.ValidationError(
+                "Nom d'utilisateur et mot de passe requis"
+            )
+        
+        # Appeler la méthode parent pour obtenir les tokens
+        return super().validate(attrs)
+    
 
 
 class AdminRegisterSerializer(serializers.ModelSerializer):

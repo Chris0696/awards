@@ -131,28 +131,35 @@ class AdminCommercialRegisterSerializer(serializers.ModelSerializer):
         # if not re.match(r'^\d{7,15}$', value):
         #     raise serializers.ValidationError(_("Le numéro de téléphone doit contenir entre 7 et 15 chiffres."))
         if User.objects.filter(phone=value).exists():
-            raise serializers.ValidationError(_("Ce numéro de téléphone est déjà utilisé."))
+            raise serializers.ValidationError(
+             [_("Ce numéro de téléphone est déjà utilisé.")]
+             )
+         
         return value
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError(_("Cet email est déjà utilisé."))
+            raise serializers.ValidationError(
+                [_("Cet email est déjà utilisé.")]
+                
+                )
+            
         return value
     
     def validate(self, attrs):
         # Autoriser les superusers ou les utilisateurs avec user_type='admin'
         request = self.context.get('request')
         if not request.user.is_authenticated or (request.user.user_type != 'admin' and not request.user.is_superuser):
-            raise serializers.ValidationError({
-                "permission": _("Seul un administrateur ou un superuser peut créer un utilisateur de type admin ou commercial.")
-            })
+            raise serializers.ValidationError([
+                 _("Seul un administrateur ou un superuser peut créer un utilisateur de type admin ou commercial.")
+            ])
         
         return attrs
 
     def validate_user_type(self, value):
         allowed_types = ['admin', 'commercial']
         if value not in allowed_types:
-            raise serializers.ValidationError(_("Le type d'utilisateur doit être 'admin' ou 'commercial'."))
+            raise serializers.ValidationError([_("Le type d'utilisateur doit être 'admin' ou 'commercial'.")])
         return value
     
     def create(self, validated_data):
@@ -181,9 +188,9 @@ class AdminCommercialRegisterSerializer(serializers.ModelSerializer):
 
             return user
         except Exception as e:
-            raise serializers.ValidationError({
-                "creation_error": _("Erreur lors de la création de l'utilisateur: {}").format(str(e))
-            })
+            raise serializers.ValidationError([
+                _("Erreur lors de la création de l'utilisateur: {}").format(str(e))
+            ])
     
 # class AdminCommercialCreateSerializer(serializers.ModelSerializer):
 #     """Serializer unifié pour créer admin et commerciaux"""

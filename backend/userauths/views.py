@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from rest_framework import serializers
 
 import json
 
@@ -25,6 +26,26 @@ logger = logging.getLogger(__name__)
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = api_serializer.MyTokenObtainPairSerializer
+    
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        
+        try:
+            serializer.is_valid(raise_exception=True)
+        except serializers.ValidationError as e:
+            # Personnaliser la réponse d'erreur
+            return Response(
+                {
+                    "error": [
+                        "Aucun compte actif avec les informations de connexion fournies"
+                    ]
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+
     
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
