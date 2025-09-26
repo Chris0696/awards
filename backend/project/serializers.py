@@ -462,60 +462,170 @@ class ProjectPaymentSerializer(serializers.Serializer):
         return value.strip()
 
 
+# class ProjectSubmissionWithPaymentSerializer(serializers.Serializer):
+#     """Serializer pour soumettre un nouveau projet avec paiement"""
+#     project = ProjectCreateUpdateSerializer(required=True)
+#     payment = ProjectPaymentSerializer(required=True)
+
+#     def validate(self, attrs):
+#         request = self.context.get('request')
+        
+#         # Vérifier que l'utilisateur est authentifié et est un owner
+#         if not request.user.is_authenticated:
+#             raise serializers.ValidationError({"user": [_("Authentification requise.")]})
+        
+#         if request.user.user_type != 'owner':
+#             raise serializers.ValidationError({"user": [_("Seul un owner peut soumettre un projet.")]})
+
+#         try:
+#             owner = Owner.objects.get(user=request.user)
+#         except Owner.DoesNotExist:
+#             raise serializers.ValidationError({"user": [_("Profil owner non trouvé.")]})
+
+#         # Valider le projet
+#         project_data = attrs.get('project')
+#         project_context = {'request': request}
+#         project_serializer = ProjectCreateUpdateSerializer(data=project_data, context=project_context)
+#         if not project_serializer.is_valid():
+#             raise serializers.ValidationError({"project": project_serializer.errors})
+#         attrs['project'] = project_serializer.validated_data
+#         attrs['owner'] = owner
+
+#         # Valider le paiement
+#         payment_data = attrs.get('payment')
+#         payment_serializer = ProjectPaymentSerializer(data=payment_data)
+#         if not payment_serializer.is_valid():
+#             raise serializers.ValidationError({"payment": payment_serializer.errors})
+#         attrs['payment'] = payment_serializer.validated_data
+
+#         return attrs
+
+#     @transaction.atomic
+#     def create(self, validated_data):
+#         project_data = validated_data['project']
+#         payment_data = validated_data['payment']
+#         owner = validated_data['owner']
+
+#         # Créer le projet
+#         project_data['owner'] = owner
+#         if owner.commercial:
+#             project_data['commercial'] = owner.commercial
+            
+#         project_serializer = ProjectCreateUpdateSerializer()
+#         project = project_serializer.create(project_data)
+
+#         # Créer le paiement
+#         submission_price = ProjectSubmissionSettings.get_submission_price()
+        
+#         payment = ProjectSubmissionPayment.objects.create(
+#             user=owner.user,
+#             project=project,
+#             amount=submission_price,
+#             status=payment_data['payment_status'],
+#             payment_method=payment_data['payment_method'],
+#             external_transaction_id=payment_data.get('external_transaction_id', ''),
+#             payment_reference=payment_data['payment_reference'],
+#             payer_name=payment_data['payer_name'],
+#             payer_email=payment_data['payer_email'],
+#             payer_phone=payment_data['payer_phone']
+#         )
+
+#         # Si le paiement est approuvé, activer le projet
+#         if payment_data['payment_status'] == 'approved':
+#             payment.paid_at = timezone.now()
+#             payment.save()
+            
+#             project.owner_project_status = 'publie'
+#             project.save()
+
+#         return {
+#             'project': ProjectCreateUpdateSerializer(project).data,
+#             'payment': {
+#                 'status': payment.status,
+#                 'amount': float(payment.amount),
+#                 'reference': payment.payment_reference,
+#                 'external_transaction_id': payment.external_transaction_id
+#             }
+#         }
+
+
 class ProjectSubmissionWithPaymentSerializer(serializers.Serializer):
-    """Serializer pour soumettre un nouveau projet avec paiement"""
+    """Serializer pour soumettre un nouveau projet avec paiement - Support FormData"""
     project = ProjectCreateUpdateSerializer(required=True)
     payment = ProjectPaymentSerializer(required=True)
 
     def validate(self, attrs):
+        print("🔍 DEBUG ProjectSubmissionSerializer - Début validation")
+        print(f"🔍 DEBUG ProjectSubmissionSerializer - Attrs keys: {list(attrs.keys())}")
+        
         request = self.context.get('request')
         
         # Vérifier que l'utilisateur est authentifié et est un owner
         if not request.user.is_authenticated:
+            print("❌ DEBUG ProjectSubmissionSerializer - Utilisateur non authentifié")
             raise serializers.ValidationError({"user": [_("Authentification requise.")]})
         
         if request.user.user_type != 'owner':
+            print(f"❌ DEBUG ProjectSubmissionSerializer - Type utilisateur incorrect: {request.user.user_type}")
             raise serializers.ValidationError({"user": [_("Seul un owner peut soumettre un projet.")]})
 
         try:
             owner = Owner.objects.get(user=request.user)
+            print(f"✅ DEBUG ProjectSubmissionSerializer - Owner trouvé: {owner.full_name}")
         except Owner.DoesNotExist:
+            print("❌ DEBUG ProjectSubmissionSerializer - Profil owner non trouvé")
             raise serializers.ValidationError({"user": [_("Profil owner non trouvé.")]})
 
         # Valider le projet
         project_data = attrs.get('project')
+        print(f"🔍 DEBUG ProjectSubmissionSerializer - Project data: {project_data}")
+        
         project_context = {'request': request}
         project_serializer = ProjectCreateUpdateSerializer(data=project_data, context=project_context)
         if not project_serializer.is_valid():
+            print(f"❌ DEBUG ProjectSubmissionSerializer - Erreurs projet: {project_serializer.errors}")
             raise serializers.ValidationError({"project": project_serializer.errors})
         attrs['project'] = project_serializer.validated_data
         attrs['owner'] = owner
+        print("✅ DEBUG ProjectSubmissionSerializer - Projet validé")
 
         # Valider le paiement
         payment_data = attrs.get('payment')
+        print(f"🔍 DEBUG ProjectSubmissionSerializer - Payment data: {payment_data}")
+        
         payment_serializer = ProjectPaymentSerializer(data=payment_data)
         if not payment_serializer.is_valid():
+            print(f"❌ DEBUG ProjectSubmissionSerializer - Erreurs paiement: {payment_serializer.errors}")
             raise serializers.ValidationError({"payment": payment_serializer.errors})
         attrs['payment'] = payment_serializer.validated_data
+        print("✅ DEBUG ProjectSubmissionSerializer - Paiement validé")
 
+        print("✅ DEBUG ProjectSubmissionSerializer - Validation terminée")
         return attrs
 
     @transaction.atomic
     def create(self, validated_data):
+        print("🔍 DEBUG ProjectSubmissionSerializer - Début création")
+        
         project_data = validated_data['project']
         payment_data = validated_data['payment']
         owner = validated_data['owner']
+
+        print(f"🔍 DEBUG ProjectSubmissionSerializer - Création projet pour owner: {owner.full_name}")
 
         # Créer le projet
         project_data['owner'] = owner
         if owner.commercial:
             project_data['commercial'] = owner.commercial
+            print(f"🔍 DEBUG ProjectSubmissionSerializer - Commercial assigné: {owner.commercial}")
             
         project_serializer = ProjectCreateUpdateSerializer()
         project = project_serializer.create(project_data)
+        print(f"✅ DEBUG ProjectSubmissionSerializer - Projet créé: {project.project_id}")
 
         # Créer le paiement
         submission_price = ProjectSubmissionSettings.get_submission_price()
+        print(f"🔍 DEBUG ProjectSubmissionSerializer - Prix soumission: {submission_price}")
         
         payment = ProjectSubmissionPayment.objects.create(
             user=owner.user,
@@ -529,6 +639,7 @@ class ProjectSubmissionWithPaymentSerializer(serializers.Serializer):
             payer_email=payment_data['payer_email'],
             payer_phone=payment_data['payer_phone']
         )
+        print(f"✅ DEBUG ProjectSubmissionSerializer - Paiement créé: {payment.payment_reference}")
 
         # Si le paiement est approuvé, activer le projet
         if payment_data['payment_status'] == 'approved':
@@ -537,8 +648,9 @@ class ProjectSubmissionWithPaymentSerializer(serializers.Serializer):
             
             project.owner_project_status = 'publie'
             project.save()
+            print("✅ DEBUG ProjectSubmissionSerializer - Projet publié (paiement approuvé)")
 
-        return {
+        result = {
             'project': ProjectCreateUpdateSerializer(project).data,
             'payment': {
                 'status': payment.status,
@@ -547,8 +659,11 @@ class ProjectSubmissionWithPaymentSerializer(serializers.Serializer):
                 'external_transaction_id': payment.external_transaction_id
             }
         }
-
-
+        
+        print("✅ DEBUG ProjectSubmissionSerializer - Création terminée avec succès")
+        return result
+    
+    
 class ProjectListSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     owner = OwnerSerializer(read_only=True)

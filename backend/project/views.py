@@ -16,6 +16,8 @@ from rest_framework.views import APIView
 from django.db import transaction
 from django.utils import timezone
 from django.db.models import Count, Sum, Avg, Q
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+import json
 
 from django.utils.translation import gettext_lazy as _
 from .models import Category, Commercial, Project, ProjectSubmissionSettings, Vote, VotePayment, VotePriceSettings
@@ -330,16 +332,51 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
             return Project.objects.filter(platform_status='publie').select_related('category', 'owner')
 
 
+# class ProjectSubmissionWithPaymentAPIView(generics.CreateAPIView):
+#     """API pour soumettre un nouveau projet avec paiement"""
+#     serializer_class = ProjectSubmissionWithPaymentSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+        
+#         try:
+#             with transaction.atomic():
+#                 result = serializer.save()
+                
+#             return Response({
+#                 'success': True,
+#                 'message': _('Projet soumis avec succès'),
+#                 'data': result
+#             }, status=status.HTTP_201_CREATED)
+            
+#         except Exception as e:
+#             return Response({
+#                 'success': False,
+#                 'message': _('Erreur lors de la soumission du projet'),
+#                 'error': str(e)
+#             }, status=status.HTTP_400_BAD_REQUEST)
+
+
 class ProjectSubmissionWithPaymentAPIView(generics.CreateAPIView):
-    """API pour soumettre un nouveau projet avec paiement"""
+    """API pour soumettre un nouveau projet avec paiement - Support FormData"""
     serializer_class = ProjectSubmissionWithPaymentSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        print(f"🔍 DEBUG ProjectSubmission - Content-Type: {request.content_type}")
+        print(f"🔍 DEBUG ProjectSubmission - Request data keys: {list(request.data.keys())}")
+        print(f"🔍 DEBUG ProjectSubmission - Request FILES keys: {list(request.FILES.keys())}")
         
         try:
+            # Préprocesser les données FormData si nécessaire
+            processed_data = self.preprocess_submission_data(request)
+            
+            serializer = self.get_serializer(data=processed_data)
+            serializer.is_valid(raise_exception=True)
+            
             with transaction.atomic():
                 result = serializer.save()
                 
@@ -349,12 +386,80 @@ class ProjectSubmissionWithPaymentAPIView(generics.CreateAPIView):
                 'data': result
             }, status=status.HTTP_201_CREATED)
             
+        except ValidationError as e:
+            print(f"❌ DEBUG ProjectSubmission - Erreurs de validation: {e}")
+            return Response({
+                'success': False,
+                'message': _('Erreur de validation'),
+                'errors': e.detail if hasattr(e, 'detail') else str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
         except Exception as e:
+            print(f"❌ DEBUG ProjectSubmission - Erreur inattendue: {str(e)}")
+            logger.exception("Erreur lors de la soumission du projet avec paiement")
             return Response({
                 'success': False,
                 'message': _('Erreur lors de la soumission du projet'),
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    def preprocess_submission_data(self, request):
+        """
+        Préprocesse les données de soumission FormData
+        """
+        print("🔍 DEBUG ProjectSubmission - Préprocessing des données...")
+        
+        processed_data = {}
+        
+        # Traitement des données projet et paiement
+        if request.content_type and request.content_type.startswith('multipart/'):
+            print("🔍 DEBUG ProjectSubmission - FormData détecté")
+            
+            for key, value in request.data.items():
+                if key == 'project':
+                    # Désérialiser le JSON du projet
+                    if isinstance(value, str):
+                        print(f"🔍 DEBUG ProjectSubmission - Project data (string): {value[:200]}...")
+                        try:
+                            project_data = json.loads(value)
+                            processed_data[key] = project_data
+                            print("✅ DEBUG ProjectSubmission - Project JSON désérialisé")
+                        except json.JSONDecodeError as e:
+                            print(f"❌ DEBUG ProjectSubmission - Erreur JSON projet: {str(e)}")
+                            raise ValueError(f"Format JSON invalide pour le projet: {str(e)}")
+                    else:
+                        processed_data[key] = value
+                        
+                elif key == 'payment':
+                    # Désérialiser le JSON du paiement
+                    if isinstance(value, str):
+                        print(f"🔍 DEBUG ProjectSubmission - Payment data (string): {value[:200]}...")
+                        try:
+                            payment_data = json.loads(value)
+                            processed_data[key] = payment_data
+                            print("✅ DEBUG ProjectSubmission - Payment JSON désérialisé")
+                        except json.JSONDecodeError as e:
+                            print(f"❌ DEBUG ProjectSubmission - Erreur JSON paiement: {str(e)}")
+                            raise ValueError(f"Format JSON invalide pour le paiement: {str(e)}")
+                    else:
+                        processed_data[key] = value
+                else:
+                    processed_data[key] = value
+            
+            # Ajouter les fichiers
+            if 'project.image' in request.FILES:
+                processed_data['project']['image'] = request.FILES['project.image']
+                print(f"🔍 DEBUG - Fichier project.image: {request.FILES['project.image'].name}")
+            if 'project.file' in request.FILES:
+                processed_data['project']['file'] = request.FILES['project.file']
+                print(f"🔍 DEBUG - Fichier project.file: {request.FILES['project.file'].name}")
+                
+        else:
+            print("🔍 DEBUG ProjectSubmission - JSON standard")
+            processed_data = request.data
+        
+        print("✅ DEBUG ProjectSubmission - Préprocessing terminé")
+        return processed_data
 
 
 # views.py - API utilitaires
