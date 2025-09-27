@@ -16,6 +16,7 @@ export async function POST(req: Request) {
     }
 
     const data = await res.json();
+    console.log(data, "loginData");
 
     const response = NextResponse.json({ access: data.access });
     response.cookies.set("refresh_token", data.refresh, {

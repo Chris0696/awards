@@ -13,6 +13,8 @@ import { useEffect, useState } from "react";
 
 import { useProjectStore } from "@/stores/useProjectStore";
 import { useDashboardStatsStore } from "@/stores/useDashboardStatsStore";
+import { useQuery } from "@tanstack/react-query";
+import { getAdmStats } from "@/services/statsService";
 
 export default function AdminPage() {
   const user = useAuthStore((state) => state.user);
@@ -28,6 +30,18 @@ export default function AdminPage() {
       getOwnerStats();
     }
   }, [user]);
+  const {
+    data: stats,
+    isLoading,
+    isPending,
+  } = useQuery({
+    queryKey: ["adminStats"],
+    queryFn: () => getAdmStats(),
+  });
+
+  if (isLoading) {
+    console.log("loading");
+  }
 
   return (
     <>
@@ -74,32 +88,32 @@ export default function AdminPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 mb-10 gap-4">
             <ProjectOverviewCard
               title="Nombre total de projets soumis"
-              total={adminStats?.general_stats.total}
+              total={stats?.general_stats.total}
               color="text-[#CECE2C]"
             />
             <ProjectOverviewCard
               title="Nombre total de projets validés"
-              total={adminStats?.general_stats.validated}
+              total={stats?.general_stats.validated}
               color="text-[#34C759]"
             />
             <ProjectOverviewCard
               title="Nombre total de projets rejetés"
-              total={adminStats?.general_stats.rejected}
+              total={stats?.general_stats.rejected}
               color="text-[#FF3B30]"
             />
             <ProjectOverviewCard
               title="Total des votes enregistrés"
-              total={adminStats?.vote_stats.total_votes}
+              total={stats?.vote_stats.total_votes}
               color="text-[#0026B0]"
             />
             <ProjectOverviewCard
               title="Total utilisateurs"
-              total={adminStats?.user_stats.total_users}
+              total={stats?.user_stats.total_users}
               color="text-[#2C2C2E]"
             />
             <ProjectOverviewCard
               title="Revenus générés(Paiment de vote)"
-              total={adminStats?.vote_stats.total_revenue}
+              total={stats?.vote_stats.total_revenue}
               color="text-[#FF7F00]"
             />
           </div>

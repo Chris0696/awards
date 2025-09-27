@@ -11,7 +11,8 @@ import { useState } from "react";
 import CreateCategoryModal from "./CreateCategoryModal";
 import { AdminCategory } from "@/app/common/types/category";
 import Popover from "@/components/ui/Popover";
-import { useCategoryStore } from "@/stores/useCategoryStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteCategory } from "@/services/categoryService";
 
 export default function CategoryCard({
   color,
@@ -86,9 +87,18 @@ const DeleteCategoryModal = ({
   setShowDeleteModal: (show: boolean) => void;
   categoryId: number | undefined;
 }) => {
-  const deleteCategory = useCategoryStore((state) => state.deleteCategory);
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: deleteCategory,
+    onSuccess: () => {
+      setShowDeleteModal(false);
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    },
+    onError: () => {},
+  });
+
   const handleDelete = () => {
-    if (categoryId) deleteCategory(categoryId);
+    if (categoryId) deleteMutation.mutate(categoryId);
   };
   return (
     <Popover

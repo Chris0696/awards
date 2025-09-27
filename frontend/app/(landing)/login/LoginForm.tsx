@@ -4,8 +4,10 @@ import PasswordField from "@/app/(landing)/submit/forms/PasswordField";
 import { userSchema } from "@/frontendlib/schemas";
 import { login } from "@/frontendlib/services/authService";
 import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
+import { loginUser } from "@/services/authService";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,7 +15,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 
-type AuthForm = z.infer<typeof userSchema>;
+export type AuthForm = z.infer<typeof userSchema>;
 export default function LoginForm() {
   const methods = useForm<AuthForm>({
     resolver: zodResolver(userSchema),
@@ -31,16 +33,28 @@ export default function LoginForm() {
   } = methods;
 
   const router = useRouter();
+  const mutateLogin = useMutation({
+    mutationFn: loginUser,
+    onSuccess: () => {
+      router.replace("/admin");
+    },
+    onError: (err) => {
+      console.log(err, "erreurs");
+
+      toast.error("Erreur login");
+    },
+  });
 
   const onSubmit = async (data: AuthForm) => {
-    try {
+    mutateLogin.mutate(data);
+    /*  try {
       await login(data.email, data.password);
       router.replace("/admin");
     } catch (error) {
       const message = mapServerErrors(error, setError);
 
       toast.error(message);
-    }
+    } */
   };
   return (
     <FormProvider {...methods}>
@@ -68,10 +82,17 @@ export default function LoginForm() {
         <div className="mt-10">
           <button
             type="submit"
-            className="flex items-center justify-center space-x-2 bg-secondary text-white px-4 py-4 text-lg rounded-md w-full cursor-pointer"
+            disabled={mutateLogin.isPending}
+            className="flex items-center justify-center space-x-2 bg-secondary text-white px-4 py-4 text-lg rounded-md w-full cursor-pointer disabled:bg-gray-200 disabled:text-gray-800"
           >
-            <span>Se connecter</span>
-            <ChevronRightIcon />
+            {mutateLogin.isPending ? (
+              "En cours..."
+            ) : (
+              <>
+                <span>Se connecter</span>
+                <ChevronRightIcon />
+              </>
+            )}
           </button>
         </div>
       </form>

@@ -6,22 +6,33 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { AffiliateInfo } from "@/app/common/types/affiliate";
+
 import AddGdChildModal from "../modals/AddGdChildModal";
 import { useState } from "react";
 import ConfirmDeleteModal from "../modals/ConfirmDeleteModal";
-import { useTeamStore } from "@/stores/useTeamStore";
+
+import { Team } from "@/app/(dashboard)/admin/team/page";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteAdminRelatedUser } from "@/services/userService";
 interface Props {
-  affiliates: AffiliateInfo[];
+  affiliates: Team[];
 }
 export default function AffiliateTable({ affiliates }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<AffiliateInfo>();
-  const deleteMember = useTeamStore((state) => state.deleteMember);
+  const [selectedMember, setSelectedMember] = useState<Team>();
+
+  const queryClient = useQueryClient();
+  const deleteUserMutation = useMutation({
+    mutationFn: deleteAdminRelatedUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team"] });
+      setShowConfirmModal(false);
+    },
+  });
 
   const handleDelete = () => {
-    if (selectedMember) deleteMember(selectedMember?.id);
+    if (selectedMember) deleteUserMutation.mutate(selectedMember?.id);
   };
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">
@@ -83,15 +94,6 @@ export default function AffiliateTable({ affiliates }: Props) {
                     <MoreVerticalIcon />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setShowModal(true);
-                        setSelectedMember(affiliate);
-                      }}
-                      className="cursor-pointer"
-                    >
-                      Mettre à jour
-                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
                         setShowConfirmModal(true);

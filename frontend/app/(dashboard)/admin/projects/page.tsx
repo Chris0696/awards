@@ -9,17 +9,32 @@ import {
   ChevronRight,
   ChevronRightIcon,
 } from "lucide-react";
-import { useAuthStore } from "@/stores/useAuthStore";
+
 import CreateNewAuthProjectModal from "./CreateNewAuthProjectModal";
 import { useState } from "react";
 import { useProjectStore } from "@/stores/useProjectStore";
 import AdminTable from "@/components/dashboard/AdminTable";
+import { useQuery } from "@tanstack/react-query";
+import {
+  getProjectsAsAdmin,
+  getProjectsAsOwner,
+} from "@/services/projectService";
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
 
 export default function AdminProjectList() {
   const [showModal, setShowModal] = useState(false);
-  const user = useAuthStore((state) => state.user);
+  const user = useUserSessionStore((state) => state.user);
   const projects = useProjectStore((state) => state.projects);
-  const adminProjects = useProjectStore((state) => state.adminProjects);
+  const { data: adminProjects } = useQuery({
+    queryKey: ["adminProjects"],
+    queryFn: () => getProjectsAsAdmin(),
+  });
+  const { data: ownerProjects } = useQuery({
+    queryKey: ["ownerProjects"],
+    queryFn: () => getProjectsAsOwner(),
+    enabled: user?.user_type === "owner",
+  });
+  console.log(user, "user???");
 
   return user?.user_type === "owner" ? (
     <section>
@@ -69,14 +84,14 @@ export default function AdminProjectList() {
           <FilterBtn text="Statut" />
           <FilterBtn text="Catégorie" />
         </div>
-        {adminProjects.length > 0 ? (
+        {adminProjects?.length > 0 ? (
           <div className="overflow-x-auto">
             <AdminTable projects={adminProjects} />
             <SwitchPageBtn />
           </div>
         ) : (
           <p className="text-center text-primary text-3xl font-medium">
-            Vous n'avez ajouté personne pour le moment
+            Il n'y a encore aucun projet de soumis.
           </p>
         )}
       </div>

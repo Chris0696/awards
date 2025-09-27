@@ -1,12 +1,12 @@
 "use client";
 import ProfilImg from "@/assets/profil.png";
-import {
-  getUserInfo,
-  updateUserInfo,
-} from "@/frontendlib/services/authService";
+
 import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
 import { useImagePreview } from "@/hooks/useImagePreview";
+import { updateUserInfo } from "@/services/userService";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -28,9 +28,13 @@ export interface IUserInfo {
 }
 
 export default function page() {
-  const user = useAuthStore((state) => state.user);
+  const userInfo = useUserSessionStore((state) => state.additionalInfo);
 
-  const userInfo = useAuthStore((state) => state.userInfo);
+  const updateMutation = useMutation({
+    mutationFn: updateUserInfo,
+    onSuccess: () => {},
+    onError: () => {},
+  });
 
   const methods = useForm<UserForms>({
     defaultValues: {
@@ -64,12 +68,7 @@ export default function page() {
     if (fileInput && fileInput.length > 0) {
       formData.append("image", fileInput[0]);
     }
-
-    try {
-      await updateUserInfo(formData);
-    } catch (error) {
-      console.log(error);
-    }
+    updateMutation.mutate(formData);
   };
 
   return (

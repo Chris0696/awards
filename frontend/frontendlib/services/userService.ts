@@ -1,8 +1,8 @@
-export async function getOwners() {
+/* export async function getOwners() {
   const res = await fetch("/api/auth/admin/owners", { cache: "no-store" });
   if (!res.ok) throw new Error("Erreur à la récupération des statistique");
   return res.json();
-}
+} */
 
 export async function deleteUser(id: number) {
   try {

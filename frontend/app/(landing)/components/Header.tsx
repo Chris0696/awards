@@ -8,10 +8,11 @@ import MobileMenu from "./MobileMenu";
 import ColoredLink from "../../../components/ui/ColoredLink";
 import { landingpagelinks } from "@/app/common/navigationlinks";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
 
 export default function Header() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const user = useAuthStore((state) => state.user);
+  const user = useUserSessionStore((state) => state.user);
   return (
     <header className="bg-primary py-5 px-10">
       <nav className="flex justify-between">

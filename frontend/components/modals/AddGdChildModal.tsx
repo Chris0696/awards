@@ -7,13 +7,18 @@ import { FormProvider, useForm } from "react-hook-form";
 import PasswordField from "@/app/(landing)/submit/forms/PasswordField";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAffiliateStore } from "@/stores/affiliateStore";
 import {
   createAffiliateSchema,
+  createUserSchema,
   updateAffiliateSchema,
 } from "@/frontendlib/schemas";
-import { useTeamStore } from "@/stores/useTeamStore";
-import { AffiliateInfo } from "@/app/common/types/affiliate";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  addAdminRelatedUser,
+  updateAdminRelatedUser,
+} from "@/services/userService";
+import { Team } from "@/app/(dashboard)/admin/team/page";
 
 type Props = {
   showModal: boolean;
@@ -21,11 +26,12 @@ type Props = {
   title: string;
   description: string;
   user_type: "commercial" | "admin";
-  member?: AffiliateInfo;
+  member?: Team;
 };
 export type CreateAffiliateForm = z.infer<typeof createAffiliateSchema>;
 export type UpdateAffiliateForm = z.infer<typeof updateAffiliateSchema>;
 export type AffiliateForm = CreateAffiliateForm | UpdateAffiliateForm;
+export type User = z.infer<typeof createUserSchema>;
 
 export type UpdateTeamMemberForm = {
   id: number;
@@ -57,11 +63,22 @@ export default function AddGdChildModal({
     },
   });
 
-  const addAfiiliate = useAffiliateStore((state) => state.addAffiliate);
-  const addTeamMember = useTeamStore((state) => state.addTeam);
-  const updateTeamMember = useTeamStore((state) => state.updateMember);
-
+  const queryClient = useQueryClient();
   const { handleSubmit, reset } = methods;
+  const createMutation = useMutation({
+    mutationFn: addAdminRelatedUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team"] });
+    },
+    onError: (error) => {},
+  });
+  const updateMutation = useMutation({
+    mutationFn: updateAdminRelatedUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team"] });
+    },
+    onError: (error) => {},
+  });
   const onSubmit = (data: AffiliateForm) => {
     try {
       if (user_type === "commercial") {
@@ -70,9 +87,9 @@ export default function AddGdChildModal({
             id: member.id,
             ...data,
           };
-          updateTeamMember(payload);
+          updateMutation.mutate(payload as User);
         } else {
-          addAfiiliate(data);
+          createMutation.mutate(data as User);
         }
       } else {
         if (member) {
@@ -80,9 +97,9 @@ export default function AddGdChildModal({
             id: member.id,
             ...data,
           };
-          updateTeamMember(payload);
+          updateMutation.mutate(payload as User);
         } else {
-          addTeamMember(data);
+          createMutation.mutate(data as User);
         }
       }
 

@@ -11,21 +11,24 @@ import SearchIcon from "@/assets/searchicon.svg";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useAffiliateStore } from "@/stores/affiliateStore";
 import AffiliateTable from "@/components/dashboard/AffiliateTable";
+import { useQuery } from "@tanstack/react-query";
+import { getAdminRelatedUsers } from "@/services/userService";
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
+import { Team } from "../team/page";
 
 export default function page() {
   const [showModal, setShowModal] = useState(false);
-  const user = useAuthStore((state) => state.user);
-  const affiliates = useAffiliateStore((state) => state.affiliates);
-  const fetchAffiliates = useAffiliateStore((state) => state.fetchAffiliates);
-  console.log(affiliates, "affiliates");
+  const user = useUserSessionStore((state) => state.user);
 
-  useEffect(() => {
-    fetchAffiliates();
-  }, []);
+  const { data: affiliates } = useQuery({
+    queryKey: ["team"],
+    queryFn: () => getAdminRelatedUsers(),
+  });
 
-  const filteredList = affiliates.filter(
-    (affiliate) => affiliate.user_type !== "admin"
+  const filteredList = affiliates?.data?.filter(
+    (affiliate: Team) => affiliate.user_type !== "admin"
   );
+  console.log(affiliates, "affiliates");
 
   return user?.user_type === "user" ? (
     <section>
@@ -39,7 +42,7 @@ export default function page() {
           <span>Créer un affilié (Commerciaux)</span> <ChevronRightIcon />
         </button>
       </div>
-      {filteredList.length > 0 ? (
+      {filteredList?.length > 0 ? (
         <div>
           <AffiliateTable affiliates={filteredList} />
           <SwitchPageBtn />

@@ -5,6 +5,8 @@ import { getTeam } from "@/frontendlib/services/teamService";
 import TeamTable from "@/components/dashboard/TeamTable";
 import AddGdChildModal from "@/components/modals/AddGdChildModal";
 import { AffiliateInfo } from "@/app/common/types/affiliate";
+import { useQuery } from "@tanstack/react-query";
+import { getAdminRelatedUsers } from "@/services/userService";
 
 export type Team = {
   id: number;
@@ -23,21 +25,14 @@ export type Team = {
   commission_earned: string;
 };
 export default function page() {
-  const [team, setTeam] = useState<AffiliateInfo[]>([]);
   const [showModal, setShowModal] = useState(false);
-  useEffect(() => {
-    async function getTeamInfo() {
-      try {
-        const users = await getTeam();
-        setTeam(users);
-      } catch (error) {
-        console.log(error, "errue teams");
-      }
-    }
-    getTeamInfo();
-  }, []);
-  const filteredList = team.filter(
-    (member) => member.user_type !== "commercial"
+  const { data: teams } = useQuery({
+    queryKey: ["team"],
+    queryFn: () => getAdminRelatedUsers(),
+  });
+
+  const filteredList = teams?.data?.filter(
+    (member: Team) => member.user_type !== "commercial"
   );
   return (
     <section>
@@ -51,7 +46,7 @@ export default function page() {
           Ajouter un membre
         </button>
       </div>
-      {filteredList.length > 0 ? (
+      {filteredList?.length > 0 ? (
         <TeamTable teams={filteredList} />
       ) : (
         <p className="text-center text-primary text-3xl font-medium">

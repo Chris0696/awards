@@ -1,5 +1,7 @@
+"use client";
 import Footer from "@/app/(landing)/components/Footer";
 import Header from "@/app/(landing)/components/Header";
+import { SessionProvider } from "../(dashboard)/SessionProvider";
 
 export default function LandingLayout({
   children,

@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
 
     if (event.object === "transaction") {
       const context = event.entity.custom_metadata?.context; //would be project-awards
-      const payload = {
+      /*  const payload = {
         payment_reference: event.entity.reference,
         payment_status: event.entity.status,
         project_id: event.entity.custom_metadata.projectId,
@@ -19,10 +19,11 @@ export async function POST(req: NextRequest) {
         external_transaction_id: event.entity.transaction_key
           ? event.entity.transaction_key
           : "",
-      };
-      console.log(payload, "payload tests");
+      }; */
+      console.log(event, "payload tests context");
+      const formData = new FormData();
 
-      if (context && context === "project-awards") {
+      /*  if (context && context === "project-awards") {
         try {
           const response = await fetch(
             `${process.env.API_URL}votes/create-and-pay/`,
@@ -39,14 +40,14 @@ export async function POST(req: NextRequest) {
             : await response.text();
 
           if (!response.ok) {
-            console.error("❌ Backend rejected:", response.status, data);
+            console.error(" Backend rejected:", response.status, data);
           } else {
-            console.log("✅ Backend success:", data);
+            console.log(" Backend success:", data);
           }
         } catch (error: any) {
-          console.error("🔥 Backend fetch failed:", error);
+          console.error(" Backend fetch failed:", error);
         }
-      }
+      } */
     }
 
     return NextResponse.json({ received: true }, { status: 200 });

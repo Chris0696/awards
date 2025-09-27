@@ -9,6 +9,8 @@ import Image from "next/image";
 import ProjectCard from "@/app/(landing)/projects/ProjectCard";
 import { useProjectStore } from "@/stores/useProjectStore";
 import { useCategories } from "@/hooks/useCategories";
+import { useQuery } from "@tanstack/react-query";
+import { getPublicProjects } from "@/services/projectService";
 
 type Category = {
   tagname: string;
@@ -50,14 +52,16 @@ export type PublicProject = {
 
 export default function ProjectsList() {
   const [activeTab, setActiveTab] = useState<string>("all");
-  const getProjects = useProjectStore((state) => state.setPublicProjects);
-  const projects = useProjectStore((state) => state.publicProjects);
 
   const { categories, loading } = useCategories();
 
-  useEffect(() => {
-    getProjects();
-  }, []);
+  const { data: projects } = useQuery({
+    queryKey: ["publicProject"],
+    queryFn: () => getPublicProjects(),
+  });
+
+  console.log(projects, "dtataProjectq");
+
   return (
     <section className="py-16 bg-gray-100  ">
       <div className="flex justify-center px-8">
@@ -88,7 +92,7 @@ export default function ProjectsList() {
       </p>
       <div className="flex justify-center">
         <div className="flex flex-wrap gap-8 justify-center w-5/6">
-          {projects.map((project, idx) => (
+          {projects?.map((project, idx) => (
             <ProjectCard project={project} key={idx} />
           ))}
         </div>
