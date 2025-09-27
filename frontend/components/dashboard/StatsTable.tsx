@@ -1,8 +1,13 @@
+import { getProjectsToRank } from "@/services/statsService";
 import { useProjectStore } from "@/stores/useProjectStore";
+import { useQuery } from "@tanstack/react-query";
 
 export default function StatsTable() {
-  const adminProjects = useProjectStore((state) => state.adminProjects);
-  const orderedProjects = adminProjects.sort(
+  const { data: adminProjects } = useQuery({
+    queryKey: ["projects-to-rank"],
+    queryFn: getProjectsToRank,
+  });
+  const orderedProjects = adminProjects?.data?.sort(
     (a, b) => a.total_votes - b.total_votes
   );
   return (
@@ -29,7 +34,7 @@ export default function StatsTable() {
           </tr>
         </thead>
         <tbody>
-          {orderedProjects.map((project, idx) => (
+          {orderedProjects?.map((project, idx) => (
             <tr
               key={project.project_id}
               className="hover:bg-white hover:rounded-full transition-colors"

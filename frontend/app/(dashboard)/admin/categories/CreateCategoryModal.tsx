@@ -3,9 +3,11 @@ import { AdminCategory, Category } from "@/app/common/types/category";
 import Popover from "@/components/ui/Popover";
 import { categorySchema } from "@/frontendlib/schemas";
 import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
+import { createCategory, updateCategory } from "@/services/categoryService";
 
 import { useCategoryStore } from "@/stores/useCategoryStore";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -35,14 +37,31 @@ export default function CreateCategoryModal({
     setError,
     formState: { isSubmitting },
   } = methods;
-  const addCategory = useCategoryStore((state) => state.addCategory);
-  const updateCategory = useCategoryStore((state) => state.updateCategory);
+
+  const queryClient = useQueryClient();
+  const createMutation = useMutation({
+    mutationFn: createCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    },
+    onError: () => {},
+  });
+  const updateMutation = useMutation({
+    mutationFn: updateCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    },
+    onError: () => {},
+  });
   const onSubmit = (data: CategoryForm) => {
     try {
       if (category) {
-        updateCategory(data.category_name, category.id);
+        updateMutation.mutate({
+          category_id: category.id,
+          category_name: data.category_name,
+        });
       } else {
-        addCategory(data.category_name);
+        createMutation.mutate(data.category_name);
       }
 
       setShowModal(false);

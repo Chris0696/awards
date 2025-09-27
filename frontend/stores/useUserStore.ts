@@ -1,4 +1,4 @@
-import { deleteUser, getOwners } from "@/frontendlib/services/userService";
+import { deleteUser } from "@/frontendlib/services/userService";
 import { create } from "zustand";
 
 export type User = {
@@ -26,8 +26,7 @@ type UserStore = {
 export const useUserStore = create<UserStore>((set, get) => ({
   user: [],
   getUsers: async () => {
-    const users = await getOwners();
-    set({ user: users.results });
+    return [];
   },
   deleteUser: async (id: number) => {
     await deleteUser(id);

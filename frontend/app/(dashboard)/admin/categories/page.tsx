@@ -1,21 +1,20 @@
 "use client";
 
-import { AdminCategory, Category } from "@/app/common/types/category";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DashboardHeader from "../../DasboardHeader";
-import ProjectOverviewCard from "@/components/dashboard/admin/ProjectOverviewCard";
 import CreateCategoryModal from "./CreateCategoryModal";
-import { useCategoryStore } from "@/stores/useCategoryStore";
+
 import CategoryCard from "./CategoryCard";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAdminCategories } from "@/services/categoryService";
 
 export default function page() {
   const [showModal, setShowModal] = useState(false);
 
-  const categories = useCategoryStore((state) => state.categories);
-  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => fetchAdminCategories(),
+  });
 
   return (
     <section>
@@ -28,9 +27,9 @@ export default function page() {
           <span>Ajouter une catégorie </span>
         </button>
       </div>
-      {categories.length > 0 ? (
+      {categories?.data?.length > 0 ? (
         <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 mb-10 gap-4">
-          {categories?.map((category) => (
+          {categories?.data?.map((category) => (
             <CategoryCard
               key={category.category_id}
               color="text-[#CECE2C]"

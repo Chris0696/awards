@@ -60,7 +60,7 @@ export default function MakeVoteModal({
       amount: amount,
       description: "Vote sur Project Awards",
       custom_metadata: {
-        context: "project-awards",
+        context: "voteProjet",
         projectId: project.project_id,
         voteCount: voteCount,
       },
@@ -171,7 +171,7 @@ export default function MakeVoteModal({
           <div className="pt-16 bg-primary">
             <FedaCheckoutContainer
               options={checkoutEmbedOptions}
-              style={{ height: 500, width: 500, backgroundColor: "#f37c0d" }}
+              style={{ height: 500, width: 500 }}
             />
           </div>
         )}

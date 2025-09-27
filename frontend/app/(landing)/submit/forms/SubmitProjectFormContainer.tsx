@@ -20,10 +20,13 @@ import { projectService } from "@/frontendlib/services/projectService";
 import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
 import { useImagePreview } from "@/hooks/useImagePreview";
 import Step5 from "./steps/Step5";
+import { FedaCheckoutContainer } from "fedapay-reactjs";
+import Popover from "@/components/ui/Popover";
 
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {
   const [showModal, setShowModal] = useState(false);
+  const [isWidgetOpen, setIsWidgetOpen] = useState(false);
 
   const methods = useForm<ProjectForm>({
     resolver: zodResolver(projectSchema),
@@ -57,6 +60,80 @@ export default function SubmitProjectFormContainer() {
     watch,
     formState: { isSubmitting },
   } = methods;
+  const email = watch("email");
+  const fullName = watch("full_name");
+  const phone = watch("phone");
+  const profession = watch("profession");
+  const password = watch("password");
+  const age = watch("age");
+  const affiliate = watch("affiliate");
+  const acceptReformulation = watch("acceptReformulation");
+  const acceptTerm = watch("acceptTerms");
+  const category_id = watch("category_id");
+  const project_title = watch("project_title");
+  const local_area_impact = watch("local_area_impact");
+  const main_objective = watch("main_objective");
+  const solution = watch("solution");
+  const description = watch("description");
+  const estimated_budget = watch("estimated_budget");
+  const target_audience = watch("target_audience");
+  const progress_report = watch("progress_report");
+  const owner_project_status = "brouillon";
+  const image = watch("image");
+
+  const checkoutEmbedOptions = {
+    public_key: process.env.NEXT_PUBLIC_FEDAPAY_PUBLIC_KEY,
+    transaction: {
+      amount: 5000,
+      description: "Soummission de projet sur Project Awards",
+      custom_metadata: {
+        context: "soumissionProjet",
+        fullname: fullName,
+        email: email,
+        countryCode: `+${parsePhoneNumber(phone)?.countryCallingCode}`,
+        phone: formatPhoneNumber(phone).replaceAll(" ", ""),
+        profession: profession,
+        password: password,
+        age: age,
+        affiliate: affiliate ? affiliate : "",
+        accept_project_reformulation: acceptReformulation,
+        accept_terms_of_use: acceptTerm,
+        image: image ? image[0] : null,
+        project: {
+          category_id: category_id,
+          project_title: project_title,
+          local_area_impact: local_area_impact,
+          main_objective: main_objective,
+          solution: solution,
+          description: description,
+          estimated_budget: estimated_budget,
+          target_audience: target_audience,
+          progress_report: progress_report,
+          owner_project_status: owner_project_status,
+        },
+      },
+    },
+    customer: {
+      email: email ? email : "",
+      firstname: fullName ? fullName : "",
+    },
+    currency: {
+      iso: "XOF",
+    },
+    onComplete(resp) {
+      const FedaPay = window["FedaPay"];
+      if (resp.reason === FedaPay.DIALOG_DISMISSED) {
+        setIsWidgetOpen(false);
+        console.log(resp, "modal fermé");
+      } else {
+        setIsWidgetOpen(false);
+        setShowModal(false);
+        reset();
+        console.log("Transaction terminée: " + resp.reason);
+        console.log(resp, "resultat");
+      }
+    },
+  };
 
   const imageFile: FileList | null = watch("image");
   const preview = useImagePreview(imageFile);
@@ -64,51 +141,6 @@ export default function SubmitProjectFormContainer() {
   const [step, setStep] = useState(1);
   const onSubmit = async (data: ProjectForm) => {
     const formData = new FormData();
-    formData.append("full_name", data.full_name);
-    formData.append("email", data.email);
-    formData.append(
-      "country_code",
-      `+${parsePhoneNumber(data.phone)?.countryCallingCode}`
-    );
-    formData.append("phone", formatPhoneNumber(data.phone).replaceAll(" ", ""));
-    formData.append("profession", data.profession);
-    formData.append("password", data.password);
-    formData.append("age", String(data.age));
-    formData.append("affiliate", "");
-    formData.append(
-      "accept_project_reformulation",
-      data.acceptReformulation ? "1" : "0"
-    );
-    formData.append("accept_terms_of_use", data.acceptTerms ? "1" : "0");
-    formData.append(
-      "project",
-      JSON.stringify({
-        category_id: data.category_id,
-        project_title: data.project_title,
-        local_area_impact: data.local_area_impact,
-        main_objective: data.main_objective,
-        solution: data.solution,
-        description: data.description,
-        estimated_budget: data.estimated_budget,
-        target_audience: data.target_audience,
-        progress_report: data.progress_report,
-        owner_project_status: "brouillon",
-      })
-    );
-
-    if (data.image && data.image.length > 0) {
-      formData.append("project.image", data.image[0]);
-    }
-
-    try {
-      await projectService.createProject(formData);
-      setShowModal(true);
-      reset();
-      setStep(1);
-    } catch (error) {
-      const message = mapServerErrors(error, setError);
-      toast.error(message);
-    }
   };
   return (
     <section className="pb-40 pt-28" id="submit-form">
@@ -133,7 +165,7 @@ export default function SubmitProjectFormContainer() {
                   </button>
                   <button
                     type="button"
-                    disabled={isSubmitting}
+                    onClick={() => setIsWidgetOpen(true)}
                     className="bg-secondary w-full md:w-auto px-10  py-2.5 cursor-pointer text-lg rounded-md text-white disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? "En cours..." : "Payer pour valider"}
@@ -144,6 +176,11 @@ export default function SubmitProjectFormContainer() {
           )}
         </form>
       </FormProvider>
+      <CheckoutModal
+        setShowModal={setIsWidgetOpen}
+        showModal={isWidgetOpen}
+        checkoutEmbedOptions={checkoutEmbedOptions}
+      />
       {showModal && (
         <ThanksNoteModal
           title="Soumission réussie"
@@ -154,3 +191,26 @@ export default function SubmitProjectFormContainer() {
     </section>
   );
 }
+
+const CheckoutModal = ({
+  showModal,
+  setShowModal,
+  checkoutEmbedOptions,
+}: {
+  showModal: boolean;
+  setShowModal: (show: boolean) => void;
+  checkoutEmbedOptions: any;
+}) => {
+  return (
+    <Popover
+      visible={showModal}
+      title="Paiement soumission de projet"
+      onClose={() => setShowModal(false)}
+    >
+      <FedaCheckoutContainer
+        options={checkoutEmbedOptions}
+        style={{ height: 500, width: 500 }}
+      />
+    </Popover>
+  );
+};

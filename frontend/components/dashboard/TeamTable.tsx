@@ -11,16 +11,24 @@ import {
 import AddGdChildModal from "../modals/AddGdChildModal";
 import ConfirmDeleteModal from "../modals/ConfirmDeleteModal";
 import { AffiliateInfo } from "@/app/common/types/affiliate";
-import { useTeamStore } from "@/stores/useTeamStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteAdminRelatedUser } from "@/services/userService";
 
 export default function TeamTable({ teams }: { teams: AffiliateInfo[] }) {
   const [showModal, setShowModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<AffiliateInfo>();
-  const deleteMember = useTeamStore((state) => state.deleteMember);
+  const queryClient = useQueryClient();
+  const deleteUserMutation = useMutation({
+    mutationFn: deleteAdminRelatedUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team"] });
+      setShowConfirmModal(false);
+    },
+  });
 
   const handleDelete = () => {
-    if (selectedMember) deleteMember(selectedMember?.id);
+    if (selectedMember) deleteUserMutation.mutate(selectedMember.id);
   };
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">
@@ -65,16 +73,10 @@ export default function TeamTable({ teams }: { teams: AffiliateInfo[] }) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem
-                      className="cursor-pointer"
                       onClick={() => {
-                        setShowModal(true);
+                        setShowConfirmModal(true);
                         setSelectedMember(team);
                       }}
-                    >
-                      Mettre à jour
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setShowConfirmModal(true)}
                       className="cursor-pointer"
                     >
                       Supprimer
@@ -87,7 +89,7 @@ export default function TeamTable({ teams }: { teams: AffiliateInfo[] }) {
         </tbody>
       </table>
       <AddGdChildModal
-        user_type="commercial"
+        user_type="admin"
         title="Affiliés"
         description="Mettre à jour les infos du membre"
         showModal={showModal}

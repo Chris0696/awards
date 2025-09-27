@@ -22,6 +22,15 @@ export type ProjectInput = {
     progress_report: string;
     owner_project_status: "brouillon" | "desactive" | "publie";
   };
+  project_payment: {
+    payer_name: string;
+    payer_email: string;
+    payer_phone?: string;
+    payment_reference: string;
+    payment_method: string;
+    payment_status: string;
+    external_transaction_id?: string;
+  };
 };
 
 export type AuthProjectInput = {

@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { dashboardlinks } from "../common/navigationlinks";
 import NavLink from "../common/NavLink";
-import { useAuthStore } from "@/stores/useAuthStore";
 import ProfilImg from "@/assets/defaultProfil.png";
 import { MoreVerticalIcon } from "lucide-react";
 import {
@@ -13,6 +12,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
+import { useMutation } from "@tanstack/react-query";
+import { logoutUser } from "@/services/authService";
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
 
 export default function Sidebar({
   open,
@@ -21,9 +23,19 @@ export default function Sidebar({
   open?: boolean;
   onClose?: () => void;
 }) {
-  const { user, logout, userInfo } = useAuthStore();
+  const userInfo = useUserSessionStore((state) => state.additionalInfo);
+  const user = useUserSessionStore((state) => state.user);
   const router = useRouter();
-  console.log(userInfo, "sideabar userinfo");
+
+  const mutateLogout = useMutation({
+    mutationFn: logoutUser,
+    onSuccess: () => {
+      router.push("/");
+    },
+    onError: (error) => {
+      console.log("erreur de déconnexion", error);
+    },
+  });
 
   const filteredLinks = dashboardlinks.filter((link) => {
     if (user?.user_type === "owner") {
@@ -33,11 +45,6 @@ export default function Sidebar({
       return dashboardlinks;
     }
   });
-
-  const handleLogout = async () => {
-    await logout();
-    router.push("/");
-  };
 
   return (
     <aside
@@ -85,7 +92,10 @@ export default function Sidebar({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem>
-                <button className="cursor-pointer" onClick={handleLogout}>
+                <button
+                  className="cursor-pointer"
+                  onClick={() => mutateLogout.mutate()}
+                >
                   Se déconnecter
                 </button>
               </DropdownMenuItem>
