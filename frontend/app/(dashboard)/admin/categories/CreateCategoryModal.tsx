@@ -5,7 +5,6 @@ import { categorySchema } from "@/frontendlib/schemas";
 import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
 import { createCategory, updateCategory } from "@/services/categoryService";
 
-import { useCategoryStore } from "@/stores/useCategoryStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
