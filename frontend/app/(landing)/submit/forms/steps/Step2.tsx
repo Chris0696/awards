@@ -5,20 +5,25 @@ import NumberField from "../NumberField";
 import SelectField from "../SelectField";
 import TextField from "../TextField";
 import { useFormContext } from "react-hook-form";
-import { useAuthStore } from "@/stores/useAuthStore";
 import Image from "next/image";
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
 
 export default function Step2({
   setStep,
   preview,
+  project,
+  adminProject,
 }: {
   setStep: (step: number) => void;
   preview: string | null;
+  project?: any;
+  adminProject?: any;
 }) {
   const { trigger } = useFormContext();
-  const user = useAuthStore((state) => state.user);
+  const user = useUserSessionStore((state) => state.user);
+  const isOnEditMode = Boolean(project) || Boolean(adminProject);
   return (
-    <FormCard step={2}>
+    <FormCard isOnEditMode={isOnEditMode} step={2}>
       <div className="space-y-6">
         <TextField
           name="project_title"

@@ -7,8 +7,8 @@ export default function StatsTable() {
     queryKey: ["projects-to-rank"],
     queryFn: getProjectsToRank,
   });
-  const orderedProjects = adminProjects?.data?.sort(
-    (a, b) => a.total_votes - b.total_votes
+  const orderedProjects = adminProjects?.sort(
+    (a, b) => b.total_votes - a.total_votes
   );
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">

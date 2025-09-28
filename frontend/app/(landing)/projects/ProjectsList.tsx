@@ -11,6 +11,7 @@ import { useProjectStore } from "@/stores/useProjectStore";
 import { useCategories } from "@/hooks/useCategories";
 import { useQuery } from "@tanstack/react-query";
 import { getPublicProjects } from "@/services/projectService";
+import { fetchPublicCategories } from "@/services/categoryService";
 
 type Category = {
   tagname: string;
@@ -53,14 +54,15 @@ export type PublicProject = {
 export default function ProjectsList() {
   const [activeTab, setActiveTab] = useState<string>("all");
 
-  const { categories, loading } = useCategories();
+  const { data: categories } = useQuery({
+    queryKey: ["publicCategories"],
+    queryFn: () => fetchPublicCategories(),
+  });
 
   const { data: projects } = useQuery({
     queryKey: ["publicProject"],
     queryFn: () => getPublicProjects(),
   });
-
-  console.log(projects, "dtataProjectq");
 
   return (
     <section className="py-16 bg-gray-100  ">
@@ -76,7 +78,7 @@ export default function ProjectsList() {
           >
             Tout
           </button>
-          {categories.map((category, idx) => (
+          {categories?.map((category, idx) => (
             <CategoryTag
               isActive={activeTab === category.category_name}
               key={idx}

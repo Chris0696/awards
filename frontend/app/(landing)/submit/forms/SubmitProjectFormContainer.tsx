@@ -1,12 +1,11 @@
 "use client";
 import { ChevronLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { ProjectInput } from "@/app/common/types/project";
 import ThanksNoteModal from "@/components/modals/ThanksNoteModal";
 import Step1 from "./steps/Step1";
 import Step2 from "./steps/Step2";
@@ -16,17 +15,19 @@ import Step4 from "./steps/Step4";
 import { toast } from "sonner";
 import { formatPhoneNumber, parsePhoneNumber } from "react-phone-number-input";
 import { projectSchema } from "@/frontendlib/schemas";
-import { projectService } from "@/frontendlib/services/projectService";
-import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
+
 import { useImagePreview } from "@/hooks/useImagePreview";
 import Step5 from "./steps/Step5";
 import { FedaCheckoutContainer } from "fedapay-reactjs";
 import Popover from "@/components/ui/Popover";
+import { useMutation } from "@tanstack/react-query";
+import { submitFirstProject } from "@/services/projectService";
 
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {
   const [showModal, setShowModal] = useState(false);
   const [isWidgetOpen, setIsWidgetOpen] = useState(false);
+  const [step, setStep] = useState(1);
 
   const methods = useForm<ProjectForm>({
     resolver: zodResolver(projectSchema),
@@ -54,7 +55,6 @@ export default function SubmitProjectFormContainer() {
     },
   });
   const {
-    setError,
     reset,
     handleSubmit,
     watch,
@@ -66,20 +66,29 @@ export default function SubmitProjectFormContainer() {
   const profession = watch("profession");
   const password = watch("password");
   const age = watch("age");
-  const affiliate = watch("affiliate");
+  const acceptTerms = watch("acceptTerms");
   const acceptReformulation = watch("acceptReformulation");
-  const acceptTerm = watch("acceptTerms");
   const category_id = watch("category_id");
   const project_title = watch("project_title");
   const local_area_impact = watch("local_area_impact");
+  const estimated_budget = watch("estimated_budget");
+  const description = watch("description");
   const main_objective = watch("main_objective");
   const solution = watch("solution");
-  const description = watch("description");
-  const estimated_budget = watch("estimated_budget");
   const target_audience = watch("target_audience");
   const progress_report = watch("progress_report");
-  const owner_project_status = "brouillon";
-  const image = watch("image");
+  const image: FileList | null = watch("image");
+
+  const submissionMutation = useMutation({
+    mutationFn: submitFirstProject,
+    onSuccess: () => {
+      setIsWidgetOpen(false);
+
+      reset();
+      setStep(1);
+    },
+    onError: () => {},
+  });
 
   const checkoutEmbedOptions = {
     public_key: process.env.NEXT_PUBLIC_FEDAPAY_PUBLIC_KEY,
@@ -88,29 +97,6 @@ export default function SubmitProjectFormContainer() {
       description: "Soummission de projet sur Project Awards",
       custom_metadata: {
         context: "soumissionProjet",
-        fullname: fullName,
-        email: email,
-        countryCode: `+${parsePhoneNumber(phone)?.countryCallingCode}`,
-        phone: formatPhoneNumber(phone).replaceAll(" ", ""),
-        profession: profession,
-        password: password,
-        age: age,
-        affiliate: affiliate ? affiliate : "",
-        accept_project_reformulation: acceptReformulation,
-        accept_terms_of_use: acceptTerm,
-        image: image ? image[0] : null,
-        project: {
-          category_id: category_id,
-          project_title: project_title,
-          local_area_impact: local_area_impact,
-          main_objective: main_objective,
-          solution: solution,
-          description: description,
-          estimated_budget: estimated_budget,
-          target_audience: target_audience,
-          progress_report: progress_report,
-          owner_project_status: owner_project_status,
-        },
       },
     },
     customer: {
@@ -124,24 +110,121 @@ export default function SubmitProjectFormContainer() {
       const FedaPay = window["FedaPay"];
       if (resp.reason === FedaPay.DIALOG_DISMISSED) {
         setIsWidgetOpen(false);
-        console.log(resp, "modal fermé");
+        const transactionId = resp.transaction.id;
+        const status = resp.transaction.status;
+        const paymentReference = resp.transaction.reference;
+        const formData = new FormData();
+        formData.append("full_name", fullName);
+        formData.append("email", email);
+        formData.append(
+          "country_code",
+          `+${parsePhoneNumber(phone)?.countryCallingCode}`
+        );
+        formData.append("phone", formatPhoneNumber(phone).replaceAll(" ", ""));
+        formData.append("profession", profession);
+        formData.append("password", password);
+        formData.append("age", String(age));
+        formData.append("affiliate", "");
+        formData.append(
+          "accept_project_reformulation",
+          acceptReformulation ? "1" : "0"
+        );
+        formData.append("accept_terms_of_use", acceptTerms ? "1" : "0");
+        formData.append(
+          "project",
+          JSON.stringify({
+            category_id: category_id,
+            project_title: project_title,
+            local_area_impact: local_area_impact,
+            main_objective: main_objective,
+            solution: solution,
+            description: description,
+            estimated_budget: estimated_budget,
+            target_audience: target_audience,
+            progress_report: progress_report,
+            owner_project_status: "brouillon",
+          })
+        );
+
+        if (image && image.length > 0) {
+          formData.append("project.image", image[0]);
+        }
+
+        formData.append(
+          "project_payment",
+          JSON.stringify({
+            payer_name: fullName,
+            payer_email: email,
+            payer_phone: phone,
+            payment_reference: paymentReference,
+            payment_status: status,
+            payment_method: "pending",
+            external_transaction_id: String(transactionId),
+          })
+        );
+        submissionMutation.mutate(formData);
       } else {
-        setIsWidgetOpen(false);
-        setShowModal(false);
-        reset();
-        console.log("Transaction terminée: " + resp.reason);
-        console.log(resp, "resultat");
+        const transactionId = resp.transaction.id;
+        const status = resp.transaction.status;
+        const paymentReference = resp.transaction.reference;
+        const formData = new FormData();
+        formData.append("full_name", fullName);
+        formData.append("email", email);
+        formData.append(
+          "country_code",
+          `+${parsePhoneNumber(phone)?.countryCallingCode}`
+        );
+        formData.append("phone", formatPhoneNumber(phone).replaceAll(" ", ""));
+        formData.append("profession", profession);
+        formData.append("password", password);
+        formData.append("age", String(age));
+        formData.append("affiliate", "");
+        formData.append(
+          "accept_project_reformulation",
+          acceptReformulation ? "1" : "0"
+        );
+        formData.append("accept_terms_of_use", acceptTerms ? "1" : "0");
+        formData.append(
+          "project",
+          JSON.stringify({
+            category_id: category_id,
+            project_title: project_title,
+            local_area_impact: local_area_impact,
+            main_objective: main_objective,
+            solution: solution,
+            description: description,
+            estimated_budget: estimated_budget,
+            target_audience: target_audience,
+            progress_report: progress_report,
+            owner_project_status: "brouillon",
+          })
+        );
+
+        if (image && image.length > 0) {
+          formData.append("project.image", image[0]);
+        }
+
+        formData.append(
+          "project_payment",
+          JSON.stringify({
+            payer_name: fullName,
+            payer_email: email,
+            payer_phone: phone,
+            payment_reference: paymentReference,
+            payment_status: status,
+            payment_method: "pending",
+            external_transaction_id: String(transactionId),
+          })
+        );
+        setShowModal(true);
+        submissionMutation.mutate(formData);
       }
     },
   };
 
-  const imageFile: FileList | null = watch("image");
-  const preview = useImagePreview(imageFile);
+  const preview = useImagePreview(image);
 
-  const [step, setStep] = useState(1);
-  const onSubmit = async (data: ProjectForm) => {
-    const formData = new FormData();
-  };
+  const onSubmit = async (data: ProjectForm) => {};
   return (
     <section className="pb-40 pt-28" id="submit-form">
       <FormProvider {...methods}>
@@ -192,7 +275,7 @@ export default function SubmitProjectFormContainer() {
   );
 }
 
-const CheckoutModal = ({
+export const CheckoutModal = ({
   showModal,
   setShowModal,
   checkoutEmbedOptions,

@@ -1,7 +1,7 @@
 "use client";
 import { formatDate } from "@/app/common/types/common";
 import { ProjectInfo } from "@/app/common/types/project";
-import { useAuthStore } from "@/stores/useAuthStore";
+
 import { MoreVerticalIcon } from "lucide-react";
 import {
   DropdownMenu,
@@ -11,9 +11,13 @@ import {
 } from "../ui/dropdown-menu";
 import CreateNewAuthProjectModal from "@/app/(dashboard)/admin/projects/CreateNewAuthProjectModal";
 import { useState } from "react";
-import { projectService } from "@/frontendlib/services/projectService";
-import Popover from "../ui/Popover";
-import { useProjectStore } from "@/stores/useProjectStore";
+import ConfirmDeleteModal from "../modals/ConfirmDeleteModal";
+import {
+  deleteProjectAsOwner,
+  markProjectPublicAsOwner,
+} from "@/services/projectService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
 
 type Props = {
   projects: ProjectInfo[];
@@ -23,11 +27,30 @@ export default function Table({ projects }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string>("");
-  const user = useAuthStore((state) => state.user);
+  const user = useUserSessionStore((state) => state.user);
   const [project, setProject] = useState<ProjectInfo | undefined>(undefined);
   const openEditModal = (project: ProjectInfo) => {
     setProject(project);
     setShowModal(true);
+  };
+  const queryClient = useQueryClient();
+  const updateMutation = useMutation({
+    mutationFn: markProjectPublicAsOwner,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ownerProjects"] });
+    },
+    onError: () => {},
+  });
+  const deleteMutation = useMutation({
+    mutationFn: deleteProjectAsOwner,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ownerProjects"] });
+      setShowConfirmationModal(false);
+    },
+  });
+
+  const handleDelete = () => {
+    if (projectToDelete) deleteMutation.mutate(projectToDelete);
   };
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">
@@ -122,7 +145,7 @@ export default function Table({ projects }: Props) {
                     <DropdownMenuItem>
                       <button
                         onClick={() =>
-                          projectService.updateProject({
+                          updateMutation.mutate({
                             project_id: project.project_id,
                             owner_project_status: "publie",
                             category_id: project.category.category_id,
@@ -157,55 +180,11 @@ export default function Table({ projects }: Props) {
         project={project}
       />
       <ConfirmDeleteModal
-        setShowConfirmationModal={setShowConfirmationModal}
-        showConfirmationModal={showConfirmationModal}
-        projectId={projectToDelete}
+        title="Êtes-vous sûr de vouloir supprimer ce projet?"
+        showDeleteModal={showConfirmationModal}
+        setShowDeleteModal={setShowConfirmationModal}
+        handleDelete={handleDelete}
       />
     </div>
   );
 }
-
-const ConfirmDeleteModal = ({
-  showConfirmationModal,
-  setShowConfirmationModal,
-  projectId,
-}: {
-  showConfirmationModal: boolean;
-  setShowConfirmationModal: (show: boolean) => void;
-  projectId: string;
-}) => {
-  const deleteOwnerProject = useProjectStore(
-    (state) => state.deleteOwnerProject
-  );
-  const handleDelete = () => {
-    deleteOwnerProject(projectId);
-    setShowConfirmationModal(false);
-  };
-  return (
-    <Popover
-      title="Confirmation de supression"
-      visible={showConfirmationModal}
-      onClose={() => setShowConfirmationModal(false)}
-    >
-      <div className="p-8  text-center space-y-4">
-        <p className="text-xl ">
-          Êtes-vous sûr de vouloir supprimer ce projet ?
-        </p>
-        <p className="space-x-5">
-          <button
-            onClick={() => setShowConfirmationModal(false)}
-            className="bg-primary text-white px-6 py-2 rounded-md cursor-pointer"
-          >
-            Non
-          </button>
-          <button
-            onClick={handleDelete}
-            className="bg-secondary text-white px-6 py-2 rounded-md cursor-pointer"
-          >
-            Oui
-          </button>
-        </p>
-      </div>
-    </Popover>
-  );
-};

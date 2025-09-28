@@ -15,6 +15,8 @@ import z from "zod";
 import { voteFormSchema } from "@/frontendlib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TextField from "@/app/(landing)/submit/forms/TextField";
+import { useMutation } from "@tanstack/react-query";
+import { makeVote } from "@/services/voteService";
 
 type Props = {
   showModal: boolean;
@@ -45,6 +47,16 @@ export default function MakeVoteModal({
   const amount = getValues("amount");
   const fullname = getValues("full_name");
 
+  const makeVoteMutation = useMutation({
+    mutationFn: makeVote,
+    onSuccess: () => {
+      setIsWidgetOpen(false);
+      setShowModal(false);
+      reset();
+    },
+    onError: () => {},
+  });
+
   useEffect(() => {
     if (voteCount) {
       setValue("amount", voteCount * 100, { shouldValidate: true });
@@ -61,8 +73,6 @@ export default function MakeVoteModal({
       description: "Vote sur Project Awards",
       custom_metadata: {
         context: "voteProjet",
-        projectId: project.project_id,
-        voteCount: voteCount,
       },
     },
     customer: {
@@ -75,14 +85,30 @@ export default function MakeVoteModal({
     onComplete(resp) {
       const FedaPay = window["FedaPay"];
       if (resp.reason === FedaPay.DIALOG_DISMISSED) {
-        setIsWidgetOpen(false);
-        console.log(resp, "modal fermé");
+        // setIsWidgetOpen(false);
+        makeVoteMutation.mutate({
+          payment_reference: resp.transaction.reference,
+          payment_status: resp.transaction.status,
+          project_id: project.project_id,
+          vote_count: voteCount ? voteCount : 0,
+          voter_name: fullname ? fullname : "",
+          voter_email: email ? email : "",
+          phone: "+229610101010",
+          payment_method: resp.transaction.payment_method ?? "pending",
+          external_transaction_id: resp.transaction.id.toString(),
+        });
       } else {
-        setIsWidgetOpen(false);
-        setShowModal(false);
-        reset();
-        console.log("Transaction terminée: " + resp.reason);
-        console.log(resp, "resultat");
+        makeVoteMutation.mutate({
+          payment_reference: resp.transaction.reference,
+          payment_status: resp.transaction.status,
+          project_id: project.project_id,
+          vote_count: voteCount ? voteCount : 0,
+          voter_name: fullname ? fullname : "",
+          voter_email: email ? email : "",
+          phone: "+229610101010",
+          payment_method: resp.transaction.mode ?? "pending",
+          external_transaction_id: resp.transaction.id.toString(),
+        });
       }
     },
   };

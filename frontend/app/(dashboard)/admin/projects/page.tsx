@@ -12,7 +12,6 @@ import {
 
 import CreateNewAuthProjectModal from "./CreateNewAuthProjectModal";
 import { useState } from "react";
-import { useProjectStore } from "@/stores/useProjectStore";
 import AdminTable from "@/components/dashboard/AdminTable";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -24,24 +23,25 @@ import { useUserSessionStore } from "@/stores/useUserSessionStore";
 export default function AdminProjectList() {
   const [showModal, setShowModal] = useState(false);
   const user = useUserSessionStore((state) => state.user);
-  const projects = useProjectStore((state) => state.projects);
+
   const { data: adminProjects } = useQuery({
     queryKey: ["adminProjects"],
     queryFn: () => getProjectsAsAdmin(),
+    enabled: user?.user_type === "user" || user?.user_type === "admin",
   });
+
   const { data: ownerProjects } = useQuery({
     queryKey: ["ownerProjects"],
     queryFn: () => getProjectsAsOwner(),
     enabled: user?.user_type === "owner",
   });
-  console.log(user, "user???");
 
   return user?.user_type === "owner" ? (
     <section>
       <DashboardHeader pageTitle="Mes projets" />
-      {projects ? (
+      {ownerProjects ? (
         <div>
-          <Table projects={projects} />
+          <Table projects={ownerProjects} />
           <div className="mt-2">
             <button
               onClick={() => setShowModal(true)}

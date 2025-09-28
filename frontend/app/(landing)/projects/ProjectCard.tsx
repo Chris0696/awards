@@ -7,8 +7,6 @@ import Link from "next/link";
 import { useState } from "react";
 import ColoredOutlineBtn from "@/components/ui/ColoredOutlineBtn";
 import MakeVoteModal from "@/components/modals/MakeVoteModal";
-import { ProjectInfo } from "@/app/common/types/project";
-import { UserCircle2 } from "lucide-react";
 import { PublicProject } from "./ProjectsList";
 import { dateToMonth } from "@/app/common/types/common";
 

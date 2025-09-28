@@ -21,7 +21,7 @@ export default function page() {
       </div>
       {users?.results.length > 0 ? (
         <div>
-          <UserTable users={users} />
+          <UserTable users={users.results} />
           <SwitchPageBtn />
         </div>
       ) : (

@@ -1,15 +1,15 @@
 "use client";
 import ProjectCard from "@/app/(landing)/projects/ProjectCard";
 import ColoredLink from "../../../components/ui/ColoredLink";
-import { useProjectStore } from "@/stores/useProjectStore";
-import { useEffect } from "react";
+
+import { useQuery } from "@tanstack/react-query";
+import { getPublicProjects } from "@/services/projectService";
 
 export default function DiscoverProjects() {
-  const getProjects = useProjectStore((state) => state.setPublicProjects);
-  const projects = useProjectStore((state) => state.publicProjects);
-  useEffect(() => {
-    getProjects();
-  }, []);
+  const { data: projects } = useQuery({
+    queryKey: ["publicProject"],
+    queryFn: () => getPublicProjects(),
+  });
   return (
     <section className="my-16 md:my-20 bg-gray-50">
       <div className="w-4/5 md:w-2/5 mx-auto text-center py-12">
@@ -29,7 +29,7 @@ export default function DiscoverProjects() {
 
       <div className="flex justify-center">
         <div className="flex flex-wrap gap-8 justify-center w-5/6">
-          {projects.map((project, idx) => (
+          {projects?.map((project, idx) => (
             <ProjectCard key={idx} project={project} />
           ))}
         </div>

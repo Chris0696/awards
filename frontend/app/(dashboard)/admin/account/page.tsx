@@ -4,7 +4,7 @@ import ProfilImg from "@/assets/profil.png";
 import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
 import { useImagePreview } from "@/hooks/useImagePreview";
 import { updateUserInfo } from "@/services/userService";
-import { useAuthStore } from "@/stores/useAuthStore";
+
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Image from "next/image";

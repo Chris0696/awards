@@ -1,7 +1,7 @@
 "use client";
 import { formatDate } from "@/app/common/types/common";
 import { AdminProjectInfo } from "@/app/common/types/project";
-import { useAuthStore } from "@/stores/useAuthStore";
+
 import { MoreVerticalIcon } from "lucide-react";
 import {
   DropdownMenu,
@@ -11,7 +11,13 @@ import {
 } from "../ui/dropdown-menu";
 import CreateNewAuthProjectModal from "@/app/(dashboard)/admin/projects/CreateNewAuthProjectModal";
 import { useState } from "react";
-import { projectService } from "@/frontendlib/services/projectService";
+
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  rejectProjectAsAdmin,
+  validateProjectAsAdmin,
+} from "@/services/projectService";
 
 type Props = {
   projects: AdminProjectInfo[];
@@ -19,10 +25,25 @@ type Props = {
 
 export default function AdminTable({ projects }: Props) {
   const [showModal, setShowModal] = useState(false);
-  const user = useAuthStore((state) => state.user);
+  const user = useUserSessionStore((state) => state.user);
   const [project, setProject] = useState<AdminProjectInfo | undefined>(
     undefined
   );
+  const queryClient = useQueryClient();
+  const validateMutation = useMutation({
+    mutationFn: validateProjectAsAdmin,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminProjects"] });
+    },
+    onError: () => {},
+  });
+  const rejectMutation = useMutation({
+    mutationFn: rejectProjectAsAdmin,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminProjects"] });
+    },
+    onError: () => {},
+  });
   const openEditModal = (project: AdminProjectInfo) => {
     setProject(project);
     setShowModal(true);
@@ -117,7 +138,7 @@ export default function AdminTable({ projects }: Props) {
                       <DropdownMenuItem>
                         <button
                           onClick={() =>
-                            projectService.validateProject(project)
+                            validateMutation.mutate(project.project_id)
                           }
                           className="cursor-pointer"
                         >
@@ -126,7 +147,12 @@ export default function AdminTable({ projects }: Props) {
                       </DropdownMenuItem>
                       <DropdownMenuItem>
                         <button
-                          onClick={() => projectService.rejectProject(project)}
+                          onClick={() =>
+                            rejectMutation.mutate({
+                              id: project.project_id,
+                              admin_comment: "Inapproprié",
+                            })
+                          }
                           className="cursor-pointer"
                         >
                           Rejeter
