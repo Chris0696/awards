@@ -10,6 +10,7 @@ const baseURL = isProd
 
 const apiClient = axios.create({
   baseURL,
+  withCredentials: true,
 });
 
 apiClient.interceptors.request.use(async (config) => {
