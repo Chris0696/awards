@@ -1,10 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DashboardHeader from "../../DasboardHeader";
-import { getTeam } from "@/frontendlib/services/teamService";
 import TeamTable from "@/components/dashboard/TeamTable";
 import AddGdChildModal from "@/components/modals/AddGdChildModal";
-import { AffiliateInfo } from "@/app/common/types/affiliate";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminRelatedUsers } from "@/services/userService";
 

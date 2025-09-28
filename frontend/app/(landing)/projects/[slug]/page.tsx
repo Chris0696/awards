@@ -5,8 +5,11 @@ import ShareLinkIcon from "@/assets/shareIcon.svg";
 import CopyLinkIcon from "@/assets/linkIcon.svg";
 import ProjectImg from "@/assets/artworklight.jpg";
 import Link from "next/link";
-import { projectService } from "@/frontendlib/services/projectService";
+
 import { dateToMonth, formatDate } from "@/app/common/types/common";
+import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
+import CallToVoteAction from "./CallToVoteAction";
+import CallToAction2 from "./CallToAction2";
 
 export interface Project {
   project_id: string;
@@ -38,22 +41,20 @@ export default async function page({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const response = await fetch(
-    `${process.env.API_URL}public/projects/${slug}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    }
-  );
+  const isProd = process.env.NODE_ENV === "production";
+  const baseUrl = isProd ? process.env.PROD_API_URL : process.env.API_URL;
+  const response = await fetch(`${baseUrl}public/projects/${slug}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     throw new Error("Impossible de charger le projet");
   }
   const project: Project = await response.json();
-  console.log(project, "project");
 
   return (
     <section className="pb-72">
@@ -80,11 +81,13 @@ export default async function page({
             <h2 className="text-5xl font-bold">{project.project_title}</h2>
             <div className="flex  items-center justify-between my-7">
               <div className="flex items-center space-x-1">
-                <Image
-                  src={ProfilImg}
-                  alt="Profil"
-                  className="w-10 h-10 rounded-full"
-                />
+                {project.image && (
+                  <Image
+                    src={fixBackendUrl(project.image) ?? ProfilImg}
+                    alt="Profil"
+                    className="w-10 h-10 rounded-full"
+                  />
+                )}
                 <span className="text-gray-100">{project.owner_name} </span>
               </div>
               <p className="text-gray-400">
@@ -99,9 +102,7 @@ export default async function page({
           </div>
           <p className="text-gray-200">{project.description}</p>
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 items-center space-x-4 mt-8">
-            <button className="border border-white px-6 py-2 rounded-md hover:bg-white hover:text-secondary transition-colors cursor-pointer">
-              Voter pour ce projet-100 FCFA
-            </button>
+            <CallToAction2 project={project} />
             <button className="flex items-center border border-white px-6 py-2 rounded-md space-x-2 hover:bg-white hover:text-primary transition-colors cursor-pointer">
               <Image src={ShareLinkIcon} alt="Partager" className="w-4 h-4" />
               <span>Partager</span>
@@ -113,11 +114,13 @@ export default async function page({
           </div>
         </div>
 
-        <Image
-          src={ProjectImg}
-          alt="Projet"
-          className="w-[85%] md:w-[75%] md:h-[350px] object-cover mx-auto rounded-lg absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2"
-        />
+        {project.image && (
+          <Image
+            src={fixBackendUrl(project.image) ?? ProjectImg}
+            alt="Projet"
+            className="w-[85%] md:w-[75%] md:h-[350px] object-cover mx-auto rounded-lg absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2"
+          />
+        )}
       </div>
 
       <div className="grid grid-cols-5 mt-40 md:mt-72 w-3/4 mx-auto">
@@ -178,9 +181,7 @@ export default async function page({
             <p className="text-gray-700">
               Chaque vote compte, chaque geste rapproche le projet de la réalité
             </p>
-            <button className="border bg-gray-50 text-secondary border-secondary px-5 py-2 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-100 transition-colors">
-              Je vote pour ce projet
-            </button>
+            <CallToVoteAction project={project} />
           </div>
           <div className="">
             <h4 className="text-2xl font-semibold text-gray-700">

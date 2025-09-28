@@ -9,7 +9,6 @@ export default function AdditionalUserInfo({
   children: React.ReactNode;
 }) {
   const user = useUserSessionStore((state) => state.user);
-  console.log(user, "userrrrr");
 
   const { data } = useQuery({
     queryKey: ["userInfo"],
@@ -21,7 +20,6 @@ export default function AdditionalUserInfo({
       useUserSessionStore.getState().setAdditionalInfo?.(data);
     }
   }, [data]);
-  console.log(data, "user info from layout");
 
   return <div>{children}</div>;
 }

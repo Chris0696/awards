@@ -37,16 +37,19 @@ const steps: StepProps[] = [
 type Props = {
   step: 1 | 2 | 3 | 4 | 5;
   children: React.ReactNode;
+  isOnEditMode?: boolean;
 };
 
-export default function FormCard({ step = 1, children }: Props) {
+export default function FormCard({ step = 1, children, isOnEditMode }: Props) {
   const currentStep = steps.find((s) => s.id === step);
   return (
     <div className="w-full px-5 max-w-3xl mx-auto ">
       <div>
         <h2 className="flex  items-center text-xl md:text-4xl font-bold mb-3 space-x-20">
           <span className="flex items-center space-x-1">
-            <span className="text-[#0026B0] font-medium">{step}/5</span>
+            <span className="text-[#0026B0] font-medium">
+              {step}/{isOnEditMode ? 4 : 5}
+            </span>
             <ArrowRight size={20} />
           </span>
           <span>{currentStep?.title} </span>

@@ -4,6 +4,7 @@ import CheckIcon from "@/assets/check.svg";
 import ShootingStarIcon from "@/assets/shootstar.svg";
 import ShareNetworkIcon from "@/assets/sharenetwork.svg";
 import Popover from "../ui/Popover";
+import ColoredLink from "../ui/ColoredLink";
 
 type Props = {
   showModal: boolean;
@@ -31,9 +32,14 @@ export default function ThanksNoteModal({
             Merci pour votre soumission !
           </h2>
           <p className="text-lg leading-6">
-            Notre équipe vous contactera sous 48h. Votre projet sera reformulé,
+            {/*  Notre équipe vous contactera sous 48h. Votre projet sera reformulé,
             validé, puis publié pour le vote. Vous serez notifié dès sa mise en
-            ligne.
+            ligne. */}
+            Connectez-vous à votre compte pour publier votre projet afin de
+            finaliser la soumission
+          </p>
+          <p className="mt-8">
+            <ColoredLink url="/login" text="Connectez-vous" />
           </p>
           {showBtn && (
             <div className="flex justify-center space-x-3 mt-8">

@@ -6,12 +6,17 @@ import { useFormContext } from "react-hook-form";
 
 export default function Step3({
   setStep,
+  project,
+  adminProject,
 }: {
   setStep: (step: number) => void;
+  project?: any;
+  adminProject?: any;
 }) {
   const { trigger } = useFormContext();
+  const isOnEditMode = Boolean(project) || Boolean(adminProject);
   return (
-    <FormCard step={3}>
+    <FormCard isOnEditMode={isOnEditMode} step={3}>
       <div className="space-y-6">
         <TextareaField name="description" />
         <TextField

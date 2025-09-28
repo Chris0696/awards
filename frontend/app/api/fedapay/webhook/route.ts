@@ -20,8 +20,6 @@ export async function POST(req: NextRequest) {
           ? event.entity.transaction_key
           : "",
       }; */
-      console.log(event, "payload tests context");
-      const formData = new FormData();
 
       /*  if (context && context === "project-awards") {
         try {

@@ -42,3 +42,12 @@ export const updateUserInfo = async (data: FormData) => {
   );
   return res.data;
 };
+
+export const toggleOwnerAccountAsAdmin = async (id: number) => {
+  const res = await apiClient.patch(`admin/owners/${id}/toggle_active/`);
+  return res.data;
+};
+
+export const deleteOwner = (id: number) => {
+  return apiClient.delete(`admin/owners/${id}/delete/`);
+};

@@ -32,15 +32,14 @@ export default function Sidebar({
     onSuccess: () => {
       router.push("/");
     },
-    onError: (error) => {
-      console.log("erreur de déconnexion", error);
-    },
+    onError: (error) => {},
   });
 
   const filteredLinks = dashboardlinks.filter((link) => {
     if (user?.user_type === "owner") {
       return !link.isRequireAdmin;
-    } else if (user?.user_type === "") {
+    } else if (user?.user_type === "commercial") {
+      return link.canCommercialAccess;
     } else {
       return dashboardlinks;
     }
@@ -78,9 +77,9 @@ export default function Sidebar({
             <Image
               src={fixBackendUrl(userInfo?.image) ?? ProfilImg}
               alt="Profil image"
-              className=" rounded-full"
-              width={50}
-              height={50}
+              className=" rounded-full w-10 h-10"
+              width={80}
+              height={80}
             />
             <p className="inline-block w-min text-xl">{user?.full_name}</p>
           </div>

@@ -4,7 +4,7 @@ import React from "react";
 import NavLink from "../../common/NavLink";
 import ColoredLink from "../../../components/ui/ColoredLink";
 import { landingpagelinks } from "@/app/common/navigationlinks";
-import { useAuthStore } from "@/stores/useAuthStore";
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
 
 export default function MobileMenu({
   showMobileMenu,
@@ -13,7 +13,7 @@ export default function MobileMenu({
   showMobileMenu: boolean;
   setShowMobileMenu: (showMobileMenu: boolean) => void;
 }) {
-  const user = useAuthStore((state) => state.user);
+  const user = useUserSessionStore((state) => state.user);
   return (
     <aside
       style={{

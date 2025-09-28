@@ -9,18 +9,29 @@ import {
 import { User, useUserStore } from "@/stores/useUserStore";
 import ConfirmDeleteModal from "./modals/ConfirmDeleteModal";
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteOwner, toggleOwnerAccountAsAdmin } from "@/services/userService";
 
 export default function UserTable({ users }: { users: User[] }) {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<number>();
-  const deleteUser = useUserStore((state) => state.deleteUser);
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: deleteOwner,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["owners"] });
+    },
+    onError: () => {},
+  });
+  const updateMutation = useMutation({
+    mutationFn: toggleOwnerAccountAsAdmin,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["owners"] });
+    },
+    onError: () => {},
+  });
   const handleDelete = () => {
-    try {
-      if (selectedUser) deleteUser(selectedUser);
-      setShowConfirmationModal(true);
-    } catch (error) {
-      console.log(error, "erreur supression utilisateur");
-    }
+    if (selectedUser) deleteMutation.mutate(selectedUser);
   };
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">
@@ -100,7 +111,11 @@ export default function UserTable({ users }: { users: User[] }) {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem>Désactiver</DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => updateMutation.mutate(user.id)}
+                    >
+                      Désactiver
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
                         setSelectedUser(user.id);

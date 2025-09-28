@@ -3,7 +3,6 @@ import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
 import FilterBtn from "@/components/dashboard/FilterBtn";
 import SynthesisCard from "@/components/dashboard/project-owner/SynthesisCard";
 import { VotesChart } from "@/components/dashboard/project-owner/VotesChart";
-import Table from "@/components/dashboard/Table";
 import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
 import Link from "next/link";
 import React, { useEffect } from "react";
@@ -11,21 +10,24 @@ import FacebookIcon from "@/assets/facebook.svg";
 import LinkIcon from "@/assets/linkIcon.svg";
 import WhatsappIcon from "@/assets/whatsapp.svg";
 import Image from "next/image";
-import { useAuthStore } from "@/stores/useAuthStore";
 import StatsTable from "@/components/dashboard/StatsTable";
-import { useStatsStore } from "@/stores/useStatsStore";
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
+import { useQuery } from "@tanstack/react-query";
+import { getOwnerStats, getVotesEvolution } from "@/services/statsService";
 
 export default function StatisticPage() {
-  const user = useAuthStore((state) => state.user);
-  const ownerStats = useStatsStore((state) => state.ownerStats);
-  console.log(ownerStats, "ownerstats");
-  const fetchOwnerStats = useStatsStore((state) => state.getOwnerStats);
+  const user = useUserSessionStore((state) => state.user);
+  const { data: ownerStats } = useQuery({
+    queryKey: ["ownerStats"],
+    queryFn: () => getOwnerStats(),
+    enabled: user?.user_type === "owner",
+  });
 
-  useEffect(() => {
-    if (user?.user_type === "owner") {
-      fetchOwnerStats();
-    }
-  }, [fetchOwnerStats, user]);
+  const { data: voteEvolution, isLoading: isloadingVoteEvolution } = useQuery({
+    queryKey: ["votes-evolution"],
+    queryFn: () => getVotesEvolution(),
+    enabled: user?.user_type === "owner",
+  });
 
   return user?.user_type === "owner" ? (
     <section className="">

@@ -7,7 +7,6 @@ import NavLink from "../../common/NavLink";
 import MobileMenu from "./MobileMenu";
 import ColoredLink from "../../../components/ui/ColoredLink";
 import { landingpagelinks } from "@/app/common/navigationlinks";
-import { useAuthStore } from "@/stores/useAuthStore";
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
 
 export default function Header() {

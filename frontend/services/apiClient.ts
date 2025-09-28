@@ -3,8 +3,13 @@ import axios from "axios";
 import { clearTokens, getTokens } from "./session";
 import { refreshToken } from "./authService";
 
+const isProd = process.env.NODE_ENV === "production";
+const baseURL = isProd
+  ? process.env.NEXT_PUBLIC_PROD_BACKEND_URL
+  : process.env.NEXT_PUBLIC_BACKEND_URL;
+
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
+  baseURL,
 });
 
 apiClient.interceptors.request.use(async (config) => {

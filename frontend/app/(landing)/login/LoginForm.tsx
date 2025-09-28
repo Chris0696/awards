@@ -39,8 +39,6 @@ export default function LoginForm() {
       router.replace("/admin");
     },
     onError: (err) => {
-      console.log(err, "erreurs");
-
       toast.error("Erreur login");
     },
   });
