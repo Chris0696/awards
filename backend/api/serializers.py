@@ -234,7 +234,7 @@ class RegisterOwnerWithPaymentSerializer(serializers.ModelSerializer):
     project = ProjectCreateUpdateSerializer(required=False, write_only=True)
     
     # Informations de paiement pour le projet
-    project_payment = ProjectPaymentSerializer(required=True, write_only=True)
+    project_payment = ProjectPaymentSerializer(required=False, write_only=True)
     
     accept_project_reformulation = serializers.BooleanField(
         

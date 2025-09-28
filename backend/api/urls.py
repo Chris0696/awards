@@ -115,6 +115,8 @@ urlpatterns = [
     path('analytics/votes-evolution/', ApiViews.votes_evolution_analytics, name='votes-evolution'),
     path('analytics/projects-evolution/', ApiViews.projects_evolution_analytics, name='projects-evolution'),
     path('analytics/dashboard-summary/', ApiViews.dashboard_summary_stats, name='dashboard-summary'),
+    path('analytics/owner/<int:owner_id>/votes-evolution/', ApiViews.owner_votes_evolution_analytics, name='owner-votes-evolution'),
+
     
     
     # Vote Endpoints

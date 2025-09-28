@@ -122,9 +122,10 @@ class ProjectAdminSerializer(serializers.ModelSerializer):
 
 class PublicProjectSerializer(serializers.ModelSerializer):
     """Affichage public des projets"""
-    category_name = serializers.CharField(source='category.name', read_only=True)
+    category_name = serializers.CharField(source='category.category_name', read_only=True)
     owner_name = serializers.CharField(source='owner.user.full_name', read_only=True)
-    
+    owner_image = serializers.CharField(source='owner.image', read_only=True)
+
     # Statistiques des votes
     average_rating = serializers.SerializerMethodField()
     total_votes = serializers.SerializerMethodField()
@@ -142,7 +143,7 @@ class PublicProjectSerializer(serializers.ModelSerializer):
             'estimated_budget', 'target_audience', 'progress_report',
             'featured', 'created_at', 'validated_at',
             # Relations
-            'category_name', 'owner_name',
+            'category_name', 'owner_name', 'owner_image',
             # Fichiers
             'image', 'image_url', 'file',
             # Statistiques
@@ -170,7 +171,7 @@ class PublicProjectSerializer(serializers.ModelSerializer):
 
 class PublicProjectListSerializer(serializers.ModelSerializer):
     """Serializer léger pour la liste des projets (sans tous les détails)"""
-    category_name = serializers.CharField(source='category.name', read_only=True)
+    category_name = serializers.CharField(source='category.category_name', read_only=True)
     owner_name = serializers.CharField(source='owner.user.full_name', read_only=True)
     owner_image = serializers.CharField(source='owner.image', read_only=True)
     average_rating = serializers.SerializerMethodField()
@@ -309,14 +310,38 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
         print(f"🔍 DEBUG ProjectSerializer - Type de data reçu: {type(data)}")
         print(f"🔍 DEBUG ProjectSerializer - Data: {data}")
         print(f"🔍 DEBUG ProjectSerializer - Fichiers image/file: {data.get('image')} / {data.get('file')}")
+        print(f"🔍 DEBUG ProjectSerializer - Data keys: {list(data.keys()) if hasattr(data, 'keys') else 'N/A'}")
 
+        # Si les fichiers sont dans le contexte parent, les récupérer
+        # request = self.context.get('request')
+        # if request and hasattr(request, 'FILES'):
+        #     for file_field in ['image', 'file']:
+        #         if file_field in request.FILES and file_field not in data:
+        #             data[file_field] = request.FILES[file_field]
+        #             print(f"🔍 DEBUG ProjectCreateUpdate - Fichier {file_field} ajouté depuis FILES")
         
+        # Si les fichiers sont dans le contexte parent, les récupérer
+        request = self.context.get('request')
+        if request and hasattr(request, 'FILES'):
+            for file_field in ['image', 'file']:
+                if file_field in request.FILES and (not hasattr(data, file_field) or file_field not in data):
+                    if hasattr(data, '_mutable'):
+                        data._mutable = True
+                    elif hasattr(data, 'copy'):
+                        data = data.copy()
+                    else:
+                        data = dict(data)
+                    data[file_field] = request.FILES[file_field]
+                    print(f"🔍 DEBUG ProjectSerializer - Fichier {file_field} ajouté depuis FILES")
+
+                          
         try:
             result = super().to_internal_value(data)
             print("✅ DEBUG ProjectSerializer - to_internal_value réussi")
             return result
         except serializers.ValidationError as e:
             print(f"❌ DEBUG ProjectSerializer - Erreurs de validation: {e.detail}")
+            
             # Reformater les erreurs pour une meilleure lisibilité
             formatted_errors = {}
             for field, messages in e.detail.items():
@@ -333,6 +358,7 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
 
 
     def validate(self, attrs):
+        print(f"🔍 DEBUG ProjectCreateUpdate - Validation attrs: {list(attrs.keys())}")
         # Valider category_id (ShortUUIDField)
         
         print(f"🔍 DEBUG ProjectSerializer.validate - Attrs reçus: {attrs}")
@@ -410,10 +436,39 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
         return project
 
     def update(self, instance, validated_data):
+        print("🔍 DEBUG ProjectSerializer.update - Début mise à jour")
+        print(f"🔍 DEBUG - Données pour mise à jour: {list(validated_data.keys())}")
+        
         validated_data.pop('platform_status', None)
         validated_data.pop('admin_comment', None)
         validated_data.pop('category_id', None)  # Retirer category_id pour l'update
-        return super().update(instance, validated_data)
+        
+        # Gérer spécialement les fichiers - ne supprimer que si un nouveau fichier est fourni
+        for file_field in ['image', 'file']:
+            if file_field in validated_data:
+                file_value = validated_data[file_field]
+                if file_value is None:
+                    # Si explicitement None, garder l'ancien fichier
+                    validated_data.pop(file_field, None)
+                    print(f"🔍 DEBUG - Fichier {file_field} maintenu (valeur None ignorée)")
+                elif hasattr(file_value, 'read'):
+                    # Nouveau fichier fourni
+                    print(f"🔍 DEBUG - Nouveau fichier {file_field}: {getattr(file_value, 'name', 'unknown')}")
+                else:
+                    print(f"🔍 DEBUG - Fichier {file_field}: {file_value}")
+        
+        updated_instance = super().update(instance, validated_data)
+        
+        # Régénérer le slug si le titre a changé
+        if 'project_title' in validated_data and updated_instance.project_title:
+            new_slug = slugify(f"{updated_instance.project_title}-{updated_instance.project_id}")
+            if new_slug != updated_instance.slug:
+                updated_instance.slug = new_slug
+                updated_instance.save(update_fields=['slug'])
+                print(f"🔍 DEBUG - Slug mis à jour: {new_slug}")
+        
+        print(f"✅ DEBUG - Projet mis à jour: {updated_instance.project_id}")
+        return updated_instance
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -436,17 +491,20 @@ class ProjectPaymentSerializer(serializers.Serializer):
     payer_name = serializers.CharField(max_length=100, required=True)
     payer_email = serializers.EmailField(required=True)
     payer_phone = serializers.CharField(
-        max_length=20, 
-        required=True,
-        validators=[RegexValidator(r'^\+\d{7,15}$', message=_("Format: +XXXXXXX avec code pays"))]
+        max_length=20,
+        required=False,
+        allow_blank=True,
+        allow_null=True
+        # validators=[RegexValidator(r'^\+\d{7,15}$', message=_("Format: +XXXXXXX avec code pays"))]
     )
-    payment_reference = serializers.CharField(max_length=50, required=True)
+    payment_reference = serializers.CharField(max_length=50, required=False, allow_blank=True)
     
     # Informations de paiement
-    payment_method = serializers.CharField(max_length=50, required=True)
+    payment_method = serializers.CharField(max_length=50, required=False, allow_blank=True)
     payment_status = serializers.ChoiceField(
         choices=ProjectSubmissionPayment.SUBMISSION_PAYMENT_STATUS,
-        required=True
+        required=False,
+        allow_blank=True
     )
     external_transaction_id = serializers.CharField(max_length=100, required=False, allow_blank=True)
     

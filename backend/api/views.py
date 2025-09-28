@@ -11,14 +11,17 @@ from project.models import Commercial, Project, Category, ProjectSubmissionPayme
 from django.db.models.expressions import Window
 # from django.db.models.functions import Avg
 from django.db.models.functions import Rank
+from rest_framework.renderers import JSONRenderer
+
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.decorators import api_view, permission_classes, renderer_classes, action
 from rest_framework.response import Response
 from rest_framework import generics, permissions
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from datetime import timedelta
+from datetime import datetime, timedelta, date
+
 from django.db.models import Q, Sum, Count, Avg, F
 from collections import defaultdict
 import calendar
@@ -661,246 +664,278 @@ class ProjectValidationAPIView(generics.UpdateAPIView):
 
 #===========================LES GTRAPHIQUES ADMIN=================
 
-@api_view(['GET'])
-@permission_classes([IsAdminUser])
-def votes_evolution_analytics(request):
-    """
-    API pour récupérer l'évolution des votes et revenus par année/mois/semaine
-    Structure : {année: {mois: {semaines: [...], total_mois}, total_année}}
-    """
+def get_weeks_in_month(year, month):
+    """Retourne les semaines d'un mois avec leurs dates de début et fin"""
+    first_day = date(year, month, 1)
+    last_day = date(year, month, calendar.monthrange(year, month)[1])
     
-    # Récupérer tous les votes actifs avec paiements approuvés
-    votes_query = Vote.objects.filter(
-        active=True,
-        votepayment__status='approved'
-    ).select_related('votepayment')
+    weeks = []
+    current_date = first_day
+    week_number = 1
     
-    # Structure de données pour organiser par année > mois > semaine
-    analytics_data = defaultdict(lambda: {
-        'months': defaultdict(lambda: {
-            'weeks': [],
-            'total_votes': 0,
-            'total_revenue': 0
-        }),
-        'total_votes': 0,
-        'total_revenue': 0
-    })
+    while current_date <= last_day:
+        # Début de semaine (lundi)
+        week_start = current_date - timedelta(days=current_date.weekday())
+        # Assurer que le début n'est pas avant le premier jour du mois
+        week_start = max(week_start, first_day)
+        
+        # Fin de semaine (dimanche)
+        week_end = week_start + timedelta(days=6)
+        # Assurer que la fin n'est pas après le dernier jour du mois
+        week_end = min(week_end, last_day)
+        
+        weeks.append({
+            'week_number': week_number,
+            'start_date': week_start,
+            'end_date': week_end
+        })
+        
+        # Passer à la semaine suivante
+        current_date = week_end + timedelta(days=1)
+        week_number += 1
     
-    # Traiter chaque vote
-    for vote in votes_query:
-        created_date = vote.created_at
-        year = created_date.year
-        month = created_date.month
+    return weeks
+
+# @api_view(['GET'])
+# @permission_classes([IsAdminUser])
+# def votes_evolution_analytics(request):
+#     """
+#     API pour récupérer l'évolution des votes et revenus par année/mois/semaine
+#     Structure : {année: {mois: {semaines: [...], total_mois}, total_année}}
+#     """
+    
+#     # Récupérer tous les votes actifs avec paiements approuvés
+#     votes_query = Vote.objects.filter(
+#         active=True,
+#         votepayment__status='approved'
+#     ).select_related('votepayment')
+    
+#     # Structure de données pour organiser par année > mois > semaine
+#     analytics_data = defaultdict(lambda: {
+#         'months': defaultdict(lambda: {
+#             'weeks': [],
+#             'total_votes': 0,
+#             'total_revenue': 0
+#         }),
+#         'total_votes': 0,
+#         'total_revenue': 0
+#     })
+    
+#     # Traiter chaque vote
+#     for vote in votes_query:
+#         created_date = vote.created_at
+#         year = created_date.year
+#         month = created_date.month
         
-        # Calculer le numéro de la semaine dans le mois
-        first_day_of_month = created_date.replace(day=1)
-        week_in_month = ((created_date.day - 1) // 7) + 1
+#         # Calculer le numéro de la semaine dans le mois
+#         first_day_of_month = created_date.replace(day=1)
+#         week_in_month = ((created_date.day - 1) // 7) + 1
         
-        # Ajouter aux totaux annuels
-        analytics_data[year]['total_votes'] += vote.vote_count
-        analytics_data[year]['total_revenue'] += float(vote.votepayment.amount)
+#         # Ajouter aux totaux annuels
+#         analytics_data[year]['total_votes'] += vote.vote_count
+#         analytics_data[year]['total_revenue'] += float(vote.votepayment.amount)
         
-        # Ajouter aux totaux mensuels
-        analytics_data[year]['months'][month]['total_votes'] += vote.vote_count
-        analytics_data[year]['months'][month]['total_revenue'] += float(vote.votepayment.amount)
+#         # Ajouter aux totaux mensuels
+#         analytics_data[year]['months'][month]['total_votes'] += vote.vote_count
+#         analytics_data[year]['months'][month]['total_revenue'] += float(vote.votepayment.amount)
         
-        # Initialiser les semaines si nécessaire
-        month_data = analytics_data[year]['months'][month]
-        while len(month_data['weeks']) < week_in_month:
-            month_data['weeks'].append({
-                'week': len(month_data['weeks']) + 1,
-                'total_votes': 0,
-                'total_revenue': 0,
-                'start_date': None,
-                'end_date': None
-            })
+#         # Initialiser les semaines si nécessaire
+#         month_data = analytics_data[year]['months'][month]
+#         while len(month_data['weeks']) < week_in_month:
+#             month_data['weeks'].append({
+#                 'week': len(month_data['weeks']) + 1,
+#                 'total_votes': 0,
+#                 'total_revenue': 0,
+#                 'start_date': None,
+#                 'end_date': None
+#             })
         
-        # Ajouter aux données de la semaine
-        week_index = week_in_month - 1
-        month_data['weeks'][week_index]['total_votes'] += vote.vote_count
-        month_data['weeks'][week_index]['total_revenue'] += float(vote.votepayment.amount)
+#         # Ajouter aux données de la semaine
+#         week_index = week_in_month - 1
+#         month_data['weeks'][week_index]['total_votes'] += vote.vote_count
+#         month_data['weeks'][week_index]['total_revenue'] += float(vote.votepayment.amount)
         
-        # Calculer les dates de début et fin de semaine
-        if month_data['weeks'][week_index]['start_date'] is None:
-            week_start = created_date - timedelta(days=created_date.weekday())
-            week_start = max(week_start, first_day_of_month)  # Ne pas dépasser le début du mois
+#         # Calculer les dates de début et fin de semaine
+#         if month_data['weeks'][week_index]['start_date'] is None:
+#             week_start = created_date - timedelta(days=created_date.weekday())
+#             week_start = max(week_start, first_day_of_month)  # Ne pas dépasser le début du mois
             
-            # Fin de semaine : 6 jours après le début ou fin du mois
-            week_end = week_start + timedelta(days=6)
-            last_day_of_month = first_day_of_month.replace(
-                day=calendar.monthrange(year, month)[1]
-            )
-            week_end = min(week_end, last_day_of_month)
+#             # Fin de semaine : 6 jours après le début ou fin du mois
+#             week_end = week_start + timedelta(days=6)
+#             last_day_of_month = first_day_of_month.replace(
+#                 day=calendar.monthrange(year, month)[1]
+#             )
+#             week_end = min(week_end, last_day_of_month)
             
-            month_data['weeks'][week_index]['start_date'] = week_start.strftime('%Y-%m-%d')
-            month_data['weeks'][week_index]['end_date'] = week_end.strftime('%Y-%m-%d')
+#             month_data['weeks'][week_index]['start_date'] = week_start.strftime('%Y-%m-%d')
+#             month_data['weeks'][week_index]['end_date'] = week_end.strftime('%Y-%m-%d')
     
-    # Convertir en format JSON avec noms des mois
-    formatted_data = {}
-    for year, year_data in analytics_data.items():
-        formatted_data[str(year)] = {
-            'total_votes': year_data['total_votes'],
-            'total_revenue': year_data['total_revenue'],
-            'months': {}
-        }
+#     # Convertir en format JSON avec noms des mois
+#     formatted_data = {}
+#     for year, year_data in analytics_data.items():
+#         formatted_data[str(year)] = {
+#             'total_votes': year_data['total_votes'],
+#             'total_revenue': year_data['total_revenue'],
+#             'months': {}
+#         }
         
-        for month, month_data in year_data['months'].items():
-            month_name = calendar.month_name[month]
-            formatted_data[str(year)]['months'][f"{month:02d}_{month_name}"] = {
-                'month_number': month,
-                'month_name': month_name,
-                'total_votes': month_data['total_votes'],
-                'total_revenue': month_data['total_revenue'],
-                'weeks': month_data['weeks']
-            }
+#         for month, month_data in year_data['months'].items():
+#             month_name = calendar.month_name[month]
+#             formatted_data[str(year)]['months'][f"{month:02d}_{month_name}"] = {
+#                 'month_number': month,
+#                 'month_name': month_name,
+#                 'total_votes': month_data['total_votes'],
+#                 'total_revenue': month_data['total_revenue'],
+#                 'weeks': month_data['weeks']
+#             }
     
-    return Response({
-        'success': True,
-        'data': formatted_data,
-        'summary': {
-            'total_years': len(formatted_data),
-            'total_votes_platform': sum(year['total_votes'] for year in formatted_data.values()),
-            'total_revenue_platform': sum(year['total_revenue'] for year in formatted_data.values())
-        }
-    })
+#     return Response({
+#         'success': True,
+#         'data': formatted_data,
+#         'summary': {
+#             'total_years': len(formatted_data),
+#             'total_votes_platform': sum(year['total_votes'] for year in formatted_data.values()),
+#             'total_revenue_platform': sum(year['total_revenue'] for year in formatted_data.values())
+#         }
+#     })
 
 
-@api_view(['GET'])
-@permission_classes([IsAdminUser])
-def projects_evolution_analytics(request):
-    """
-    API pour récupérer l'évolution des projets publiés par semaine et mois
-    avec le nombre total de votes obtenus
-    """
+# @api_view(['GET'])
+# @permission_classes([IsAdminUser])
+# def projects_evolution_analytics(request):
+#     """
+#     API pour récupérer l'évolution des projets publiés par semaine et mois
+#     avec le nombre total de votes obtenus
+#     """
     
-    # Récupérer tous les projets publiés
-    projects_query = Project.objects.filter(
-        platform_status='publie',
-        validated_at__isnull=False
-    ).prefetch_related('vote_set')
+#     # Récupérer tous les projets publiés
+#     projects_query = Project.objects.filter(
+#         platform_status='publie',
+#         validated_at__isnull=False
+#     ).prefetch_related('vote_set')
     
-    # Structure pour organiser par année > mois > semaine
-    projects_data = defaultdict(lambda: {
-        'months': defaultdict(lambda: {
-            'weeks': [],
-            'total_projects': 0,
-            'total_votes_received': 0
-        }),
-        'total_projects': 0,
-        'total_votes_received': 0
-    })
+#     # Structure pour organiser par année > mois > semaine
+#     projects_data = defaultdict(lambda: {
+#         'months': defaultdict(lambda: {
+#             'weeks': [],
+#             'total_projects': 0,
+#             'total_votes_received': 0
+#         }),
+#         'total_projects': 0,
+#         'total_votes_received': 0
+#     })
     
-    # Traiter chaque projet
-    for project in projects_query:
-        validated_date = project.validated_at
-        year = validated_date.year
-        month = validated_date.month
+#     # Traiter chaque projet
+#     for project in projects_query:
+#         validated_date = project.validated_at
+#         year = validated_date.year
+#         month = validated_date.month
         
-        # Calculer le numéro de la semaine dans le mois
-        week_in_month = ((validated_date.day - 1) // 7) + 1
+#         # Calculer le numéro de la semaine dans le mois
+#         week_in_month = ((validated_date.day - 1) // 7) + 1
         
-        # Compter les votes reçus par ce projet
-        project_votes = project.vote_set.filter(active=True).aggregate(
-            total=Sum('vote_count')
-        )['total'] or 0
+#         # Compter les votes reçus par ce projet
+#         project_votes = project.vote_set.filter(active=True).aggregate(
+#             total=Sum('vote_count')
+#         )['total'] or 0
         
-        # Ajouter aux totaux annuels
-        projects_data[year]['total_projects'] += 1
-        projects_data[year]['total_votes_received'] += project_votes
+#         # Ajouter aux totaux annuels
+#         projects_data[year]['total_projects'] += 1
+#         projects_data[year]['total_votes_received'] += project_votes
         
-        # Ajouter aux totaux mensuels
-        projects_data[year]['months'][month]['total_projects'] += 1
-        projects_data[year]['months'][month]['total_votes_received'] += project_votes
+#         # Ajouter aux totaux mensuels
+#         projects_data[year]['months'][month]['total_projects'] += 1
+#         projects_data[year]['months'][month]['total_votes_received'] += project_votes
         
-        # Initialiser les semaines si nécessaire
-        month_data = projects_data[year]['months'][month]
-        while len(month_data['weeks']) < week_in_month:
-            month_data['weeks'].append({
-                'week': len(month_data['weeks']) + 1,
-                'total_projects': 0,
-                'total_votes_received': 0,
-                'average_votes_per_project': 0,
-                'start_date': None,
-                'end_date': None
-            })
+#         # Initialiser les semaines si nécessaire
+#         month_data = projects_data[year]['months'][month]
+#         while len(month_data['weeks']) < week_in_month:
+#             month_data['weeks'].append({
+#                 'week': len(month_data['weeks']) + 1,
+#                 'total_projects': 0,
+#                 'total_votes_received': 0,
+#                 'average_votes_per_project': 0,
+#                 'start_date': None,
+#                 'end_date': None
+#             })
         
-        # Ajouter aux données de la semaine
-        week_index = week_in_month - 1
-        month_data['weeks'][week_index]['total_projects'] += 1
-        month_data['weeks'][week_index]['total_votes_received'] += project_votes
+#         # Ajouter aux données de la semaine
+#         week_index = week_in_month - 1
+#         month_data['weeks'][week_index]['total_projects'] += 1
+#         month_data['weeks'][week_index]['total_votes_received'] += project_votes
         
-        # Calculer les dates de début et fin de semaine
-        if month_data['weeks'][week_index]['start_date'] is None:
-            first_day_of_month = validated_date.replace(day=1)
-            week_start = validated_date - timedelta(days=validated_date.weekday())
-            week_start = max(week_start, first_day_of_month)
+#         # Calculer les dates de début et fin de semaine
+#         if month_data['weeks'][week_index]['start_date'] is None:
+#             first_day_of_month = validated_date.replace(day=1)
+#             week_start = validated_date - timedelta(days=validated_date.weekday())
+#             week_start = max(week_start, first_day_of_month)
             
-            week_end = week_start + timedelta(days=6)
-            last_day_of_month = first_day_of_month.replace(
-                day=calendar.monthrange(year, month)[1]
-            )
-            week_end = min(week_end, last_day_of_month)
+#             week_end = week_start + timedelta(days=6)
+#             last_day_of_month = first_day_of_month.replace(
+#                 day=calendar.monthrange(year, month)[1]
+#             )
+#             week_end = min(week_end, last_day_of_month)
             
-            month_data['weeks'][week_index]['start_date'] = week_start.strftime('%Y-%m-%d')
-            month_data['weeks'][week_index]['end_date'] = week_end.strftime('%Y-%m-%d')
+#             month_data['weeks'][week_index]['start_date'] = week_start.strftime('%Y-%m-%d')
+#             month_data['weeks'][week_index]['end_date'] = week_end.strftime('%Y-%m-%d')
     
-    # Calculer les moyennes pour chaque semaine et mois
-    for year, year_data in projects_data.items():
-        for month, month_data in year_data['months'].items():
-            # Moyenne mensuelle
-            if month_data['total_projects'] > 0:
-                month_data['average_votes_per_project'] = round(
-                    month_data['total_votes_received'] / month_data['total_projects'], 2
-                )
-            else:
-                month_data['average_votes_per_project'] = 0
+#     # Calculer les moyennes pour chaque semaine et mois
+#     for year, year_data in projects_data.items():
+#         for month, month_data in year_data['months'].items():
+#             # Moyenne mensuelle
+#             if month_data['total_projects'] > 0:
+#                 month_data['average_votes_per_project'] = round(
+#                     month_data['total_votes_received'] / month_data['total_projects'], 2
+#                 )
+#             else:
+#                 month_data['average_votes_per_project'] = 0
             
-            # Moyennes hebdomadaires
-            for week in month_data['weeks']:
-                if week['total_projects'] > 0:
-                    week['average_votes_per_project'] = round(
-                        week['total_votes_received'] / week['total_projects'], 2
-                    )
+#             # Moyennes hebdomadaires
+#             for week in month_data['weeks']:
+#                 if week['total_projects'] > 0:
+#                     week['average_votes_per_project'] = round(
+#                         week['total_votes_received'] / week['total_projects'], 2
+#                     )
     
-    # Formater les données
-    formatted_data = {}
-    for year, year_data in projects_data.items():
-        # Moyenne annuelle
-        year_average = 0
-        if year_data['total_projects'] > 0:
-            year_average = round(year_data['total_votes_received'] / year_data['total_projects'], 2)
+#     # Formater les données
+#     formatted_data = {}
+#     for year, year_data in projects_data.items():
+#         # Moyenne annuelle
+#         year_average = 0
+#         if year_data['total_projects'] > 0:
+#             year_average = round(year_data['total_votes_received'] / year_data['total_projects'], 2)
         
-        formatted_data[str(year)] = {
-            'total_projects': year_data['total_projects'],
-            'total_votes_received': year_data['total_votes_received'],
-            'average_votes_per_project': year_average,
-            'months': {}
-        }
+#         formatted_data[str(year)] = {
+#             'total_projects': year_data['total_projects'],
+#             'total_votes_received': year_data['total_votes_received'],
+#             'average_votes_per_project': year_average,
+#             'months': {}
+#         }
         
-        for month, month_data in year_data['months'].items():
-            month_name = calendar.month_name[month]
-            formatted_data[str(year)]['months'][f"{month:02d}_{month_name}"] = {
-                'month_number': month,
-                'month_name': month_name,
-                'total_projects': month_data['total_projects'],
-                'total_votes_received': month_data['total_votes_received'],
-                'average_votes_per_project': month_data['average_votes_per_project'],
-                'weeks': month_data['weeks']
-            }
+#         for month, month_data in year_data['months'].items():
+#             month_name = calendar.month_name[month]
+#             formatted_data[str(year)]['months'][f"{month:02d}_{month_name}"] = {
+#                 'month_number': month,
+#                 'month_name': month_name,
+#                 'total_projects': month_data['total_projects'],
+#                 'total_votes_received': month_data['total_votes_received'],
+#                 'average_votes_per_project': month_data['average_votes_per_project'],
+#                 'weeks': month_data['weeks']
+#             }
     
-    return Response({
-        'success': True,
-        'data': formatted_data,
-        'summary': {
-            'total_years': len(formatted_data),
-            'total_projects_platform': sum(year['total_projects'] for year in formatted_data.values()),
-            'total_votes_platform': sum(year['total_votes_received'] for year in formatted_data.values()),
-            'platform_average': round(
-                sum(year['total_votes_received'] for year in formatted_data.values()) /
-                max(sum(year['total_projects'] for year in formatted_data.values()), 1), 2
-            )
-        }
-    })
+#     return Response({
+#         'success': True,
+#         'data': formatted_data,
+#         'summary': {
+#             'total_years': len(formatted_data),
+#             'total_projects_platform': sum(year['total_projects'] for year in formatted_data.values()),
+#             'total_votes_platform': sum(year['total_votes_received'] for year in formatted_data.values()),
+#             'platform_average': round(
+#                 sum(year['total_votes_received'] for year in formatted_data.values()) /
+#                 max(sum(year['total_projects'] for year in formatted_data.values()), 1), 2
+#             )
+#         }
+#     })
 
 
 @api_view(['GET'])
@@ -964,3 +999,487 @@ def dashboard_summary_stats(request):
             }
         }
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@renderer_classes([JSONRenderer])
+def votes_evolution_analytics(request):
+    """
+    API pour l'évolution des votes avec structure : Année[Mois[Semaines[Jours]]]
+    """
+    try:
+        # Récupérer tous les votes actifs avec paiements
+        votes_query = Vote.objects.filter(
+            active=True,
+            votepayment__status='approved'
+        ).select_related('votepayment')
+        
+        # Organiser les données par date
+        vote_data_by_date = defaultdict(lambda: {
+            'total_vote_count': 0,
+            'total_revenue': 0,
+            'transaction_count': 0
+        })
+        
+        for vote in votes_query:
+            vote_date = vote.created_at.date()
+            vote_data_by_date[vote_date]['total_vote_count'] += vote.vote_count
+            vote_data_by_date[vote_date]['total_revenue'] += float(vote.votepayment.amount)
+            vote_data_by_date[vote_date]['transaction_count'] += 1
+        
+        # Obtenir la plage de dates
+        if not vote_data_by_date:
+            return Response({
+                'success': True, 
+                'data': [],
+                'message': 'Aucune donnée de vote trouvée'
+            })
+        
+        min_date = min(vote_data_by_date.keys())
+        max_date = max(vote_data_by_date.keys())
+        
+        # Construire la structure hiérarchique
+        years_data = []
+        
+        for year in range(min_date.year, max_date.year + 1):
+            year_total_votes = 0
+            year_total_revenue = 0.0
+            year_total_transactions = 0
+            months_data = []
+            
+            for month in range(1, 13):
+                try:
+                    # Vérifier si le mois existe pour cette année
+                    test_date = date(year, month, 1)
+                    if test_date > max_date or date(year, month, calendar.monthrange(year, month)[1]) < min_date:
+                        continue
+                except ValueError:
+                    continue
+                    
+                month_total_votes = 0
+                month_total_revenue = 0.0
+                month_total_transactions = 0
+                weeks_data = []
+                
+                weeks = get_weeks_in_month(year, month)
+                
+                for week_info in weeks:
+                    week_total_votes = 0
+                    week_total_revenue = 0.0
+                    week_total_transactions = 0
+                    days_data = []
+                    
+                    current_date = week_info['start_date']
+                    while current_date <= week_info['end_date']:
+                        day_data = vote_data_by_date.get(current_date, {
+                            'total_vote_count': 0,
+                            'total_revenue': 0.0,
+                            'transaction_count': 0
+                        })
+                        
+                        days_data.append({
+                            'date': current_date.isoformat(),
+                            'day_name': current_date.strftime('%A'),
+                            'total_vote_count': day_data['total_vote_count'],
+                            'total_revenue': float(day_data['total_revenue']),
+                            'transaction_count': day_data['transaction_count']
+                        })
+                        
+                        # Ajouter aux totaux de la semaine
+                        week_total_votes += day_data['total_vote_count']
+                        week_total_revenue += float(day_data['total_revenue'])
+                        week_total_transactions += day_data['transaction_count']
+                        
+                        current_date += timedelta(days=1)
+                    
+                    weeks_data.append({
+                        'week_number': week_info['week_number'],
+                        'start_date': week_info['start_date'].isoformat(),
+                        'end_date': week_info['end_date'].isoformat(),
+                        'week_total_vote_count': week_total_votes,
+                        'week_total_revenue': float(week_total_revenue),
+                        'week_total_transactions': week_total_transactions,
+                        'days': days_data
+                    })
+                    
+                    # Ajouter aux totaux du mois
+                    month_total_votes += week_total_votes
+                    month_total_revenue += week_total_revenue
+                    month_total_transactions += week_total_transactions
+                
+                if weeks_data:  # N'ajouter que les mois avec des données
+                    months_data.append({
+                        'month_number': month,
+                        'month_name': calendar.month_name[month],
+                        'month_total_vote_count': month_total_votes,
+                        'month_total_revenue': float(month_total_revenue),
+                        'month_total_transactions': month_total_transactions,
+                        'weeks': weeks_data
+                    })
+                    
+                    # Ajouter aux totaux de l'année
+                    year_total_votes += month_total_votes
+                    year_total_revenue += month_total_revenue
+                    year_total_transactions += month_total_transactions
+            
+            if months_data:  # N'ajouter que les années avec des données
+                years_data.append({
+                    'year': year,
+                    'year_total_vote_count': year_total_votes,
+                    'year_total_revenue': float(year_total_revenue),
+                    'year_total_transactions': year_total_transactions,
+                    'months': months_data
+                })
+        
+        return Response({
+            'success': True,
+            'data': years_data,
+            'summary': {
+                'total_years': len(years_data),
+                'platform_total_votes': sum(year['year_total_vote_count'] for year in years_data),
+                'platform_total_revenue': sum(year['year_total_revenue'] for year in years_data),
+                'platform_total_transactions': sum(year['year_total_transactions'] for year in years_data)
+            }
+        })
+        
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e),
+            'message': 'Erreur lors de la récupération des données'
+        }, status=500)
+        
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def projects_evolution_analytics(request):
+    """
+    API pour l'évolution des projets avec structure : Année[Mois[Semaines[Jours]]]
+    """
+    # Récupérer tous les projets publiés
+    projects_query = Project.objects.filter(
+        platform_status='publie',
+        validated_at__isnull=False
+    ).prefetch_related('vote_set')
+    
+    # Organiser les données par date
+    project_data_by_date = defaultdict(lambda: {
+        'total_projects': 0,
+        'total_vote_count_received': 0,
+        'total_revenue_generated': 0
+    })
+    
+    for project in projects_query:
+        project_date = project.validated_at.date()
+        
+        # Calculer les votes et revenus pour ce projet
+        project_votes = project.vote_set.filter(active=True).aggregate(
+            total_votes=Sum('vote_count'),
+            total_revenue=Sum('votepayment__amount', filter=Q(votepayment__status='approved'))
+        )
+        
+        project_data_by_date[project_date]['total_projects'] += 1
+        project_data_by_date[project_date]['total_vote_count_received'] += project_votes['total_votes'] or 0
+        project_data_by_date[project_date]['total_revenue_generated'] += float(project_votes['total_revenue'] or 0)
+    
+    # Obtenir la plage de dates
+    if not project_data_by_date:
+        return Response({'success': True, 'data': []})
+    
+    min_date = min(project_data_by_date.keys())
+    max_date = max(project_data_by_date.keys())
+    
+    # Construire la structure hiérarchique
+    years_data = []
+    
+    for year in range(min_date.year, max_date.year + 1):
+        year_total_projects = 0
+        year_total_votes = 0
+        year_total_revenue = 0
+        months_data = []
+        
+        for month in range(1, 13):
+            try:
+                test_date = date(year, month, 1)
+                if test_date > max_date or date(year, month, calendar.monthrange(year, month)[1]) < min_date:
+                    continue
+            except:
+                continue
+                
+            month_total_projects = 0
+            month_total_votes = 0
+            month_total_revenue = 0
+            weeks_data = []
+            
+            weeks = get_weeks_in_month(year, month)
+            
+            for week_info in weeks:
+                week_total_projects = 0
+                week_total_votes = 0
+                week_total_revenue = 0
+                days_data = []
+                
+                current_date = week_info['start_date']
+                while current_date <= week_info['end_date']:
+                    day_data = project_data_by_date.get(current_date, {
+                        'total_projects': 0,
+                        'total_vote_count_received': 0,
+                        'total_revenue_generated': 0
+                    })
+                    
+                    days_data.append({
+                        'date': current_date.isoformat(),
+                        'day_name': current_date.strftime('%A'),
+                        'total_projects': day_data['total_projects'],
+                        'total_vote_count_received': day_data['total_vote_count_received'],
+                        'total_revenue_generated': day_data['total_revenue_generated']
+                    })
+                    
+                    # Ajouter aux totaux de la semaine
+                    week_total_projects += day_data['total_projects']
+                    week_total_votes += day_data['total_vote_count_received']
+                    week_total_revenue += day_data['total_revenue_generated']
+                    
+                    current_date += timedelta(days=1)
+                
+                # Calculer la moyenne de votes par projet pour la semaine
+                week_avg_votes = round(week_total_votes / max(week_total_projects, 1), 2)
+                
+                weeks_data.append({
+                    'week_number': week_info['week_number'],
+                    'start_date': week_info['start_date'].isoformat(),
+                    'end_date': week_info['end_date'].isoformat(),
+                    'week_total_projects': week_total_projects,
+                    'week_total_vote_count_received': week_total_votes,
+                    'week_total_revenue_generated': week_total_revenue,
+                    'week_average_votes_per_project': week_avg_votes,
+                    'days': days_data
+                })
+                
+                # Ajouter aux totaux du mois
+                month_total_projects += week_total_projects
+                month_total_votes += week_total_votes
+                month_total_revenue += week_total_revenue
+            
+            if weeks_data:
+                # Calculer la moyenne de votes par projet pour le mois
+                month_avg_votes = round(month_total_votes / max(month_total_projects, 1), 2)
+                
+                months_data.append({
+                    'month_number': month,
+                    'month_name': calendar.month_name[month],
+                    'month_total_projects': month_total_projects,
+                    'month_total_vote_count_received': month_total_votes,
+                    'month_total_revenue_generated': month_total_revenue,
+                    'month_average_votes_per_project': month_avg_votes,
+                    'weeks': weeks_data
+                })
+                
+                # Ajouter aux totaux de l'année
+                year_total_projects += month_total_projects
+                year_total_votes += month_total_votes
+                year_total_revenue += month_total_revenue
+        
+        if months_data:
+            # Calculer la moyenne de votes par projet pour l'année
+            year_avg_votes = round(year_total_votes / max(year_total_projects, 1), 2)
+            
+            years_data.append({
+                'year': year,
+                'year_total_projects': year_total_projects,
+                'year_total_vote_count_received': year_total_votes,
+                'year_total_revenue_generated': year_total_revenue,
+                'year_average_votes_per_project': year_avg_votes,
+                'months': months_data
+            })
+    
+    return Response({
+        'success': True,
+        'data': years_data,
+        'summary': {
+            'total_years': len(years_data),
+            'platform_total_projects': sum(year['year_total_projects'] for year in years_data),
+            'platform_total_votes': sum(year['year_total_vote_count_received'] for year in years_data),
+            'platform_total_revenue': sum(year['year_total_revenue_generated'] for year in years_data),
+            'platform_average_votes_per_project': round(
+                sum(year['year_total_vote_count_received'] for year in years_data) /
+                max(sum(year['year_total_projects'] for year in years_data), 1), 2
+            )
+        }
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def owner_votes_evolution_analytics(request, owner_id):
+    """
+    API pour l'évolution des votes sur les projets d'un owner spécifique
+    """
+    try:
+        owner = Owner.objects.get(id=owner_id)
+    except Owner.DoesNotExist:
+        return Response({
+            'success': False,
+            'error': 'Owner non trouvé'
+        }, status=404)
+    
+    # Vérifier les permissions
+    user = request.user
+    if not (user.is_staff or user.user_type == 'admin' or 
+            (user.user_type == 'owner' and hasattr(user, 'owner') and user.owner == owner)):
+        return Response({
+            'success': False,
+            'error': 'Accès non autorisé'
+        }, status=403)
+    
+    # Récupérer les votes sur les projets de cet owner
+    votes_query = Vote.objects.filter(
+        active=True,
+        project__owner=owner,
+        votepayment__status='approved'
+    ).select_related('votepayment', 'project')
+    
+    # Organiser les données par date
+    vote_data_by_date = defaultdict(lambda: {
+        'total_vote_count': 0,
+        'total_revenue': 0,
+        'transaction_count': 0,
+        'projects_voted': set()
+    })
+    
+    for vote in votes_query:
+        vote_date = vote.created_at.date()
+        vote_data_by_date[vote_date]['total_vote_count'] += vote.vote_count
+        vote_data_by_date[vote_date]['total_revenue'] += float(vote.votepayment.amount)
+        vote_data_by_date[vote_date]['transaction_count'] += 1
+        vote_data_by_date[vote_date]['projects_voted'].add(vote.project.id)
+    
+    # Convertir les sets en comptes
+    for date_data in vote_data_by_date.values():
+        date_data['unique_projects_voted'] = len(date_data['projects_voted'])
+        del date_data['projects_voted']  # Supprimer le set pour la sérialisation
+    
+    if not vote_data_by_date:
+        return Response({
+            'success': True,
+            'data': [],
+            'owner_info': {
+                'id': owner.id,
+                'name': owner.full_name,
+                'total_projects': owner.project_set.filter(platform_status='publie').count()
+            }
+        })
+    
+    min_date = min(vote_data_by_date.keys())
+    max_date = max(vote_data_by_date.keys())
+    
+    # Construire la structure hiérarchique (même logique que votes_evolution_analytics)
+    years_data = []
+    
+    for year in range(min_date.year, max_date.year + 1):
+        year_total_votes = 0
+        year_total_revenue = 0
+        year_total_transactions = 0
+        months_data = []
+        
+        for month in range(1, 13):
+            try:
+                test_date = date(year, month, 1)
+                if test_date > max_date or date(year, month, calendar.monthrange(year, month)[1]) < min_date:
+                    continue
+            except:
+                continue
+                
+            month_total_votes = 0
+            month_total_revenue = 0
+            month_total_transactions = 0
+            weeks_data = []
+            
+            weeks = get_weeks_in_month(year, month)
+            
+            for week_info in weeks:
+                week_total_votes = 0
+                week_total_revenue = 0
+                week_total_transactions = 0
+                days_data = []
+                
+                current_date = week_info['start_date']
+                while current_date <= week_info['end_date']:
+                    day_data = vote_data_by_date.get(current_date, {
+                        'total_vote_count': 0,
+                        'total_revenue': 0,
+                        'transaction_count': 0,
+                        'unique_projects_voted': 0
+                    })
+                    
+                    days_data.append({
+                        'date': current_date.isoformat(),
+                        'day_name': current_date.strftime('%A'),
+                        'total_vote_count': day_data['total_vote_count'],
+                        'total_revenue': day_data['total_revenue'],
+                        'transaction_count': day_data['transaction_count'],
+                        'unique_projects_voted': day_data['unique_projects_voted']
+                    })
+                    
+                    week_total_votes += day_data['total_vote_count']
+                    week_total_revenue += day_data['total_revenue']
+                    week_total_transactions += day_data['transaction_count']
+                    
+                    current_date += timedelta(days=1)
+                
+                weeks_data.append({
+                    'week_number': week_info['week_number'],
+                    'start_date': week_info['start_date'].isoformat(),
+                    'end_date': week_info['end_date'].isoformat(),
+                    'week_total_vote_count': week_total_votes,
+                    'week_total_revenue': week_total_revenue,
+                    'week_total_transactions': week_total_transactions,
+                    'days': days_data
+                })
+                
+                month_total_votes += week_total_votes
+                month_total_revenue += week_total_revenue
+                month_total_transactions += week_total_transactions
+            
+            if weeks_data:
+                months_data.append({
+                    'month_number': month,
+                    'month_name': calendar.month_name[month],
+                    'month_total_vote_count': month_total_votes,
+                    'month_total_revenue': month_total_revenue,
+                    'month_total_transactions': month_total_transactions,
+                    'weeks': weeks_data
+                })
+                
+                year_total_votes += month_total_votes
+                year_total_revenue += month_total_revenue
+                year_total_transactions += month_total_transactions
+        
+        if months_data:
+            years_data.append({
+                'year': year,
+                'year_total_vote_count': year_total_votes,
+                'year_total_revenue': year_total_revenue,
+                'year_total_transactions': year_total_transactions,
+                'months': months_data
+            })
+    
+    return Response({
+        'success': True,
+        'data': years_data,
+        'owner_info': {
+            'id': owner.id,
+            'name': owner.full_name,
+            'email': owner.user.email,
+            'total_published_projects': owner.project_set.filter(platform_status='publie').count()
+        },
+        'summary': {
+            'total_years': len(years_data),
+            'owner_total_votes': sum(year['year_total_vote_count'] for year in years_data),
+            'owner_total_revenue': sum(year['year_total_revenue'] for year in years_data),
+            'owner_total_transactions': sum(year['year_total_transactions'] for year in years_data)
+        }
+    })
+
+

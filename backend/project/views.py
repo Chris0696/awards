@@ -502,10 +502,26 @@ class ProjectDetailAPIView(generics.RetrieveAPIView):
             return Project.objects.filter(platform_status='publie')
 
 
+# class ProjectUpdateAPIView(generics.UpdateAPIView):
+#     queryset = Project.objects.all()
+#     serializer_class = ProjectCreateUpdateSerializer
+#     permission_classes = [IsAuthenticated, IsProjectOwnerOrAdmin]
+#     lookup_field = 'project_id'
+    
+#     def get_queryset(self):
+#         # Seuls les propriétaires peuvent modifier leurs projets
+#         try:
+#             owner = Owner.objects.get(user=self.request.user)
+#             return Project.objects.filter(owner=owner)
+#         except Owner.DoesNotExist:
+#             return Project.objects.none()
+
+
 class ProjectUpdateAPIView(generics.UpdateAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectCreateUpdateSerializer
     permission_classes = [IsAuthenticated, IsProjectOwnerOrAdmin]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]  # Ajout des parsers FormData
     lookup_field = 'project_id'
     
     def get_queryset(self):
@@ -516,6 +532,71 @@ class ProjectUpdateAPIView(generics.UpdateAPIView):
         except Owner.DoesNotExist:
             return Project.objects.none()
 
+    def update(self, request, *args, **kwargs):
+        print(f"🔍 DEBUG ProjectUpdate - Content-Type: {request.content_type}")
+        print(f"🔍 DEBUG ProjectUpdate - Request data keys: {list(request.data.keys())}")
+        print(f"🔍 DEBUG ProjectUpdate - Request FILES keys: {list(request.FILES.keys())}")
+        
+        # Obtenir l'instance du projet
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        try:
+            # Préprocesser les données si FormData
+            processed_data = self.preprocess_update_data(request)
+            
+            serializer = self.get_serializer(instance, data=processed_data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            
+            print("✅ DEBUG ProjectUpdate - Validation réussie, mise à jour en cours...")
+            self.perform_update(serializer)
+            
+            if getattr(instance, '_prefetched_objects_cache', None):
+                instance._prefetched_objects_cache = {}
+
+            print("✅ DEBUG ProjectUpdate - Mise à jour terminée avec succès")
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(f"❌ DEBUG ProjectUpdate - Erreur inattendue: {str(e)}")
+            logger.exception("Erreur lors de la mise à jour du projet")
+            return Response({
+                "error": {
+                    "non_field_errors": [f"Erreur interne: {str(e)}"]
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def preprocess_update_data(self, request):
+        """
+        Préprocesse les données de mise à jour FormData
+        """
+        print("🔍 DEBUG ProjectUpdate - Préprocessing des données...")
+        
+        processed_data = {}
+        
+        if request.content_type and request.content_type.startswith('multipart/'):
+            print("🔍 DEBUG ProjectUpdate - FormData détecté")
+            
+            for key, value in request.data.items():
+                # Pas de preprocessing spécial nécessaire pour les projets
+                # contrairement à l'inscription, car ici on travaille directement avec les champs
+                processed_data[key] = value
+            
+            # Ajouter les fichiers
+            for key, file_obj in request.FILES.items():
+                processed_data[key] = file_obj
+                print(f"🔍 DEBUG ProjectUpdate - Fichier {key}: {file_obj.name} ({file_obj.size} bytes)")
+                
+        else:
+            print("🔍 DEBUG ProjectUpdate - JSON standard")
+            processed_data = request.data
+        
+        print("✅ DEBUG ProjectUpdate - Préprocessing terminé")
+        return processed_data
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
 
 class ProjectDeleteAPIView(generics.DestroyAPIView):
     queryset = Project.objects.all()
