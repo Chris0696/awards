@@ -1,34 +1,36 @@
-FROM node:20-alpine
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copier les fichiers de dépendances
 COPY package*.json ./
+RUN npm ci --omit=dev
 
-# Installer TOUTES les dépendances (pas --production)
-RUN npm ci
 
-# Copier le code source
 COPY . .
+COPY .env.production .env.production
 
-# Créer les dossiers et permissions
+RUN npm run build
+
+
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+EXPOSE 3000
+
+
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001 && \
-    mkdir -p .next && \
-    chown -R nextjs:nodejs /app && \
-    chmod -R 755 /app
-
-# Créer le fichier next-env.d.ts
-RUN touch /app/next-env.d.ts && \
-    chown nextjs:nodejs /app/next-env.d.ts && \
-    chmod 664 /app/next-env.d.ts
+    adduser -S nextjs -u 1001
 
 USER nextjs
 
-EXPOSE 3000
 
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=development
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
 
-# Mode développement
-CMD ["npm", "run", "dev"]
+
+CMD ["npm", "run", "start"]
