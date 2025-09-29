@@ -16,9 +16,3 @@ export const logoutUser = async () => {
   await clearTokens();
   return res.data;
 };
-
-export const refreshToken = async (refresh: string) => {
-  const res = await apiClient.post("auth/refresh/", { refresh });
-  await saveTokens(res.data.access, res.data.refresh);
-  return res.data.access;
-};

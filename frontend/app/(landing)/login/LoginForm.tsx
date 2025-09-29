@@ -2,6 +2,7 @@
 import EmailField from "@/app/(landing)/submit/forms/EmailField";
 import PasswordField from "@/app/(landing)/submit/forms/PasswordField";
 import { userSchema } from "@/frontendlib/schemas";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 
 import { loginUser } from "@/services/authService";
 
@@ -27,7 +28,7 @@ export default function LoginForm() {
 
   const {
     handleSubmit,
-    setError,
+
     formState: { isSubmitting },
   } = methods;
 
@@ -40,7 +41,8 @@ export default function LoginForm() {
       router.replace("/admin");
     },
     onError: (err) => {
-      toast.error("Erreur login");
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
     },
   });
 

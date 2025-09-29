@@ -1,5 +1,6 @@
 import { User } from "@/components/modals/AddGdChildModal";
-import apiClient from "./apiClient";
+import apiClient, { BackendError } from "./apiClient";
+import { AxiosError } from "axios";
 
 export const getUserInfo = async (userId: number) => {
   const res = await apiClient.get(`auth/globalprofile/${userId}/`);
@@ -17,8 +18,12 @@ export const getAdminRelatedUsers = async () => {
 };
 
 export const addAdminRelatedUser = async (data: User) => {
-  const res = await apiClient.post("admin/users/commercial/", data);
-  return res.data;
+  try {
+    const res = await apiClient.post("admin/users/commercial/", data);
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
 };
 export const updateAdminRelatedUser = async (data: User) => {
   const res = await apiClient.patch(`admin/users/commercial/${data.id}/`, data);
