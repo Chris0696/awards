@@ -255,28 +255,49 @@ class CategoryStatsSerializer(serializers.ModelSerializer):
         fields = ['category_name', 'project_count', 'slug']
         
 
-class RecentProjectSerializer(serializers.ModelSerializer):
-    votes = serializers.IntegerField(source='vote_count')
-    rank = serializers.IntegerField()
-    category = CategorySerializer(read_only=True)  # Inclut category_id
+# class RecentProjectSerializer(serializers.ModelSerializer):
+#     votes = serializers.IntegerField(source='vote_count')
+#     rank = serializers.IntegerField()
+#     category = CategorySerializer(read_only=True)  # Inclut category_id
     
-    class Meta:
-        model = Project
-        fields = ['project_id', 'project_title', 'platform_status', 'votes', 'rank', 'category', 'created_at']
+#     class Meta:
+#         model = Project
+#         fields = ['project_id', 'project_title', 'platform_status', 'votes', 'rank', 'category', 'created_at']
 
+
+# class RecentVoteSerializer(serializers.ModelSerializer):
+#     project_title = serializers.CharField(source='project.project_title')
+#     user = serializers.CharField(source='user.full_name', allow_null=True, default='Anonyme')
+#     review = serializers.SerializerMethodField()
+#     vote_count = serializers.CharField(source='vote.vote_count')
+    
+#     class Meta:
+#         model = Vote
+#         fields = ['project_title', 'user', 'vote_count', 'review', 'created_at']
+    
+#     def get_review(self, obj):
+#         return obj.vote_count[:100] + "..." if len(obj.vote_count) > 100 else obj.vote_count
 
 class RecentVoteSerializer(serializers.ModelSerializer):
-    project_title = serializers.CharField(source='project.project_title')
-    user = serializers.CharField(source='user.full_name', allow_null=True, default='Anonyme')
-    review = serializers.SerializerMethodField()
-    vote_count = serializers.CharField(source='vote.vote_count')
+    project_title = serializers.CharField(source='project.project_title', read_only=True)
+    voter_name = serializers.CharField(read_only=True)
+    rating = serializers.IntegerField(source='vote', read_only=True)
+    votes_purchased = serializers.IntegerField(source='vote_count', read_only=True)
     
     class Meta:
         model = Vote
-        fields = ['project_title', 'user', 'vote_count', 'review', 'created_at']
+        fields = ['project_title', 'voter_name', 'rating', 'votes_purchased', 'created_at']
+
+
+class RecentProjectSerializer(serializers.ModelSerializer):
+    votes_count = serializers.IntegerField(read_only=True)
+    rank = serializers.IntegerField(read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
     
-    def get_review(self, obj):
-        return obj.vote_count[:100] + "..." if len(obj.vote_count) > 100 else obj.vote_count
+    class Meta:
+        model = Project
+        fields = ['project_id', 'project_title', 'category_name', 'platform_status', 
+                  'votes_count', 'rank', 'created_at']
 
 
 class ProjectCreateUpdateSerializer(serializers.ModelSerializer):

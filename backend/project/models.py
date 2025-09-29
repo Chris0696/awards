@@ -351,12 +351,12 @@ class Vote(models.Model):
 
         # return f"Vote de {self.user or self.phone} pour {self.project.project_title} ({self.vote_count} votes, note: {self.vote})"
 
-    def clean(self):
-        import re
-        if self.phone and not re.match(r'^\d{7,15}$', self.phone):
-            raise models.ValidationError({"phone": _("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")})
-        if self.country_code and not re.match(r'^\+\d{1,3}$', self.country_code):
-            raise models.ValidationError({"country_code": _("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33).")})
+    # def clean(self):
+    #     import re
+    #     if self.phone and not re.match(r'^\d{7,15}$', self.phone):
+    #         raise models.ValidationError({"phone": _("Le numéro de téléphone doit contenir entre 7 et 15 chiffres.")})
+    #     if self.country_code and not re.match(r'^\+\d{1,3}$', self.country_code):
+    #         raise models.ValidationError({"country_code": _("Le code pays doit être au format + suivi de 1 à 3 chiffres (ex. +33).")})
 
     def profile(self):
         return Profile.objects.get(user=self.user) if self.user else None

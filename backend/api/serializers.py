@@ -477,12 +477,21 @@ class AdminDashboardSerializer(serializers.Serializer):
     top_commercials = CommercialStatsSerializer(many=True)
     
 
+# class OwnerDashboardSerializer(serializers.Serializer):
+#     profile = serializers.DictField()
+#     project_stats = serializers.DictField(child=serializers.IntegerField(allow_null=True))
+#     vote_stats = serializers.DictField(child=serializers.FloatField(allow_null=True))
+#     recent_projects = RecentProjectSerializer(many=True)
+#     recent_votes = RecentVoteSerializer(many=True)
+#     owner_ranking = serializers.DictField(child=serializers.IntegerField(allow_null=True))
+#     top_project_votes = serializers.IntegerField() 
+
 class OwnerDashboardSerializer(serializers.Serializer):
     profile = serializers.DictField()
-    project_stats = serializers.DictField(child=serializers.IntegerField(allow_null=True))
-    vote_stats = serializers.DictField(child=serializers.FloatField(allow_null=True))
+    project_stats = serializers.DictField()
+    vote_stats = serializers.DictField()
     recent_projects = RecentProjectSerializer(many=True)
     recent_votes = RecentVoteSerializer(many=True)
-    owner_ranking = serializers.DictField(child=serializers.IntegerField(allow_null=True))
-    top_project_votes = serializers.IntegerField() 
-    
+    owner_ranking = serializers.DictField()
+    top_project_votes = serializers.IntegerField()
+

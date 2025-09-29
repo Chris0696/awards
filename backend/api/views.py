@@ -431,8 +431,101 @@ class AdminDashboardAPIView(generics.RetrieveAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 # === DASHBOARD OWNER (AUTEUR DE PROJET) ===
+# class OwnerDashboardAPIView(generics.RetrieveAPIView):
+#     permission_classes = [IsAuthenticated]
+    
+#     def get(self, request):
+#         if request.user.user_type != 'owner':
+#             return Response(
+#                 {"error": _("Seul un utilisateur de type 'owner' peut accéder à ce tableau de bord.")},
+#                 status=status.HTTP_403_FORBIDDEN
+#             )
+        
+#         try:
+#             owner = Owner.objects.get(user=request.user)
+#         except Owner.DoesNotExist:
+#             return Response(
+#                 {"error": _("Profil auteur non trouvé")},
+#                 status=status.HTTP_404_NOT_FOUND
+#             )
+        
+#         # Statistiques des projets
+#         project_stats = owner.project_set.aggregate(
+#             total=Count('id'),
+#             validated=Count('id', filter=Q(platform_status='publie')),
+#             rejected=Count('id', filter=Q(platform_status='rejete')),
+#             pending=Count('id', filter=Q(platform_status='vote')),
+#             draft=Count('id', filter=Q(platform_status='brouillon'))
+#         )
+#         project_stats['validation_rate'] = round(project_stats['validated'] / project_stats['total'] * 100, 2) if project_stats['total'] > 0 else 0
+        
+#         # Statistiques des votes
+#         vote_stats = {
+#             'total_votes': Vote.objects.filter(project__owner=owner, active=True).count(),
+#             'average_rating': round(Vote.objects.filter(project__owner=owner, active=True).aggregate(avg=Avg('vote'))['avg'] or 0, 2),
+#             'total_revenue_generated': float(VotePayment.objects.filter(vote__project__owner=owner, status='approved').aggregate(total=Sum('amount'))['total'] or 0)
+#         }
+        
+#         # Classement de l'Owner
+#         owner_votes = Owner.objects.annotate(
+#             total_votes=Count('project__vote', filter=Q(project__vote__active=True))
+#         ).order_by('-total_votes')
+#         owner_ranking = {
+#             'rank': None,
+#             'total_owners': owner_votes.count()
+#         }
+#         for index, ranked_owner in enumerate(owner_votes, start=1):
+#             if ranked_owner.id == owner.id:
+#                 owner_ranking['rank'] = index
+#                 break
+        
+#         # Nombre de votes du premier projet
+#         top_project = Project.objects.annotate(
+#             vote_count=Count('vote', filter=Q(vote__active=True))
+#         ).order_by('-vote_count').first()
+#         top_project_votes = top_project.vote_count if top_project else 0
+        
+#         # Projets récents avec rang
+#         all_projects = Project.objects.annotate(
+#             vote_count=Count('vote', filter=Q(vote__active=True)),
+#             rank=Window(
+#                 expression=Rank(),
+#                 order_by=F('vote_count').desc()
+#             )
+#         )
+#         recent_projects = owner.project_set.annotate(
+#             vote_count=Count('vote', filter=Q(vote__active=True)),
+#             rank=Window(
+#                 expression=Rank(),
+#                 order_by=F('vote_count').desc()
+#             )
+#         ).order_by('-created_at')[:5]
+        
+#         # Votes récents reçus
+#         recent_votes = Vote.objects.filter(project__owner=owner, active=True).select_related('user', 'project').order_by('-created_at')[:10]
+        
+#         data = {
+#             'profile': {
+#                 'full_name': owner.full_name,
+#                 'profession': owner.profession,
+#                 'phone': owner.phone,
+#                 'commercial': owner.commercial.full_name if owner.commercial else 'Aucun commercial associé'
+#             },
+#             'project_stats': project_stats,
+#             'vote_stats': vote_stats,
+#             'owner_ranking': owner_ranking,
+#             'top_project_votes': top_project_votes,
+#             'recent_projects': recent_projects,
+#             'recent_votes': recent_votes
+#         }
+        
+#         serializer = OwnerDashboardSerializer(data)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class OwnerDashboardAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = OwnerDashboardSerializer
     
     def get(self, request):
         if request.user.user_type != 'owner':
@@ -454,71 +547,98 @@ class OwnerDashboardAPIView(generics.RetrieveAPIView):
             total=Count('id'),
             validated=Count('id', filter=Q(platform_status='publie')),
             rejected=Count('id', filter=Q(platform_status='rejete')),
-            pending=Count('id', filter=Q(platform_status='vote')),
+            pending=Count('id', filter=Q(platform_status='en_attente')),
             draft=Count('id', filter=Q(platform_status='brouillon'))
         )
-        project_stats['validation_rate'] = round(project_stats['validated'] / project_stats['total'] * 100, 2) if project_stats['total'] > 0 else 0
+        
+        # Calculer le taux de validation
+        total_projects = project_stats['total']
+        if total_projects > 0:
+            project_stats['validation_rate'] = round(
+                (project_stats['validated'] / total_projects) * 100, 2
+            )
+        else:
+            project_stats['validation_rate'] = 0
         
         # Statistiques des votes
+        owner_votes = Vote.objects.filter(project__owner=owner, active=True)
+        
         vote_stats = {
-            'total_votes': Vote.objects.filter(project__owner=owner, active=True).count(),
-            'average_rating': round(Vote.objects.filter(project__owner=owner, active=True).aggregate(avg=Avg('vote'))['avg'] or 0, 2),
-            'total_revenue_generated': float(VotePayment.objects.filter(vote__project__owner=owner, status='approved').aggregate(total=Sum('amount'))['total'] or 0)
+            'total_vote_transactions': owner_votes.count(),
+            'total_votes_purchased': owner_votes.aggregate(
+                total=Sum('vote_count')
+            )['total'] or 0,
+            'average_rating': round(
+                owner_votes.aggregate(avg=Avg('vote'))['avg'] or 0, 2
+            ),
+            'total_revenue_generated': float(
+                VotePayment.objects.filter(
+                    vote__project__owner=owner, 
+                    status='approved'
+                ).aggregate(total=Sum('amount'))['total'] or 0
+            )
         }
         
         # Classement de l'Owner
-        owner_votes = Owner.objects.annotate(
-            total_votes=Count('project__vote', filter=Q(project__vote__active=True))
+        owner_ranking_query = Owner.objects.annotate(
+            total_votes=Sum('project__vote__vote_count', filter=Q(project__vote__active=True))
         ).order_by('-total_votes')
+        
         owner_ranking = {
             'rank': None,
-            'total_owners': owner_votes.count()
+            'total_owners': owner_ranking_query.count()
         }
-        for index, ranked_owner in enumerate(owner_votes, start=1):
+        
+        for index, ranked_owner in enumerate(owner_ranking_query, start=1):
             if ranked_owner.id == owner.id:
                 owner_ranking['rank'] = index
                 break
         
-        # Nombre de votes du premier projet
-        top_project = Project.objects.annotate(
-            vote_count=Count('vote', filter=Q(vote__active=True))
-        ).order_by('-vote_count').first()
-        top_project_votes = top_project.vote_count if top_project else 0
+        # Nombre de votes du projet le mieux classé
+        top_project = Project.objects.filter(
+            platform_status='publie'
+        ).annotate(
+            total_votes=Sum('vote__vote_count', filter=Q(vote__active=True))
+        ).order_by('-total_votes').first()
         
-        # Projets récents avec rang
-        all_projects = Project.objects.annotate(
-            vote_count=Count('vote', filter=Q(vote__active=True)),
-            rank=Window(
-                expression=Rank(),
-                order_by=F('vote_count').desc()
-            )
-        )
+        top_project_votes = top_project.total_votes if top_project and top_project.total_votes else 0
+        
+        # Projets récents de cet owner avec statistiques
         recent_projects = owner.project_set.annotate(
-            vote_count=Count('vote', filter=Q(vote__active=True)),
+            votes_count=Sum('vote__vote_count', filter=Q(vote__active=True)),
+        ).annotate(
             rank=Window(
                 expression=Rank(),
-                order_by=F('vote_count').desc()
+                order_by=F('votes_count').desc()
             )
-        ).order_by('-created_at')[:5]
+        ).select_related('category').order_by('-created_at')[:5]
         
-        # Votes récents reçus
-        recent_votes = Vote.objects.filter(project__owner=owner, active=True).select_related('user', 'project').order_by('-created_at')[:10]
+        # Votes récents reçus sur les projets de cet owner
+        recent_votes = Vote.objects.filter(
+            project__owner=owner, 
+            active=True
+        ).select_related(
+            'project'
+        ).order_by('-created_at')[:10]
         
+        # Préparer les données
         data = {
             'profile': {
                 'full_name': owner.full_name,
-                'profession': owner.profession,
-                'phone': owner.phone,
+                'profession': owner.profession or 'Non spécifié',
+                'phone': owner.phone or 'Non spécifié',
+                'email': owner.user.email,
                 'commercial': owner.commercial.full_name if owner.commercial else 'Aucun commercial associé'
             },
             'project_stats': project_stats,
             'vote_stats': vote_stats,
             'owner_ranking': owner_ranking,
             'top_project_votes': top_project_votes,
-            'recent_projects': recent_projects,
-            'recent_votes': recent_votes
+            'recent_projects': list(recent_projects),
+            'recent_votes': list(recent_votes)
         }
         
+        # Sérialiser les données
         serializer = OwnerDashboardSerializer(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
