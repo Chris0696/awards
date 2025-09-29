@@ -539,7 +539,7 @@ class CommercialDashboardAPIView(generics.RetrieveAPIView):
         
         # Statistiques des projets amenés
         total_projects = commercial.total_projects_brought()
-        validated_projects = commercial.total_validated_projects()
+        validated_projects = commercial.total_published_projects()
         rejected_projects = commercial.total_rejected_projects()
         pending_projects = Project.objects.filter(
             commercial=commercial, platform_status='vote'
@@ -584,7 +584,7 @@ class CommercialDashboardAPIView(generics.RetrieveAPIView):
         data = {
             'profile': {
                 'full_name': commercial.full_name,
-                'affiliate_code': commercial.affiliate_code,
+                'affiliate_link': commercial.affiliate_link,
                 'commission_rate': float(commercial.commission_rate),
                 'phone': commercial.phone,
                 'is_active': commercial.is_active
