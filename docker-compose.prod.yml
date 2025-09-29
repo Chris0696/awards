@@ -304,30 +304,30 @@ services:
       retries: 5
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.prod
-    depends_on:
-      postgres_db:
-        condition: service_healthy
-    volumes:
-      - ./backend:/usr/src/app
-      - awards_collectstatic:/usr/src/app/collectstatic
-      - ./backend/log:/usr/src/app/log
-      - ./backend/media:/usr/src/app/media
-      - ./.env:/usr/src/app/.env:ro
-    env_file: .env
-    environment:
-      - ALLOWED_HOSTS=awardprojectvoting.scarsoft.net,localhost,127.0.0.1,backend
-    command: >
-      sh -c "
-        echo 'Waiting for database...' &&
-        python manage.py migrate &&
-        python manage.py collectstatic --noinput &&
-        gunicorn awards.wsgi:application --name awards --workers 3 -b 0.0.0.0:8000
-      "
-    networks:
-      - awards-bridge
+  build:
+    context: ./backend
+    dockerfile: Dockerfile.prod
+  depends_on:
+    postgres_db:
+      condition: service_healthy
+  volumes:
+    - awards_collectstatic:/usr/src/app/collectstatic
+    - ./backend/log:/usr/src/app/log
+    - ./backend/media:/usr/src/app/media
+    - ./.env:/usr/src/app/.env:ro
+  env_file: .env
+  environment:
+    - ALLOWED_HOSTS=awardprojectvoting.scarsoft.net,localhost,127.0.0.1,backend
+  command: >
+    sh -c "
+      echo 'Waiting for database...' &&
+      python manage.py migrate &&
+      python manage.py collectstatic --noinput &&
+      gunicorn awards.wsgi:application --name awards --workers 3 -b 0.0.0.0:8000
+    "
+  networks:
+    - awards-bridge
+
 
   web:
     build:
