@@ -1,7 +1,8 @@
 import axios from "axios";
-
+export type BackendError = {
+  error: string[];
+};
 import { clearTokens, getTokens } from "./session";
-import { refreshToken } from "./authService";
 
 const isProd = process.env.NODE_ENV === "production";
 const baseURL = isProd
@@ -10,8 +11,15 @@ const baseURL = isProd
 
 const apiClient = axios.create({
   baseURL,
-  withCredentials: true,
+  withCredentials: isProd,
 });
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+function onRefreshed(token: string) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+}
 
 apiClient.interceptors.request.use(async (config) => {
   const tokens = await getTokens();
@@ -26,22 +34,37 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          refreshSubscribers.push((token: string) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            resolve(apiClient(originalRequest));
+          });
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
+
       try {
-        const tokens = await getTokens();
-        const refresh = tokens.refresh;
-        if (!refresh) await clearTokens();
-        else {
-          const newAccess = await refreshToken(refresh);
-          originalRequest.headers.Authorization = `Bearer ${newAccess}`;
-        }
+        const refreshRes = await axios.get("/api/auth/refresh");
+        const newAccess = refreshRes.data.access;
+
+        isRefreshing = false;
+        onRefreshed(newAccess);
+
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return apiClient(originalRequest);
-      } catch (error) {
+      } catch (err) {
+        isRefreshing = false;
         await clearTokens();
-        console.log(error);
+        return Promise.reject(err);
       }
     }
+
+    return Promise.reject(error);
   }
 );
 

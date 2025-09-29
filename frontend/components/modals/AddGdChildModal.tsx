@@ -19,6 +19,10 @@ import {
   updateAdminRelatedUser,
 } from "@/services/userService";
 import { Team } from "@/app/(dashboard)/admin/team/page";
+import axios, { AxiosError } from "axios";
+import { BackendError } from "@/services/apiClient";
+import { toast } from "sonner";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 
 type Props = {
   showModal: boolean;
@@ -69,9 +73,15 @@ export default function AddGdChildModal({
     mutationFn: addAdminRelatedUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team"] });
+      setShowModal(false);
+      reset();
     },
-    onError: (error) => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
+
   const updateMutation = useMutation({
     mutationFn: updateAdminRelatedUser,
     onSuccess: () => {
@@ -80,33 +90,26 @@ export default function AddGdChildModal({
     onError: (error) => {},
   });
   const onSubmit = (data: AffiliateForm) => {
-    try {
-      if (user_type === "commercial") {
-        if (member) {
-          const payload = {
-            id: member.id,
-            ...data,
-          };
-          updateMutation.mutate(payload as User);
-        } else {
-          createMutation.mutate(data as User);
-        }
+    if (user_type === "commercial") {
+      if (member) {
+        const payload = {
+          id: member.id,
+          ...data,
+        };
+        updateMutation.mutate(payload as User);
       } else {
-        if (member) {
-          const payload = {
-            id: member.id,
-            ...data,
-          };
-          updateMutation.mutate(payload as User);
-        } else {
-          createMutation.mutate(data as User);
-        }
+        createMutation.mutate(data as User);
       }
-
-      setShowModal(false);
-      reset();
-    } catch (error) {
-      console.log(error, "error");
+    } else {
+      if (member) {
+        const payload = {
+          id: member.id,
+          ...data,
+        };
+        updateMutation.mutate(payload as User);
+      } else {
+        createMutation.mutate(data as User);
+      }
     }
   };
 
