@@ -37,10 +37,10 @@ class MyTokenObtainPairView(TokenObtainPairView):
             return Response(
                 {
                     "error": [
-                        "Aucun compte actif avec les informations de connexion fournies"
+                        "Email ou mot de passe incorrect, veuillez essayer de nouveau."
                     ]
                 },
-                status=status.HTTP_401_UNAUTHORIZED
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         return Response(serializer.validated_data, status=status.HTTP_200_OK)

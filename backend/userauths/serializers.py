@@ -50,7 +50,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             if not user:
                 # Si l'authentification échoue, lever une exception personnalisée
                 raise serializers.ValidationError(
-                    "Aucun compte actif avec les informations de connexion fournies"
+                    "Email ou mot de passe incorrect, veuillez essayer de nouveau."
                 )
             
             if not user.is_active:
