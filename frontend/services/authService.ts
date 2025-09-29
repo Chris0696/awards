@@ -6,6 +6,7 @@ import apiClient from "./apiClient";
 export const loginUser = async (credentials: AuthForm) => {
   const res = await apiClient.post("auth/login/", credentials);
   await saveTokens(res.data.access, res.data.refresh);
+  return res.data;
 };
 
 export const logoutUser = async () => {

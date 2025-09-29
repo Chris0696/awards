@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useState } from "react";
 import Sidebar from "@/app/(dashboard)/Sidebar";
 import { MenuIcon } from "lucide-react";
 

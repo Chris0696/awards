@@ -2,8 +2,7 @@
 import EmailField from "@/app/(landing)/submit/forms/EmailField";
 import PasswordField from "@/app/(landing)/submit/forms/PasswordField";
 import { userSchema } from "@/frontendlib/schemas";
-import { login } from "@/frontendlib/services/authService";
-import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
+
 import { loginUser } from "@/services/authService";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,7 +34,9 @@ export default function LoginForm() {
   const router = useRouter();
   const mutateLogin = useMutation({
     mutationFn: loginUser,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log(data, "credentialsss");
+
       router.replace("/admin");
     },
     onError: (err) => {
