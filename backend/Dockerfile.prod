@@ -15,7 +15,7 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 # Créer les répertoires avec les permissions
 RUN mkdir -p /usr/src/app/log /usr/src/app/media/logos /usr/src/app/media/project-images /usr/src/app/collectstatic /usr/src/app/frontend /usr/src/app/locale /var/lib/celery && \
-    chmod 755 /usr/src/app/log /usr/src/app/media /usr/src/app/media/logos /usr/src/app/collectstatic /usr/src/app/frontend /usr/src/app/locale /var/lib/celery && \
+    chmod 755 /usr/src/app/log /usr/src/app/media /usr/src/app/media/logos /usr/src/app/media/project-images /usr/src/app/collectstatic /usr/src/app/frontend /usr/src/app/locale /var/lib/celery && \
     chown -R appuser:appuser /usr/src/app
 
 # Copier le code source
