@@ -1,6 +1,8 @@
 from django.db import models
 from project.models import Commercial, Vote
 from userauths.models import Profile, User
+from django.db.models import Sum, Avg
+
 from django.utils.translation import gettext_lazy as _
 import re
 
@@ -58,7 +60,7 @@ class Owner(models.Model):
         return self.project_set.filter(platform_status__in=['brouillon']).count()
     
     def total_votes_received(self):
-        return Vote.objects.filter(project__owner=self, active=True).count()
+        return Vote.objects.filter(project__owner=self, active=True).aggregate(total=Sum('vote_count'))['total'] or 0
 
 # class Owner(models.Model):
 #     user = models.OneToOneField(User, on_delete=models.CASCADE)

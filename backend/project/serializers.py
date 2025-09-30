@@ -292,7 +292,7 @@ class RecentVoteSerializer(serializers.ModelSerializer):
 class RecentProjectSerializer(serializers.ModelSerializer):
     votes_count = serializers.IntegerField(read_only=True)
     rank = serializers.IntegerField(read_only=True)
-    category_name = serializers.CharField(source='category.name', read_only=True)
+    category_name = serializers.CharField(source='category.category_name', read_only=True)
     
     class Meta:
         model = Project
@@ -384,14 +384,11 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
         
         print(f"🔍 DEBUG ProjectSerializer.validate - Attrs reçus: {attrs}")
         category_id = attrs.get('category_id')
+        print("category_id =", category_id)
         if not category_id:
             print("❌ DEBUG - Category_id manquant")
             raise serializers.ValidationError({
-                "error": {
-                    "project" :{
-                        "category_id": _("Vous devez obligatoirement choisir une catégorie pour le projet.")
-                    }
-                }
+                "error": ["Vous devez obligatoirement choisir une catégorie pour le projet."],
             })
         
         try:

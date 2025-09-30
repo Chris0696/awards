@@ -524,6 +524,20 @@ class ProjectUpdateAPIView(generics.UpdateAPIView):
     parser_classes = [JSONParser, MultiPartParser, FormParser]  # Ajout des parsers FormData
     lookup_field = 'project_id'
     
+    def format_validation_errors(self, detail):
+        errors = []
+        if isinstance(detail, dict):
+            for _, messages in detail.items():
+                if isinstance(messages, list):
+                    errors.extend(messages)
+                else:
+                    errors.append(str(messages))
+        elif isinstance(detail, list):
+            errors = detail
+        else:
+            errors = [str(detail)]
+        return errors
+    
     def get_queryset(self):
         # Seuls les propriétaires peuvent modifier leurs projets
         try:
@@ -560,10 +574,9 @@ class ProjectUpdateAPIView(generics.UpdateAPIView):
         except Exception as e:
             print(f"❌ DEBUG ProjectUpdate - Erreur inattendue: {str(e)}")
             logger.exception("Erreur lors de la mise à jour du projet")
-            return Response({
-                "error": {
-                    "non_field_errors": [f"Erreur interne: {str(e)}"]
-                }
+            return Response(
+                {"error": self.format_validation_errors(e.detail)
+                
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def preprocess_update_data(self, request):

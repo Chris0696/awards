@@ -135,11 +135,11 @@ class Project(models.Model):
         return round(avg['avg_rating'], 2) if avg['avg_rating'] else 0.0
 
     def vote_count(self):
-        return self.vote_set.filter(active=True).count()
+        return self.vote_set.filter(active=True).aggregate(total=Sum('vote_count'))['total'] or 0
     
     def total_votes_revenue(self):
         """Revenus générés par les votes sur ce projet"""
-        return VotePayment.objects.filter(vote__project=self, status='paye').aggregate(
+        return VotePayment.objects.filter(vote__project=self, status='approved').aggregate(
             total=Sum('amount'))['total'] or 0
 
 
@@ -266,10 +266,9 @@ class Commercial(models.Model):
             return 0
     
     def total_votes_generated(self):
-        """Total des votes sur les projets amenés par ce commercial"""
+        """Total des votes achetés sur les projets amenés par ce commercial"""
         try:
-            
-            return Vote.objects.filter(project__commercial=self, active=True).count()
+            return Vote.objects.filter(project__commercial=self, active=True).aggregate(total=Sum('vote_count'))['total'] or 0
         except Exception:
             return 0
     
@@ -279,7 +278,7 @@ class Commercial(models.Model):
             
             result = VotePayment.objects.filter(
                 vote__project__commercial=self, 
-                status='paye'
+                status='approved'
             ).aggregate(total=Sum('amount'))['total']
             return result or 0
         except Exception:

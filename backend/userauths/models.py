@@ -19,7 +19,7 @@ class User(AbstractUser):
         
     )
     full_name = models.CharField(max_length=100, verbose_name=_("Nom et Prénom"))
-    phone = models.CharField(max_length=25, blank=True, null=True, unique=True)
+    phone = models.CharField(max_length=25, blank=True, null=True)
     user_type = models.CharField(max_length=20, choices=USER_TYPES, default="user")
     otp = models.CharField(max_length=100, null=True, blank=True)
     refresh_token = models.CharField(max_length=1000, null=True, blank=True)

@@ -178,6 +178,20 @@ class OwnerDeleteAPIView(generics.DestroyAPIView):
     permission_classes = [IsAdminUser]
     lookup_field = 'id'
     
+    def format_validation_errors(self, detail):
+        errors = []
+        if isinstance(detail, dict):
+            for _, messages in detail.items():
+                if isinstance(messages, list):
+                    errors.extend(messages)
+                else:
+                    errors.append(str(messages))
+        elif isinstance(detail, list):
+            errors = detail
+        else:
+            errors = [str(detail)]
+        return errors
+    
     @transaction.atomic
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -189,8 +203,8 @@ class OwnerDeleteAPIView(generics.DestroyAPIView):
         if has_projects:
             return Response(
                 {
-                    'error': 'Impossible de supprimer ce Owner',
-                    'reason': "Il possède des projets. Supprimez d'abord ses projets ou transférez-les."
+                    "error": ["Impossible de supprimer ce Owner, Il possède des projets. Supprimez d'abord ses projets ou transférez-les."]
+                   
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -213,15 +227,18 @@ class OwnerDeleteAPIView(generics.DestroyAPIView):
             
             return Response(
                 {
-                    'message': f'Owner "{owner_name}" et son utilisateur associé ont été supprimés avec succès',
-                    'deleted_data': owner_data
+                    # 'message': f'Owner "{owner_name}" et son utilisateur associé ont été supprimés avec succès',
+                    # 'deleted_data': owner_data,
+                    'message': [f'Owner "{owner_name}" et son utilisateur associé ont été supprimés avec succès. Deleted_data :"{owner_data}"']
                 },
                 status=status.HTTP_200_OK
             )
             
         except Exception as e:
             return Response(
-                {'error': 'Erreur lors de la suppression', 'details': str(e)},
+                {
+                    'error': [f'Erreur lors de la suppression, details: {str(e)}']
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -247,13 +264,16 @@ class OwnerToggleActiveAPIView(generics.UpdateAPIView):
         action = "activé" if new_status else "désactivé"
         
         return Response({
-            'message': f'Owner "{instance.full_name}" a été {action} avec succès',
-            'owner': {
-                'id': instance.id,
-                'full_name': instance.full_name,
-                'email': instance.user.email,
-                'is_active': new_status
-            }
+            'message': [
+                f'Owner "{instance.full_name}" a été {action} avec succès. Info : id: {instance.id}, full_name: {instance.full_name}, email: {instance.user.email}, is_active: {new_status}',     
+            ],
+            
+            # 'owner': {
+            #     'id': instance.id,
+            #     'full_name': instance.full_name,
+            #     'email': instance.user.email,
+            #     'is_active': new_status
+            # }
         })
 
 
