@@ -22,6 +22,8 @@ export default function Step2({
   const { trigger } = useFormContext();
   const user = useUserSessionStore((state) => state.user);
   const isOnEditMode = Boolean(project) || Boolean(adminProject);
+  console.log(user, "userherre");
+
   return (
     <FormCard isOnEditMode={isOnEditMode} step={2}>
       <div className="space-y-6">

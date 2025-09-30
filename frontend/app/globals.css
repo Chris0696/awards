@@ -134,3 +134,9 @@ html {
   border: none !important;
   outline: none !important;
 }
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}

@@ -11,6 +11,8 @@ import ConfirmDeleteModal from "./modals/ConfirmDeleteModal";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteOwner, toggleOwnerAccountAsAdmin } from "@/services/userService";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
+import { toast } from "sonner";
 
 export default function UserTable({ users }: { users: User[] }) {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -20,8 +22,13 @@ export default function UserTable({ users }: { users: User[] }) {
     mutationFn: deleteOwner,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["owners"] });
+      setShowConfirmationModal(false);
     },
-    onError: () => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+      setShowConfirmationModal(false);
+    },
   });
   const updateMutation = useMutation({
     mutationFn: toggleOwnerAccountAsAdmin,
@@ -111,11 +118,11 @@ export default function UserTable({ users }: { users: User[] }) {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem
+                    {/*  <DropdownMenuItem
                       onClick={() => updateMutation.mutate(user.id)}
                     >
                       Désactiver
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                     <DropdownMenuItem
                       onClick={() => {
                         setSelectedUser(user.id);

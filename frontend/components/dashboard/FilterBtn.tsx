@@ -1,9 +1,25 @@
 import React from "react";
 
-export default function FilterBtn({ text }: { text: string }) {
+export default function FilterBtn({
+  defaultText,
+  options,
+  onChange,
+}: {
+  defaultText: string;
+  options: { value: string; text: string }[];
+  onChange: (value: string) => void;
+}) {
   return (
-    <button className="px-6 py-2 text-lg font-medium rounded-lg border border-primary text-primary cursor-pointer">
-      {text}
-    </button>
+    <select
+      className="px-6 py-2 text-lg font-medium rounded-lg border border-primary text-primary cursor-pointer"
+      onChange={(e) => onChange(e.target.value)}
+    >
+      <option value="">{defaultText}</option>
+      {options?.map((option, idx) => (
+        <option key={idx} value={option.value}>
+          {option.text}
+        </option>
+      ))}
+    </select>
   );
 }

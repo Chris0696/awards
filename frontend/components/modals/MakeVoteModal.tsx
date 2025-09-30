@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import TextField from "@/app/(landing)/submit/forms/TextField";
 import { useMutation } from "@tanstack/react-query";
 import { makeVote } from "@/services/voteService";
+import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
 
 type Props = {
   showModal: boolean;
@@ -127,7 +128,7 @@ export default function MakeVoteModal({
           <div>
             <h4>
               <span>Catégorie: </span>
-              <span>Énergie</span>
+              <span>{project.category_name} </span>
             </h4>
             <h4>
               <span>Auteur: </span>
@@ -138,13 +139,15 @@ export default function MakeVoteModal({
               <span>{project.total_votes} votes</span>
             </h4>
           </div>
-          <div>
-            <Image
-              src={ArtworkImg}
-              alt="Project image"
-              className="w-[85%] md:mx-auto rounded-lg h-20 object-cover"
-            />
-          </div>
+          {project.image && (
+            <div>
+              <Image
+                src={fixBackendUrl(project.image) ?? ArtworkImg}
+                alt="Project image"
+                className="w-[85%] md:mx-auto rounded-lg h-20 object-cover"
+              />
+            </div>
+          )}
         </div>
         {!isWidgetOpen ? (
           <FormProvider {...methods}>

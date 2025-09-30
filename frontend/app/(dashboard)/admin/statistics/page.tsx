@@ -5,7 +5,7 @@ import SynthesisCard from "@/components/dashboard/project-owner/SynthesisCard";
 import { VotesChart } from "@/components/dashboard/project-owner/VotesChart";
 import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import FacebookIcon from "@/assets/facebook.svg";
 import LinkIcon from "@/assets/linkIcon.svg";
 import WhatsappIcon from "@/assets/whatsapp.svg";
@@ -13,21 +13,59 @@ import Image from "next/image";
 import StatsTable from "@/components/dashboard/StatsTable";
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
 import { useQuery } from "@tanstack/react-query";
-import { getOwnerStats, getVotesEvolution } from "@/services/statsService";
+import {
+  getMyProjectEvolutionAsOwner,
+  getOwnerStats,
+  getProjectsEvolution,
+  getProjectsToRank,
+  getVotesEvolution,
+} from "@/services/statsService";
+import { fetchAdminCategories } from "@/services/categoryService";
+import { Category } from "@/app/common/types/category";
+import { AdminProjectInfo } from "@/app/common/types/project";
 
 export default function StatisticPage() {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const user = useUserSessionStore((state) => state.user);
+  const userInfo = useUserSessionStore((state) => state.additionalInfo);
   const { data: ownerStats } = useQuery({
     queryKey: ["ownerStats"],
     queryFn: () => getOwnerStats(),
     enabled: user?.user_type === "owner",
   });
 
-  const { data: voteEvolution, isLoading: isloadingVoteEvolution } = useQuery({
-    queryKey: ["votes-evolution"],
-    queryFn: () => getVotesEvolution(),
-    enabled: user?.user_type === "owner",
+  const { data: projetEvolution, isLoading: isloadingProjectEvolution } =
+    useQuery({
+      queryKey: ["owner-projects-evolution"],
+      queryFn: () => getMyProjectEvolutionAsOwner(Number(userInfo?.id)),
+      enabled: user?.user_type === "owner",
+    });
+
+  const { data: adminProjects } = useQuery({
+    queryKey: ["projects-to-rank"],
+    queryFn: getProjectsToRank,
   });
+
+  console.log(projetEvolution, "projetEvolution");
+  const { data: categories } = useQuery({
+    queryKey: ["ownerProjects"],
+    queryFn: () => fetchAdminCategories(),
+    enabled: user?.user_type === "user",
+  });
+
+  const cleanedCategories = categories?.data.map((cat: Category) => ({
+    value: cat.category_id,
+    text: cat.category_name,
+  }));
+
+  const filteredProjects = adminProjects
+    ?.filter((project: AdminProjectInfo) => {
+      if (selectedCategory && project.category_id !== selectedCategory) {
+        return false;
+      }
+      return true;
+    })
+    .sort((a, b) => b.total_votes - a.total_votes);
 
   return user?.user_type === "owner" ? (
     <section className="">
@@ -41,7 +79,7 @@ export default function StatisticPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 md:pl-5 gap-2">
               <SynthesisCard
                 title="Total des votes reçus"
-                data={`${ownerStats?.vote_stats.total_votes}`}
+                data={`${ownerStats?.vote_stats.total_vote_transactions}`}
               />
               <SynthesisCard
                 title="Classement actuel"
@@ -126,10 +164,14 @@ export default function StatisticPage() {
       {
         <div>
           <div className=" flex justify-end space-x-3  mb-5">
-            <FilterBtn text="Catégorie" />
+            <FilterBtn
+              onChange={(value) => setSelectedCategory(value)}
+              defaultText="Catégorie"
+              options={cleanedCategories}
+            />
           </div>
           <div>
-            <StatsTable />
+            <StatsTable projects={filteredProjects} />
             <SwitchPageBtn />
           </div>
         </div>

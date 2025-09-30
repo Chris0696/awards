@@ -18,6 +18,8 @@ import {
   rejectProjectAsAdmin,
   validateProjectAsAdmin,
 } from "@/services/projectService";
+import { toast } from "sonner";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 
 type Props = {
   projects: AdminProjectInfo[];
@@ -33,16 +35,24 @@ export default function AdminTable({ projects }: Props) {
   const validateMutation = useMutation({
     mutationFn: validateProjectAsAdmin,
     onSuccess: () => {
+      toast.success("Projet validé");
       queryClient.invalidateQueries({ queryKey: ["adminProjects"] });
     },
-    onError: () => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
   const rejectMutation = useMutation({
     mutationFn: rejectProjectAsAdmin,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminProjects"] });
+      toast.success("Projet rejeté");
     },
-    onError: () => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
   const openEditModal = (project: AdminProjectInfo) => {
     setProject(project);
@@ -82,88 +92,99 @@ export default function AdminTable({ projects }: Props) {
           </tr>
         </thead>
         <tbody>
-          {projects.map((project) => (
-            <tr
-              key={project.project_id}
-              className="hover:bg-white hover:rounded-full transition-colors"
-            >
-              <td className="px-6 py-4 text-gray-600 whitespace-normal max-w-[100px] ">
-                <p>{project.project_title} </p>
-              </td>
-              {user?.user_type === "user" && (
-                <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                  {project.owner_name}
+          {projects.length > 0 ? (
+            projects.map((project) => (
+              <tr
+                key={project.project_id}
+                className="hover:bg-white hover:rounded-full transition-colors"
+              >
+                <td className="px-6 py-4 text-gray-600 whitespace-normal max-w-[100px] ">
+                  <p>{project.project_title} </p>
                 </td>
-              )}
+                {user?.user_type === "user" && (
+                  <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                    {project.owner_name}
+                  </td>
+                )}
 
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {formatDate(project.created_at)}
-              </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                <span
-                  className={`${
-                    project.platform_status === "publie"
-                      ? "text-green-500 bg-green-100"
-                      : project.platform_status === "rejete"
-                      ? "bg-red-100 text-red-500"
-                      : "text-orange-500 bg-orange-100"
-                  }  px-10 py-0.5 rounded-full`}
-                >
-                  {project.platform_status}
-                </span>
-              </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {project.total_votes}
-              </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">1</td>
-              {user?.user_type === "user" && (
                 <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button>
-                        <MoreVerticalIcon />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      {project.platform_status !== "rejete" && (
+                  {formatDate(project.created_at)}
+                </td>
+                <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                  <span
+                    className={`${
+                      project.platform_status === "publie"
+                        ? "text-green-500 bg-green-100"
+                        : project.platform_status === "rejete"
+                        ? "bg-red-100 text-red-500"
+                        : "text-orange-500 bg-orange-100"
+                    }  px-10 py-0.5 rounded-full`}
+                  >
+                    {project.platform_status}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                  {project.total_votes}
+                </td>
+                <td className="px-6 py-4 text-gray-600 whitespace-nowrap">1</td>
+                {user?.user_type === "user" && (
+                  <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button>
+                          <MoreVerticalIcon />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        {project.platform_status !== "rejete" && (
+                          <DropdownMenuItem>
+                            <button
+                              className="cursor-pointer"
+                              onClick={() => openEditModal(project)}
+                            >
+                              Reformuler
+                            </button>
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem>
                           <button
+                            onClick={() =>
+                              validateMutation.mutate(project.project_id)
+                            }
                             className="cursor-pointer"
-                            onClick={() => openEditModal(project)}
                           >
-                            Reformuler
+                            Valider
                           </button>
                         </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem>
-                        <button
-                          onClick={() =>
-                            validateMutation.mutate(project.project_id)
-                          }
-                          className="cursor-pointer"
-                        >
-                          Valider
-                        </button>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <button
-                          onClick={() =>
-                            rejectMutation.mutate({
-                              id: project.project_id,
-                              admin_comment: "Inapproprié",
-                            })
-                          }
-                          className="cursor-pointer"
-                        >
-                          Rejeter
-                        </button>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              )}
+                        <DropdownMenuItem>
+                          <button
+                            onClick={() =>
+                              rejectMutation.mutate({
+                                id: project.project_id,
+                                admin_comment: "Inapproprié",
+                              })
+                            }
+                            className="cursor-pointer"
+                          >
+                            Rejeter
+                          </button>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                )}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan={user?.user_type === "user" ? 7 : 6}
+                className="text-center py-4 text-xl font-semibold text-red-500"
+              >
+                Aucun projet trouvé
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
       <CreateNewAuthProjectModal

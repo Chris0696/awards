@@ -11,6 +11,13 @@ export const getOwnerStats = async () => {
   return res.data;
 };
 
+export const getMyProjectEvolutionAsOwner = async (owner_id: number) => {
+  const res = await apiClient.get(
+    `analytics/owner/${owner_id}/votes-evolution/`
+  );
+  return res.data;
+};
+
 export const getCommercialStats = async () => {
   const res = await apiClient.get("dashboard/commercial/");
   return res.data;
