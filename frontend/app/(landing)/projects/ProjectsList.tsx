@@ -27,6 +27,8 @@ export type PublicProject = {
   created_at: string;
   validated_at: string;
   owner_name: string;
+  category_name: string;
+  owner_image: string | null;
   image: string | null;
   image_url: string | null;
   average_rating: number;

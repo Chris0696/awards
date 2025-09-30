@@ -109,7 +109,10 @@ export default function SubmitProjectFormContainer() {
     onComplete(resp) {
       const FedaPay = window["FedaPay"];
       if (resp.reason === FedaPay.DIALOG_DISMISSED) {
+        toast.error("Paiement annulé");
         setIsWidgetOpen(false);
+        setIsWidgetOpen(false);
+        /*  setIsWidgetOpen(false);
         const transactionId = resp.transaction.id;
         const status = resp.transaction.status;
         const paymentReference = resp.transaction.reference;
@@ -162,7 +165,7 @@ export default function SubmitProjectFormContainer() {
             external_transaction_id: String(transactionId),
           })
         );
-        submissionMutation.mutate(formData);
+        submissionMutation.mutate(formData); */
       } else {
         const transactionId = resp.transaction.id;
         const status = resp.transaction.status;
@@ -218,6 +221,7 @@ export default function SubmitProjectFormContainer() {
         );
         setShowModal(true);
         submissionMutation.mutate(formData);
+        setStep(1);
       }
     },
   };

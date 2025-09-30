@@ -2,7 +2,8 @@ import TextField from "@/app/(landing)/submit/forms/TextField";
 import { AdminCategory, Category } from "@/app/common/types/category";
 import Popover from "@/components/ui/Popover";
 import { categorySchema } from "@/frontendlib/schemas";
-import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
+
 import { createCategory, updateCategory } from "@/services/categoryService";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,7 +44,10 @@ export default function CreateCategoryModal({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
-    onError: () => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
   const updateMutation = useMutation({
     mutationFn: updateCategory,

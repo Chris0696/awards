@@ -8,12 +8,11 @@ import { useState } from "react";
 import AffiliateTable from "@/components/dashboard/AffiliateTable";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminRelatedUsers } from "@/services/userService";
-import { useUserSessionStore } from "@/stores/useUserSessionStore";
+
 import { Team } from "../team/page";
 
 export default function page() {
   const [showModal, setShowModal] = useState(false);
-  const user = useUserSessionStore((state) => state.user);
 
   const { data: affiliates } = useQuery({
     queryKey: ["team"],

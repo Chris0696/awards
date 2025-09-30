@@ -16,8 +16,8 @@ export default function page() {
     <div className="overflow-x-hidden">
       <DashboardHeader pageTitle="Utilisateurs inscrits" />
       <div className=" flex justify-end space-x-3  mb-5">
-        <FilterBtn text="Date" />
-        <FilterBtn text="Statut" />
+        {/* <FilterBtn defaultText="Date" options={["Date"]} />
+        <FilterBtn defaultText="Statut" options={["Statut"]} /> */}
       </div>
       {users?.results.length > 0 ? (
         <div>

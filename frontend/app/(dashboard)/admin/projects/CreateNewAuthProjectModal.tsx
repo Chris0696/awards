@@ -8,6 +8,7 @@ import { AdminProjectInfo, ProjectInfo } from "@/app/common/types/project";
 import Popover from "@/components/ui/Popover";
 import { authProjectSchema } from "@/frontendlib/schemas";
 import { projectService } from "@/frontendlib/services/projectService";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
 import { useImagePreview } from "@/hooks/useImagePreview";
 import {
@@ -88,8 +89,12 @@ export default function CreateNewAuthProjectModal({
       setShowModal(false);
       setStep(2);
       queryClient.invalidateQueries({ queryKey: ["adminProjects"] });
+      toast.success("Projet mis à jour");
     },
-    onError: () => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
   const ownerUpdateMutation = useMutation({
     mutationFn: updateProjectAsOwner,
@@ -97,8 +102,12 @@ export default function CreateNewAuthProjectModal({
       setShowModal(false);
       setStep(2);
       queryClient.invalidateQueries({ queryKey: ["ownerProjects"] });
+      toast.success("Projet mis à jour");
     },
-    onError: () => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
   const submissionMutation = useMutation({
     mutationFn: submitNewProject,
@@ -108,7 +117,10 @@ export default function CreateNewAuthProjectModal({
       reset();
       queryClient.invalidateQueries({ queryKey: ["ownerProjects"] });
     },
-    onError: () => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
   const checkoutEmbedOptions = {
     public_key: process.env.NEXT_PUBLIC_FEDAPAY_PUBLIC_KEY,
@@ -166,7 +178,7 @@ export default function CreateNewAuthProjectModal({
           JSON.stringify({
             payer_name: user?.full_name,
             payer_email: user?.email,
-            payer_phone: "+2290161112233",
+            payer_phone: "",
             payment_reference: paymentReference,
             payment_status: status,
             payment_method: "pending",
@@ -212,7 +224,7 @@ export default function CreateNewAuthProjectModal({
           JSON.stringify({
             payer_name: user?.full_name,
             payer_email: user?.email,
-            payer_phone: "+2290161112233",
+            payer_phone: "",
             payment_reference: paymentReference,
             payment_status: status,
             payment_method: "pending",
@@ -231,21 +243,17 @@ export default function CreateNewAuthProjectModal({
       data.acceptReformulation ? "1" : "0"
     );
     formData.append("accept_terms_of_use", data.acceptTerms ? "1" : "0");
-    formData.append(
-      "project",
-      JSON.stringify({
-        category_id: data.category_id,
-        project_title: data.project_title,
-        local_area_impact: data.local_area_impact,
-        main_objective: data.main_objective,
-        solution: data.solution,
-        description: data.description,
-        estimated_budget: data.estimated_budget,
-        target_audience: data.target_audience,
-        progress_report: data.progress_report,
-        owner_project_status: "brouillon",
-      })
-    );
+    formData.append("category_id", String(data.category_id));
+    formData.append("project_title", String(data.project_title));
+    formData.append("local_area_impact", String(data.local_area_impact));
+    formData.append("estimated_budget", String(data.estimated_budget));
+    formData.append("description", String(data.description));
+    formData.append("main_objective", String(data.main_objective));
+    formData.append("solution", String(data.solution));
+    formData.append("target_audience", String(data.target_audience));
+    formData.append("progress_report", String(data.progress_report));
+    formData.append("affiliate", "");
+    formData.append("owner_project_status", String(data.owner_project_status));
 
     if (data.image && data.image.length > 0) {
       formData.append("project.image", data.image[0]);

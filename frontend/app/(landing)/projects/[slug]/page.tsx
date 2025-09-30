@@ -129,15 +129,7 @@ export default async function page({
             <h3 className="text-3xl font-semibold text-gray-700 mb-6">
               Qui est à l'origine du projet ?
             </h3>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-              Perspiciatis mollitia natus recusandae assumenda dignissimos
-              itaque quae unde praesentium laborum hic deserunt ducimus possimus
-              nesciunt, similique atque odio fuga debitis animi distinctio
-              doloremque iste officiis. Repudiandae, dignissimos. Recusandae nam
-              voluptatibus nobis dolor quos quo illo iusto debitis fugiat earum,
-              quam vero?
-            </p>
+            <p>{project.owner_name}</p>
           </div>
           <div>
             <h3 className="text-3xl font-semibold text-gray-700 mb-6">
@@ -145,7 +137,7 @@ export default async function page({
             </h3>
             <p>{project.main_objective}</p>
           </div>
-          <div>
+          {/*  <div>
             <h3 className="text-3xl font-semibold text-gray-700 mb-6">
               Comment le projet sera t-il mise en oeuvre
             </h3>
@@ -155,14 +147,14 @@ export default async function page({
               <li>Étape 3 : Développement et tests</li>
               <li>Étape 4 : Déploiement et suivi</li>
             </ul>
-          </div>
+          </div> */}
           <div>
             <h3 className="text-3xl font-semibold text-gray-700 mb-6">
               Budget estimatif
             </h3>
             <p>{project.estimated_budget} FCFA</p>
           </div>
-          <div>
+          {/* <div>
             <h3 className="text-3xl font-semibold text-gray-700 mb-6">
               Pourquoi voter pour ce projet ?
             </h3>
@@ -171,7 +163,7 @@ export default async function page({
               dolores aspernatur debitis eum culpa tempora impedit repudiandae
               officiis consequuntur esse!
             </p>
-          </div>
+          </div> */}
         </div>
         <div className="col-span-5 md:col-span-1 bg-gray-50 md:py-14 px-6 rounded-lg h-max space-y-20">
           <div className="space-y-4">

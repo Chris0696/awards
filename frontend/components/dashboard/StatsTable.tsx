@@ -1,15 +1,13 @@
+import { AdminProjectInfo } from "@/app/common/types/project";
 import { getProjectsToRank } from "@/services/statsService";
-import { useProjectStore } from "@/stores/useProjectStore";
+
 import { useQuery } from "@tanstack/react-query";
 
-export default function StatsTable() {
-  const { data: adminProjects } = useQuery({
-    queryKey: ["projects-to-rank"],
-    queryFn: getProjectsToRank,
-  });
-  const orderedProjects = adminProjects?.sort(
-    (a, b) => b.total_votes - a.total_votes
-  );
+export default function StatsTable({
+  projects,
+}: {
+  projects: AdminProjectInfo[];
+}) {
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">
       <table className=" w-full">
@@ -34,7 +32,7 @@ export default function StatsTable() {
           </tr>
         </thead>
         <tbody>
-          {orderedProjects?.map((project, idx) => (
+          {projects?.map((project, idx) => (
             <tr
               key={project.project_id}
               className="hover:bg-white hover:rounded-full transition-colors"

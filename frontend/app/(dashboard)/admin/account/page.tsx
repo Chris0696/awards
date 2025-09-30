@@ -1,5 +1,6 @@
 "use client";
 import ProfilImg from "@/assets/profil.png";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 
 import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
 import { useImagePreview } from "@/hooks/useImagePreview";
@@ -10,6 +11,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export type UserForms = {
   full_name: string;
@@ -32,8 +34,13 @@ export default function page() {
 
   const updateMutation = useMutation({
     mutationFn: updateUserInfo,
-    onSuccess: () => {},
-    onError: () => {},
+    onSuccess: () => {
+      toast.success("Informations mises à jour");
+    },
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
 
   const methods = useForm<UserForms>({
@@ -166,7 +173,9 @@ export default function page() {
                 type="submit"
                 className="bg-primary text-white px-2 py-2 cursor-pointer rounded-md"
               >
-                Enregistrer les modifications
+                {updateMutation.isPending
+                  ? "Enregistrement..."
+                  : "Enregistrer les modifications"}
               </button>
             </div>
           </div>

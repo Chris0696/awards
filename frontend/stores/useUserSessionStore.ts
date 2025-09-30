@@ -19,8 +19,8 @@ export type AdditionalUserInfo = {
 type SessionStore = {
   user: User | null;
   additionalInfo?: AdditionalUserInfo | null;
-  setUserSession: (user: User) => void;
-  setAdditionalInfo?: (info: AdditionalUserInfo) => void;
+  setUserSession: (user: User | null) => void;
+  setAdditionalInfo?: (info: AdditionalUserInfo | null) => void;
 };
 
 export const useUserSessionStore = create<SessionStore>((set) => ({

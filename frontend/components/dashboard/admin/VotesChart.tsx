@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, Legend, XAxis, YAxis } from "recharts";
 
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 
@@ -14,29 +14,52 @@ const chartData = [
 ];
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
+  votes: {
+    label: "Nombre de votes",
     color: "#0026B0",
   },
-  mobile: {
-    label: "Mobile",
+  revenue: {
+    label: "Revenus générés",
     color: "#FF7F00",
+  },
+  transactions: {
+    label: "Transactions",
+    color: "#00A36C",
   },
 } satisfies ChartConfig;
 
-export function VotesChart() {
+export function VotesChart({
+  metric,
+  chartData,
+}: {
+  chartData: any;
+  metric: "votes" | "revenue" | "transactions";
+}) {
+  console.log(chartData, "chartData");
+
   return (
-    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+    <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
       <BarChart
         accessibilityLayer
         data={chartData}
         barSize={10}
-        barCategoryGap={"10%"}
+        barCategoryGap="15%"
       >
-        <XAxis tickLine={false} dataKey="month" />
+        <XAxis dataKey="label" tickLine={false} />
         <YAxis axisLine={false} tickLine={false} />
-        <Bar dataKey="desktop" fill="var(--color-desktop)" radius={20} />
-        <Bar dataKey="mobile" fill="var(--color-mobile)" radius={20} />
+        <Legend />
+        <Bar
+          dataKey="votes"
+          fill="var(--color-votes)"
+          name={chartConfig.votes.label}
+          radius={20}
+        />
+        <Bar
+          dataKey="revenue"
+          fill="var(--color-revenue)"
+          name={chartConfig.revenue.label}
+          radius={20}
+        />
       </BarChart>
     </ChartContainer>
   );

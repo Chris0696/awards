@@ -35,9 +35,7 @@ export default function LoginForm() {
   const router = useRouter();
   const mutateLogin = useMutation({
     mutationFn: loginUser,
-    onSuccess: (data) => {
-      console.log(data, "credentialsss");
-
+    onSuccess: () => {
       router.replace("/admin");
     },
     onError: (err) => {
@@ -48,14 +46,6 @@ export default function LoginForm() {
 
   const onSubmit = async (data: AuthForm) => {
     mutateLogin.mutate(data);
-    /*  try {
-      await login(data.email, data.password);
-      router.replace("/admin");
-    } catch (error) {
-      const message = mapServerErrors(error, setError);
-
-      toast.error(message);
-    } */
   };
   return (
     <FormProvider {...methods}>

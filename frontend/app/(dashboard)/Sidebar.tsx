@@ -15,6 +15,8 @@ import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
 import { useMutation } from "@tanstack/react-query";
 import { logoutUser } from "@/services/authService";
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
+import { toast } from "sonner";
 
 export default function Sidebar({
   open,
@@ -23,16 +25,25 @@ export default function Sidebar({
   open?: boolean;
   onClose?: () => void;
 }) {
-  const userInfo = useUserSessionStore((state) => state.additionalInfo);
-  const user = useUserSessionStore((state) => state.user);
+  const {
+    user,
+    additionalInfo: userInfo,
+    setUserSession,
+    setAdditionalInfo,
+  } = useUserSessionStore();
   const router = useRouter();
 
   const mutateLogout = useMutation({
     mutationFn: logoutUser,
     onSuccess: () => {
       router.push("/");
+      setUserSession(null);
+      if (setAdditionalInfo) setAdditionalInfo(null);
     },
-    onError: (error) => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
 
   const filteredLinks = dashboardlinks.filter((link) => {

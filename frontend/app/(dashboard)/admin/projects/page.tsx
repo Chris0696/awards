@@ -19,10 +19,15 @@ import {
   getProjectsAsOwner,
 } from "@/services/projectService";
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
+import { fetchAdminCategories } from "@/services/categoryService";
+import { Category } from "@/app/common/types/category";
+import { AdminProjectInfo, ProjectInfo } from "@/app/common/types/project";
 
 export default function AdminProjectList() {
   const [showModal, setShowModal] = useState(false);
   const user = useUserSessionStore((state) => state.user);
+  const [selectedSatus, setSelectedStatus] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const { data: adminProjects } = useQuery({
     queryKey: ["adminProjects"],
@@ -35,6 +40,31 @@ export default function AdminProjectList() {
     queryFn: () => getProjectsAsOwner(),
     enabled: user?.user_type === "owner",
   });
+
+  const { data: categories } = useQuery({
+    queryKey: ["ownerProjects"],
+    queryFn: () => fetchAdminCategories(),
+    enabled: user?.user_type === "user",
+  });
+
+  const cleanedCategories = categories?.data.map((cat: Category) => ({
+    value: cat.category_id,
+    text: cat.category_name,
+  }));
+  console.log(cleanedCategories, "cleanedCategories");
+  const filteredProjects = adminProjects?.filter(
+    (project: AdminProjectInfo) => {
+      if (selectedSatus && project.platform_status !== selectedSatus) {
+        return false;
+      }
+      if (selectedCategory && project.category_id !== selectedCategory) {
+        return false;
+      }
+      return true;
+    }
+  );
+
+  console.log(filteredProjects, "filteredProjects");
 
   return user?.user_type === "owner" ? (
     <section>
@@ -80,20 +110,30 @@ export default function AdminProjectList() {
       <DashboardHeader pageTitle="Projets" />
       <div>
         <div className=" flex justify-end space-x-3  mb-5">
-          <FilterBtn text="Date" />
-          <FilterBtn text="Statut" />
-          <FilterBtn text="Catégorie" />
+          {/* <FilterBtn
+            defaultText="Date"
+            options={["Date", "Statut", "Catégorie"]}
+          /> */}
+          <FilterBtn
+            onChange={(value) => setSelectedStatus(value)}
+            defaultText="Statut"
+            options={[
+              { value: "brouillon", text: "Brouillon" },
+              { value: "publie", text: "Publiée" },
+              { value: "rejete", text: "Rejetée" },
+            ]}
+          />
+          <FilterBtn
+            onChange={(value) => setSelectedCategory(value)}
+            defaultText="Catégorie"
+            options={cleanedCategories}
+          />
         </div>
-        {adminProjects?.length > 0 ? (
-          <div className="overflow-x-auto">
-            <AdminTable projects={adminProjects} />
-            <SwitchPageBtn />
-          </div>
-        ) : (
-          <p className="text-center text-primary text-3xl font-medium">
-            Il n'y a encore aucun projet de soumis.
-          </p>
-        )}
+
+        <div className="overflow-x-auto">
+          <AdminTable projects={filteredProjects ?? []} />
+          <SwitchPageBtn />
+        </div>
       </div>
     </section>
   );

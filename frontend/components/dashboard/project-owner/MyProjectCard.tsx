@@ -22,9 +22,7 @@ export default function MyProjectCard({ project }: Props) {
       </p>
       <p>
         <span className="font-semibold">Nombre de vote reçus:</span>{" "}
-        <span className="text-gray-600">
-          {project.owner.total_votes_received}{" "}
-        </span>{" "}
+        <span className="text-gray-600">{project.vote_count} </span>{" "}
       </p>
       <p>
         <span className="font-semibold">Statut du projet:</span>{" "}
