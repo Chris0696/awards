@@ -338,8 +338,8 @@ services:
         condition: service_healthy
     volumes:
       - awards_collectstatic:/usr/src/app/collectstatic
+      - awards_media:/usr/src/app/media
       - ./backend/log:/usr/src/app/log
-      - ./backend/media:/usr/src/app/media
       - ./.env:/usr/src/app/.env:ro
     env_file: .env
     environment:
@@ -372,9 +372,9 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/letsencrypt:ro
-      - ./nginx/www:/var/www/certbot # AJOUT IMPORTANT
+      - ./nginx/www:/var/www/certbot
       - awards_collectstatic:/var/www/static:ro
-      - ./backend/media:/var/www/media:ro
+      - awards_media:/var/www/media:ro
     depends_on:
       - backend
       - web
@@ -389,3 +389,4 @@ networks:
 volumes:
   awards_local_pgdata: {}
   awards_collectstatic: {}
+  awards_media: {}
