@@ -1432,174 +1432,185 @@ def projects_evolution_analytics(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def owner_votes_evolution_analytics(request, owner_id):
+def owner_votes_evolution_analytics(request, user_id):
     """
     API pour l'évolution des votes sur les projets d'un owner spécifique
     """
     try:
-        owner = Owner.objects.get(id=owner_id)
+         # Récupérer l'owner via l'user_id
+        owner = Owner.objects.get(user_id=user_id)
     except Owner.DoesNotExist:
         return Response({
             'success': False,
-            'error': 'Owner non trouvé'
+            'error': 'Owner non trouvé pour cet utilisateur'
         }, status=404)
     
     # Vérifier les permissions
     user = request.user
     if not (user.is_staff or user.user_type == 'admin' or 
-            (user.user_type == 'owner' and hasattr(user, 'owner') and user.owner == owner)):
+            (user.user_type == 'owner' and user.id == user_id)):
         return Response({
             'success': False,
             'error': 'Accès non autorisé'
         }, status=403)
     
-    # Récupérer les votes sur les projets de cet owner
-    votes_query = Vote.objects.filter(
-        active=True,
-        project__owner=owner,
-        votepayment__status='approved'
-    ).select_related('votepayment', 'project')
-    
-    # Organiser les données par date
-    vote_data_by_date = defaultdict(lambda: {
-        'total_vote_count': 0,
-        'total_revenue': 0,
-        'transaction_count': 0,
-        'projects_voted': set()
-    })
-    
-    for vote in votes_query:
-        vote_date = vote.created_at.date()
-        vote_data_by_date[vote_date]['total_vote_count'] += vote.vote_count
-        vote_data_by_date[vote_date]['total_revenue'] += float(vote.votepayment.amount)
-        vote_data_by_date[vote_date]['transaction_count'] += 1
-        vote_data_by_date[vote_date]['projects_voted'].add(vote.project.id)
-    
-    # Convertir les sets en comptes
-    for date_data in vote_data_by_date.values():
-        date_data['unique_projects_voted'] = len(date_data['projects_voted'])
-        del date_data['projects_voted']  # Supprimer le set pour la sérialisation
-    
-    if not vote_data_by_date:
+    try :
+        # Récupérer les votes sur les projets de cet owner
+        votes_query = Vote.objects.filter(
+            active=True,
+            project__owner=owner,
+            votepayment__status='approved'
+        ).select_related('votepayment', 'project')
+        
+        # Organiser les données par date
+        vote_data_by_date = defaultdict(lambda: {
+            'total_vote_count': 0,
+            'total_revenue': 0,
+            'transaction_count': 0,
+            'projects_voted': set()
+        })
+        
+        for vote in votes_query:
+            vote_date = vote.created_at.date()
+            vote_data_by_date[vote_date]['total_vote_count'] += vote.vote_count
+            vote_data_by_date[vote_date]['total_revenue'] += float(vote.votepayment.amount)
+            vote_data_by_date[vote_date]['transaction_count'] += 1
+            vote_data_by_date[vote_date]['projects_voted'].add(vote.project.id)
+        
+        # Convertir les sets en comptes
+        for date_data in vote_data_by_date.values():
+            date_data['unique_projects_voted'] = len(date_data['projects_voted'])
+            del date_data['projects_voted']  # Supprimer le set pour la sérialisation
+        
+        if not vote_data_by_date:
+            return Response({
+                'success': True,
+                'data': [],
+                'owner_info': {
+                    'id': owner.id,
+                    'name': owner.full_name,
+                    'total_projects': owner.project_set.filter(platform_status='publie').count()
+                },
+                'message': 'Aucune donnée de vote trouvée pour cet owner'
+            })
+        
+        min_date = min(vote_data_by_date.keys())
+        max_date = max(vote_data_by_date.keys())
+        
+        # Construire la structure hiérarchique (même logique que votes_evolution_analytics)
+        years_data = []
+        
+        for year in range(min_date.year, max_date.year + 1):
+            year_total_votes = 0
+            year_total_revenue = 0
+            year_total_transactions = 0
+            months_data = []
+            
+            for month in range(1, 13):
+                try:
+                    test_date = date(year, month, 1)
+                    if test_date > max_date or date(year, month, calendar.monthrange(year, month)[1]) < min_date:
+                        continue
+                except:
+                    continue
+                    
+                month_total_votes = 0
+                month_total_revenue = 0
+                month_total_transactions = 0
+                weeks_data = []
+                
+                weeks = get_weeks_in_month(year, month)
+                
+                for week_info in weeks:
+                    week_total_votes = 0
+                    week_total_revenue = 0
+                    week_total_transactions = 0
+                    days_data = []
+                    
+                    current_date = week_info['start_date']
+                    while current_date <= week_info['end_date']:
+                        day_data = vote_data_by_date.get(current_date, {
+                            'total_vote_count': 0,
+                            'total_revenue': 0,
+                            'transaction_count': 0,
+                            'unique_projects_voted': 0
+                        })
+                        
+                        days_data.append({
+                            'date': current_date.isoformat(),
+                            'day_name': current_date.strftime('%A'),
+                            'total_vote_count': day_data['total_vote_count'],
+                            'total_revenue': day_data['total_revenue'],
+                            'transaction_count': day_data['transaction_count'],
+                            'unique_projects_voted': day_data['unique_projects_voted']
+                        })
+                        
+                        week_total_votes += day_data['total_vote_count']
+                        week_total_revenue += day_data['total_revenue']
+                        week_total_transactions += day_data['transaction_count']
+                        
+                        current_date += timedelta(days=1)
+                    
+                    weeks_data.append({
+                        'week_number': week_info['week_number'],
+                        'start_date': week_info['start_date'].isoformat(),
+                        'end_date': week_info['end_date'].isoformat(),
+                        'week_total_vote_count': week_total_votes,
+                        'week_total_revenue': week_total_revenue,
+                        'week_total_transactions': week_total_transactions,
+                        'days': days_data
+                    })
+                    
+                    month_total_votes += week_total_votes
+                    month_total_revenue += week_total_revenue
+                    month_total_transactions += week_total_transactions
+                
+                if weeks_data:
+                    months_data.append({
+                        'month_number': month,
+                        'month_name': calendar.month_name[month],
+                        'month_total_vote_count': month_total_votes,
+                        'month_total_revenue': month_total_revenue,
+                        'month_total_transactions': month_total_transactions,
+                        'weeks': weeks_data
+                    })
+                    
+                    year_total_votes += month_total_votes
+                    year_total_revenue += month_total_revenue
+                    year_total_transactions += month_total_transactions
+            
+            if months_data:
+                years_data.append({
+                    'year': year,
+                    'year_total_vote_count': year_total_votes,
+                    'year_total_revenue': year_total_revenue,
+                    'year_total_transactions': year_total_transactions,
+                    'months': months_data
+                })
+        
         return Response({
             'success': True,
-            'data': [],
+            'data': years_data,
             'owner_info': {
                 'id': owner.id,
                 'name': owner.full_name,
-                'total_projects': owner.project_set.filter(platform_status='publie').count()
+                'email': owner.user.email,
+                'total_published_projects': owner.project_set.filter(platform_status='publie').count()
+            },
+            'summary': {
+                'total_years': len(years_data),
+                'owner_total_votes': sum(year['year_total_vote_count'] for year in years_data),
+                'owner_total_revenue': sum(year['year_total_revenue'] for year in years_data),
+                'owner_total_transactions': sum(year['year_total_transactions'] for year in years_data)
             }
         })
-    
-    min_date = min(vote_data_by_date.keys())
-    max_date = max(vote_data_by_date.keys())
-    
-    # Construire la structure hiérarchique (même logique que votes_evolution_analytics)
-    years_data = []
-    
-    for year in range(min_date.year, max_date.year + 1):
-        year_total_votes = 0
-        year_total_revenue = 0
-        year_total_transactions = 0
-        months_data = []
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e),
+            'message': 'Erreur lors de la récupération des données'
+        }, status=500)
         
-        for month in range(1, 13):
-            try:
-                test_date = date(year, month, 1)
-                if test_date > max_date or date(year, month, calendar.monthrange(year, month)[1]) < min_date:
-                    continue
-            except:
-                continue
-                
-            month_total_votes = 0
-            month_total_revenue = 0
-            month_total_transactions = 0
-            weeks_data = []
-            
-            weeks = get_weeks_in_month(year, month)
-            
-            for week_info in weeks:
-                week_total_votes = 0
-                week_total_revenue = 0
-                week_total_transactions = 0
-                days_data = []
-                
-                current_date = week_info['start_date']
-                while current_date <= week_info['end_date']:
-                    day_data = vote_data_by_date.get(current_date, {
-                        'total_vote_count': 0,
-                        'total_revenue': 0,
-                        'transaction_count': 0,
-                        'unique_projects_voted': 0
-                    })
-                    
-                    days_data.append({
-                        'date': current_date.isoformat(),
-                        'day_name': current_date.strftime('%A'),
-                        'total_vote_count': day_data['total_vote_count'],
-                        'total_revenue': day_data['total_revenue'],
-                        'transaction_count': day_data['transaction_count'],
-                        'unique_projects_voted': day_data['unique_projects_voted']
-                    })
-                    
-                    week_total_votes += day_data['total_vote_count']
-                    week_total_revenue += day_data['total_revenue']
-                    week_total_transactions += day_data['transaction_count']
-                    
-                    current_date += timedelta(days=1)
-                
-                weeks_data.append({
-                    'week_number': week_info['week_number'],
-                    'start_date': week_info['start_date'].isoformat(),
-                    'end_date': week_info['end_date'].isoformat(),
-                    'week_total_vote_count': week_total_votes,
-                    'week_total_revenue': week_total_revenue,
-                    'week_total_transactions': week_total_transactions,
-                    'days': days_data
-                })
-                
-                month_total_votes += week_total_votes
-                month_total_revenue += week_total_revenue
-                month_total_transactions += week_total_transactions
-            
-            if weeks_data:
-                months_data.append({
-                    'month_number': month,
-                    'month_name': calendar.month_name[month],
-                    'month_total_vote_count': month_total_votes,
-                    'month_total_revenue': month_total_revenue,
-                    'month_total_transactions': month_total_transactions,
-                    'weeks': weeks_data
-                })
-                
-                year_total_votes += month_total_votes
-                year_total_revenue += month_total_revenue
-                year_total_transactions += month_total_transactions
-        
-        if months_data:
-            years_data.append({
-                'year': year,
-                'year_total_vote_count': year_total_votes,
-                'year_total_revenue': year_total_revenue,
-                'year_total_transactions': year_total_transactions,
-                'months': months_data
-            })
     
-    return Response({
-        'success': True,
-        'data': years_data,
-        'owner_info': {
-            'id': owner.id,
-            'name': owner.full_name,
-            'email': owner.user.email,
-            'total_published_projects': owner.project_set.filter(platform_status='publie').count()
-        },
-        'summary': {
-            'total_years': len(years_data),
-            'owner_total_votes': sum(year['year_total_vote_count'] for year in years_data),
-            'owner_total_revenue': sum(year['year_total_revenue'] for year in years_data),
-            'owner_total_transactions': sum(year['year_total_transactions'] for year in years_data)
-        }
-    })
 
 

@@ -233,11 +233,11 @@ class Commercial(models.Model):
             affiliate_id = f"COM_{uuid.uuid4().hex[:8].upper()}"
             # Construire le lien d'affiliation avec l'URL de base du site
             try:
-                base_url = getattr(settings, 'BASE_URL', settings.BASE_URL)
-                self.affiliate_link = f"{base_url}/api/v1/user/register/?affiliate={affiliate_id}"
+                frontend_site_affiliate = getattr(settings, 'FRONTEND_SITE_AFFILIATE_URL', settings.FRONTEND_SITE_AFFILIATE_URL)
+                self.affiliate_link = f"{frontend_site_affiliate}/?affiliate={affiliate_id}"
             except Exception:
-                base_url = getattr(settings, 'BASE_URL', 'http://localhost:8000')
-                self.affiliate_link = f"{base_url}/api/v1/user/register/?affiliate={affiliate_id}"
+                frontend_site_affiliate = getattr(settings, 'FRONTEND_SITE_AFFILIATE_URL', 'https://awardprojectvoting.scarsoft.net/submit')
+                self.affiliate_link = f"{frontend_site_affiliate}/?affiliate={affiliate_id}"
         super().save(*args, **kwargs)
     
     def total_projects_brought(self):

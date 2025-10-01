@@ -7,7 +7,7 @@ from pathlib import Path
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 # BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASE_URL = os.environ.get('BASE_URL')
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -58,6 +58,11 @@ else:
         'http://vps114277.serveur-vps.net:8081',
     ]
 
+if DEBUG:
+    BASE_URL = os.environ.get('BASE_URL')
+else:
+    BASE_PROD_URL = os.environ.get('BASE_PROD_URL')
+    FRONTEND_SITE_AFFILIATE_URL = os.environ.get('FRONTEND_SITE_AFFILIATE_URL')
 # Configuration HTTPS
 # SECURE_SSL_REDIRECT = True
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
