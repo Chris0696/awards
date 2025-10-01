@@ -1,5 +1,5 @@
 "use client";
-import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
+import DashboardHeader from "@/app/admin/DasboardHeader";
 import FilterBtn from "@/components/dashboard/FilterBtn";
 import Table from "@/components/dashboard/Table";
 import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
@@ -47,11 +47,11 @@ export default function AdminProjectList() {
     enabled: user?.user_type === "user",
   });
 
-  const cleanedCategories = categories?.data.map((cat: Category) => ({
+  const cleanedCategories = categories?.data?.map((cat: Category) => ({
     value: cat.category_id,
     text: cat.category_name,
   }));
-  console.log(cleanedCategories, "cleanedCategories");
+
   const filteredProjects = adminProjects?.filter(
     (project: AdminProjectInfo) => {
       if (selectedSatus && project.platform_status !== selectedSatus) {
@@ -63,8 +63,6 @@ export default function AdminProjectList() {
       return true;
     }
   );
-
-  console.log(filteredProjects, "filteredProjects");
 
   return user?.user_type === "owner" ? (
     <section>

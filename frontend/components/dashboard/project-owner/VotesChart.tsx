@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, Legend, Tooltip, XAxis, YAxis } from "recharts";
 
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 
@@ -14,28 +14,24 @@ const chartData = [
 ];
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
+  votes: {
+    label: "Nombre de votes",
     color: "#0026B0",
-  },
-  mobile: {
-    label: "Mobile",
-    color: "#FF7F00",
   },
 } satisfies ChartConfig;
 
-export function VotesChart() {
+export function VotesChart({ chartData }: { chartData: any }) {
   return (
-    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+    <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
       <BarChart
         accessibilityLayer
         data={chartData}
-        barSize={40}
-        barCategoryGap={"10%"}
+        barSize={20}
+        barCategoryGap="10%"
       >
-        <XAxis tickLine={false} dataKey="month" />
-        <YAxis axisLine={false} tickLine={false} />
-        <Bar dataKey="desktop" fill="var(--color-desktop)" radius={20} />
+        <XAxis tickLine={false} dataKey="label" />
+        <YAxis axisLine={false} tickLine={false} allowDecimals={false} />
+        <Bar dataKey="votes" fill="var(--color-votes)" radius={20} />
       </BarChart>
     </ChartContainer>
   );

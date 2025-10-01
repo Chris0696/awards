@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import DashboardHeader from "../../DasboardHeader";
+import DashboardHeader from "../DasboardHeader";
 import CreateCategoryModal from "./CreateCategoryModal";
 
 import CategoryCard from "./CategoryCard";

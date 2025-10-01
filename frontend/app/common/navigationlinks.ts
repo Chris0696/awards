@@ -37,6 +37,12 @@ export const dashboardlinks = [
     canCommercialAccess: false,
   },
   {
+    page: "Commerciaux",
+    url: "/admin/membership",
+    isRequireAdmin: true,
+    canCommercialAccess: false,
+  },
+  {
     page: "Équipe",
     url: "/admin/team",
     isRequireAdmin: true,
@@ -65,11 +71,5 @@ export const dashboardlinks = [
     url: "/admin/settings",
     isRequireAdmin: false,
     canCommercialAccess: true,
-  },
-  {
-    page: "Affiliation",
-    url: "/admin/membership",
-    isRequireAdmin: true,
-    canCommercialAccess: false,
   },
 ];

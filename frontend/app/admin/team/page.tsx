@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import DashboardHeader from "../../DasboardHeader";
+import DashboardHeader from "../DasboardHeader";
 import TeamTable from "@/components/dashboard/TeamTable";
 import AddGdChildModal from "@/components/modals/AddGdChildModal";
 import { useQuery } from "@tanstack/react-query";

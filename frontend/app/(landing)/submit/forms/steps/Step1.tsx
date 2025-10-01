@@ -5,6 +5,8 @@ import NumberField from "../NumberField";
 import PasswordField from "../PasswordField";
 import PhoneNumberField from "../PhoneNumberField";
 import TextField from "../TextField";
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
+import { toast } from "sonner";
 
 interface Props {
   setStep: (step: number) => void;
@@ -12,6 +14,7 @@ interface Props {
 
 export default function Step1({ setStep }: Props) {
   const { trigger } = useFormContext();
+  const user = useUserSessionStore((state) => state.user);
   return (
     <FormCard step={1}>
       <div className="space-y-6">
@@ -51,6 +54,11 @@ export default function Step1({ setStep }: Props) {
         <button
           type="button"
           onClick={async () => {
+            if (user) {
+              return toast.error(
+                "Vous avez déjà un compte! Ajouter un nouveau projet depuis l'espace admin"
+              );
+            }
             const valid = await trigger([
               "full_name",
               "email",

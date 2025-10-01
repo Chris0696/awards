@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import CreateNewAuthProjectModal from "@/app/(dashboard)/admin/projects/CreateNewAuthProjectModal";
+import CreateNewAuthProjectModal from "@/app/admin/projects/CreateNewAuthProjectModal";
 import { useState } from "react";
 
 import { useUserSessionStore } from "@/stores/useUserSessionStore";

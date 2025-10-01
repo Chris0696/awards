@@ -1,5 +1,5 @@
 "use client";
-import { Team } from "@/app/(dashboard)/admin/team/page";
+import { Team } from "@/app/admin/team/page";
 import { MoreVerticalIcon } from "lucide-react";
 import React, { useState } from "react";
 import {

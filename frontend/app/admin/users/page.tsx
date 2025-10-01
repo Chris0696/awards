@@ -1,5 +1,5 @@
 "use client";
-import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
+import DashboardHeader from "@/app/admin/DasboardHeader";
 import FilterBtn from "@/components/dashboard/FilterBtn";
 import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
 import UserTable from "@/components/UserTable";

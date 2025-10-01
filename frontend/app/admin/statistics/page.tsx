@@ -1,5 +1,5 @@
 "use client";
-import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
+import DashboardHeader from "@/app/admin/DasboardHeader";
 import FilterBtn from "@/components/dashboard/FilterBtn";
 import SynthesisCard from "@/components/dashboard/project-owner/SynthesisCard";
 import { VotesChart } from "@/components/dashboard/project-owner/VotesChart";
@@ -34,26 +34,26 @@ export default function StatisticPage() {
     enabled: user?.user_type === "owner",
   });
 
-  const { data: projetEvolution, isLoading: isloadingProjectEvolution } =
+  /*  const { data: projetEvolution, isLoading: isloadingProjectEvolution } =
     useQuery({
       queryKey: ["owner-projects-evolution"],
       queryFn: () => getMyProjectEvolutionAsOwner(Number(userInfo?.id)),
       enabled: user?.user_type === "owner",
-    });
+    }); */
 
   const { data: adminProjects } = useQuery({
     queryKey: ["projects-to-rank"],
     queryFn: getProjectsToRank,
+    enabled: user?.user_type === "user",
   });
 
-  console.log(projetEvolution, "projetEvolution");
   const { data: categories } = useQuery({
     queryKey: ["ownerProjects"],
     queryFn: () => fetchAdminCategories(),
     enabled: user?.user_type === "user",
   });
 
-  const cleanedCategories = categories?.data.map((cat: Category) => ({
+  const cleanedCategories = categories?.data?.map((cat: Category) => ({
     value: cat.category_id,
     text: cat.category_name,
   }));
@@ -66,6 +66,12 @@ export default function StatisticPage() {
       return true;
     })
     .sort((a, b) => b.total_votes - a.total_votes);
+
+  console.log(ownerStats?.recent_projects, "ownerStat");
+  const chartData = ownerStats?.recent_projects?.map((project) => ({
+    label: project.project_title,
+    votes: project.votes_count ?? 0,
+  }));
 
   return user?.user_type === "owner" ? (
     <section className="">
@@ -100,7 +106,7 @@ export default function StatisticPage() {
             </div>
             <div className="bg-white rounded-xl">
               <div className=" mt-10 max-w-xl ">
-                <VotesChart />
+                <VotesChart chartData={chartData} />
               </div>
             </div>
           </div>

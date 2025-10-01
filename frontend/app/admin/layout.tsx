@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Sidebar from "@/app/(dashboard)/Sidebar";
+import Sidebar from "@/app/admin/Sidebar";
 import { MenuIcon } from "lucide-react";
 
 import { SessionProvider } from "./SessionProvider";
