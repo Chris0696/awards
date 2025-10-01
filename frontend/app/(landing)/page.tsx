@@ -15,9 +15,9 @@ export default function Home() {
       <SubheroSection />
       <HowItWorksSection />
       <DiscoverProjects />
-      <TestimonialsSection />
+      {/* <TestimonialsSection /> */}
       <FaqSection title="Faq" />
-      <PartnersSection />
+      {/* <PartnersSection /> */}
     </section>
   );
 }

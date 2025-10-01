@@ -12,9 +12,7 @@ export default function ProjectOverviewCard({
       <h4 className="text-lg text-gray-600  ">
         {title ? title : "Nombre total de projets validés"}
       </h4>
-      <p className={`text-4xl font-semibold ${color}  `}>
-        {total !== undefined ? total : 150}
-      </p>
+      <p className={`text-4xl font-semibold ${color}  `}>{total ?? 0}</p>
     </div>
   );
 }

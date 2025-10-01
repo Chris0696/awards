@@ -1,5 +1,5 @@
 import OverviewCard from "@/components/dashboard/project-owner/OverviewCard";
-import DashboardHeader from "../DasboardHeader";
+import DashboardHeader from "./DasboardHeader";
 import InfobulleCard from "@/components/dashboard/project-owner/InfobulleCard";
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
 import { useQuery } from "@tanstack/react-query";
@@ -46,7 +46,7 @@ export default function OwnerHome() {
             color="text-[#FF7F00]"
             title="Total des votes reçus"
             showThumb
-            total={ownerStats?.vote_stats.total_votes}
+            total={ownerStats?.vote_stats.total_votes_purchased}
           />
         </div>
         <InfobulleCard />

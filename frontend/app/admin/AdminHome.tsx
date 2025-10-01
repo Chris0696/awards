@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import DashboardHeader from "../DasboardHeader";
+import DashboardHeader from "./DasboardHeader";
 import ProjectOverviewCard from "@/components/dashboard/admin/ProjectOverviewCard";
 import FilterBtn from "@/components/dashboard/FilterBtn";
 import { VotesChart } from "@/components/dashboard/admin/VotesChart";
@@ -209,7 +209,7 @@ export default function AdminHome() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             {" "}
             <h2 className="text-xl font-medium">Évolution des votes</h2>
-            <div className="space-x-2">
+            <div className="space-x-2 space-y-2 md:space-y-0">
               <FilterBtn
                 defaultText="Année"
                 options={yearOptionsVote}
@@ -269,7 +269,7 @@ export default function AdminHome() {
             <h2 className="text-lg text-wrap font-medium w-[200px] ">
               Statistique des projets publiés
             </h2>
-            <div className="space-x-2">
+            <div className="space-x-2 space-y-2 md:space-y-0">
               <FilterBtn
                 defaultText="Année"
                 options={yearOptions}

@@ -18,7 +18,7 @@ import {
   addAdminRelatedUser,
   updateAdminRelatedUser,
 } from "@/services/userService";
-import { Team } from "@/app/(dashboard)/admin/team/page";
+import { Team } from "@/app/admin/team/page";
 import axios, { AxiosError } from "axios";
 import { BackendError } from "@/services/apiClient";
 import { toast } from "sonner";

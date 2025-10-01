@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
 
@@ -22,11 +22,14 @@ import { FedaCheckoutContainer } from "fedapay-reactjs";
 import Popover from "@/components/ui/Popover";
 import { useMutation } from "@tanstack/react-query";
 import { submitFirstProject } from "@/services/projectService";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {
   const [showModal, setShowModal] = useState(false);
   const [isWidgetOpen, setIsWidgetOpen] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState<string>();
+  const [urlOptionnalPart, SetUrlOptionnalPart] = useState<string>();
   const [step, setStep] = useState(1);
 
   const methods = useForm<ProjectForm>({
@@ -87,7 +90,10 @@ export default function SubmitProjectFormContainer() {
       reset();
       setStep(1);
     },
-    onError: () => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
 
   const checkoutEmbedOptions = {
@@ -110,9 +116,8 @@ export default function SubmitProjectFormContainer() {
       const FedaPay = window["FedaPay"];
       if (resp.reason === FedaPay.DIALOG_DISMISSED) {
         toast.error("Paiement annulé");
-        setIsWidgetOpen(false);
-        setIsWidgetOpen(false);
-        /*  setIsWidgetOpen(false);
+
+        /*  
         const transactionId = resp.transaction.id;
         const status = resp.transaction.status;
         const paymentReference = resp.transaction.reference;
@@ -127,7 +132,10 @@ export default function SubmitProjectFormContainer() {
         formData.append("profession", profession);
         formData.append("password", password);
         formData.append("age", String(age));
-        formData.append("affiliate", "");
+        formData.append(
+          "affiliate",
+          urlOptionnalPart ? String(currentUrl) : ""
+        );
         formData.append(
           "accept_project_reformulation",
           acceptReformulation ? "1" : "0"
@@ -181,7 +189,10 @@ export default function SubmitProjectFormContainer() {
         formData.append("profession", profession);
         formData.append("password", password);
         formData.append("age", String(age));
-        formData.append("affiliate", "");
+        formData.append(
+          "affiliate",
+          urlOptionnalPart ? String(currentUrl) : ""
+        );
         formData.append(
           "accept_project_reformulation",
           acceptReformulation ? "1" : "0"
@@ -227,6 +238,12 @@ export default function SubmitProjectFormContainer() {
   };
 
   const preview = useImagePreview(image);
+  useEffect(() => {
+    const currentUrl = window.location.href;
+    const search = window.location.search;
+    setCurrentUrl(currentUrl);
+    SetUrlOptionnalPart(search);
+  }, []);
 
   const onSubmit = async (data: ProjectForm) => {};
   return (

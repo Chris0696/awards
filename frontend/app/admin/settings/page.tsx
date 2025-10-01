@@ -1,4 +1,4 @@
-import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
+import DashboardHeader from "@/app/admin/DasboardHeader";
 import SettingsCard from "@/components/dashboard/project-owner/SettingsCard";
 import LanguageIcon from "@/assets/language.svg";
 import ClockIcon from "@/assets/clock.svg";

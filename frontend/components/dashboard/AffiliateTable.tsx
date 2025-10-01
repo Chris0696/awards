@@ -11,9 +11,10 @@ import AddGdChildModal from "../modals/AddGdChildModal";
 import { useState } from "react";
 import ConfirmDeleteModal from "../modals/ConfirmDeleteModal";
 
-import { Team } from "@/app/(dashboard)/admin/team/page";
+import { Team } from "@/app/admin/team/page";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteAdminRelatedUser } from "@/services/userService";
+import useCopyToClipboard from "@/hooks/useCopyToClipboard";
 interface Props {
   affiliates: Team[];
 }
@@ -21,6 +22,7 @@ export default function AffiliateTable({ affiliates }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Team>();
+  const { handleCopy } = useCopyToClipboard();
 
   const queryClient = useQueryClient();
   const deleteUserMutation = useMutation({
@@ -94,6 +96,11 @@ export default function AffiliateTable({ affiliates }: Props) {
                     <MoreVerticalIcon />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={() => handleCopy(affiliate.affiliate_link)}
+                    >
+                      Copier le lien
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
                         setShowConfirmModal(true);

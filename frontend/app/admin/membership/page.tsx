@@ -1,6 +1,6 @@
 "use client";
 import AddGdChildModal from "@/components/modals/AddGdChildModal";
-import DashboardHeader from "@/app/(dashboard)/DasboardHeader";
+import DashboardHeader from "@/app/admin/DasboardHeader";
 
 import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
 import { ChevronRightIcon } from "lucide-react";
