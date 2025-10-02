@@ -30,6 +30,7 @@ urlpatterns = [
     
     path("auth/password-reset/<email>/", UserViews.PasswordResetEmailVerifyAPIView.as_view(), name='password_reset_email'),
     path("auth/password-change/", UserViews.PasswordChangeAPIView.as_view(), name='password_change'),
+    path('auth/change-password/', UserViews.ChangePasswordAPIView.as_view(), name='change-password'),
     path('auth/globalprofile/<user_id>/', UserViews.ProfileAPIView.as_view(), name='profile'),
 
     path('auth/profile/<int:user_id>/', ApiViews.UserProfileAPIView.as_view(), name='user_profile'),

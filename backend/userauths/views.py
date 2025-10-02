@@ -438,6 +438,30 @@ class PasswordChangeAPIView(generics.CreateAPIView):
             return Response({"message": "Reconnectez-vous pour changer votre mot de passe.", "icon": "error"}, status=status.HTTP_404_NOT_FOUND)
 
 
+class ChangePasswordAPIView(generics.CreateAPIView):
+    serializer_class = api_serializer.UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+
+        if not user_id:
+            return Response({"message": "User ID is missing.", "icon": "error"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.get(id=user_id)
+        if user is not None:
+            if check_password(old_password, user.password):
+                user.set_password(new_password)
+                user.save()
+                return Response({"message": "Mot de passe changé avec succès", "icon": "success"})
+            else:
+                return Response({"message": "L'ancien mot  de passe est incorrecte", "icon": "warning"})
+        else:
+            return Response({"message": "Cet utilisateur n'existe pas", "icon": "error"})
+        
+        
 class ProfileAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]

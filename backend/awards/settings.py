@@ -63,6 +63,7 @@ if DEBUG:
 else:
     BASE_PROD_URL = os.environ.get('BASE_PROD_URL')
     FRONTEND_SITE_AFFILIATE_URL = os.environ.get('FRONTEND_SITE_AFFILIATE_URL')
+    BASE_URL = os.environ.get('BASE_URL')
 # Configuration HTTPS
 # SECURE_SSL_REDIRECT = True
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
