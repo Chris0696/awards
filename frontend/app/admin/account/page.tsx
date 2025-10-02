@@ -165,10 +165,7 @@ export default function page() {
                 className="border-2 border-gray-300 rounded-lg p-2 w-full "
               />
             </div>
-            <div className="flex space-x-3">
-              <button className=" border border-primary px-2 py-2 cursor-pointer text-primary rounded-md">
-                Mettre à jour mes informations
-              </button>
+            <div className="">
               <button
                 type="submit"
                 className="bg-primary text-white px-2 py-2 cursor-pointer rounded-md"
