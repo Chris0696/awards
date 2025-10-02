@@ -49,7 +49,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshRes = await axios.post("/api/v1/auth/refresh");
+        const refreshRes = await axios.post("/frontend-api/auth/refresh");
         const newAccess = refreshRes.data.access;
 
         isRefreshing = false;
