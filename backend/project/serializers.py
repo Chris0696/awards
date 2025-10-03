@@ -237,7 +237,7 @@ class ProjectAnalyticsVoteSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['category_id', 'category_name', 'image', 'slug']
+        fields = ['category_id', 'category_name', 'is_custom', 'created_by', 'image', 'slug']
         
     def to_representation(self, instance):
         # Ne retourner que les catégories actives
@@ -300,17 +300,222 @@ class RecentProjectSerializer(serializers.ModelSerializer):
                   'votes_count', 'rank', 'created_at']
 
 
+# class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
+#     category_id = serializers.CharField(
+#         max_length=20,
+#         required=True,
+#         write_only=True,
+#         error_messages={
+#         "required": "Vous devez obligatoirement choisir une catégorie pour le projet.",
+#         "blank": "Le champ catégorie ne peut pas être vide.",
+#         "max_length": "L’identifiant de catégorie est trop long."
+#     }
+#     )
+#     owner_id = serializers.PrimaryKeyRelatedField(
+#         read_only=True,
+#         source='owner'
+#     )
+
+#     class Meta:
+#         model = Project
+#         fields = [
+#             'project_id', 'category_id', 'owner_id', 'file', 'image',
+#             'project_title', 'local_area_impact', 'main_objective', 'solution',
+#             'description', 'estimated_budget', 'target_audience', 'progress_report',
+#             'owner_project_status'
+#         ]
+#         read_only_fields = ['project_id', 'owner_id']
+        
+        
+#     def to_internal_value(self, data):
+#         print(f"🔍 DEBUG ProjectSerializer - Type de data reçu: {type(data)}")
+#         print(f"🔍 DEBUG ProjectSerializer - Data: {data}")
+#         print(f"🔍 DEBUG ProjectSerializer - Fichiers image/file: {data.get('image')} / {data.get('file')}")
+#         print(f"🔍 DEBUG ProjectSerializer - Data keys: {list(data.keys()) if hasattr(data, 'keys') else 'N/A'}")
+
+#         # Si les fichiers sont dans le contexte parent, les récupérer
+#         request = self.context.get('request')
+#         if request and hasattr(request, 'FILES'):
+#             for file_field in ['image', 'file']:
+#                 if file_field in request.FILES and (not hasattr(data, file_field) or file_field not in data):
+#                     if hasattr(data, '_mutable'):
+#                         data._mutable = True
+#                     elif hasattr(data, 'copy'):
+#                         data = data.copy()
+#                     else:
+#                         data = dict(data)
+#                     data[file_field] = request.FILES[file_field]
+#                     print(f"🔍 DEBUG ProjectSerializer - Fichier {file_field} ajouté depuis FILES")
+
+                          
+#         try:
+#             result = super().to_internal_value(data)
+#             print("✅ DEBUG ProjectSerializer - to_internal_value réussi")
+#             return result
+#         except serializers.ValidationError as e:
+#             print(f"❌ DEBUG ProjectSerializer - Erreurs de validation: {e.detail}")
+            
+#             # Reformater les erreurs pour une meilleure lisibilité
+#             formatted_errors = {}
+#             for field, messages in e.detail.items():
+#                 if isinstance(messages, list):
+#                     formatted_errors[field] = messages[0] if messages else "Erreur de validation"
+#                 else:
+#                     formatted_errors[field] = str(messages)
+            
+#             raise serializers.ValidationError({
+#                 "error": {
+#                     "project": formatted_errors
+#                 }
+#             })
+
+
+#     def validate(self, attrs):
+#         print(f"🔍 DEBUG ProjectCreateUpdate - Validation attrs: {list(attrs.keys())}")
+#         # Valider category_id (ShortUUIDField)
+        
+#         print(f"🔍 DEBUG ProjectSerializer.validate - Attrs reçus: {attrs}")
+#         category_id = attrs.get('category_id')
+#         print("category_id =", category_id)
+#         if not category_id:
+#             print("❌ DEBUG - Category_id manquant")
+#             raise serializers.ValidationError({
+#                 "error": ["Vous devez obligatoirement choisir une catégorie pour le projet."],
+#             })
+        
+#         try:
+#             category = Category.objects.get(category_id=category_id, active=True)
+#             attrs['category'] = category
+#             print("Found category:", category.category_name)  # Débogage
+#         except Category.DoesNotExist:
+#             print(f"❌ DEBUG - Catégorie non trouvée: {category_id}")
+#             raise serializers.ValidationError({
+#                 "error": {
+#                     "project" :{
+#                         "category_id": _("La catégorie sélectionnée n'existe pas ou n'est pas active.")
+#                     }
+#                 }
+                
+#             })
+
+#         # Ne pas retirer category_id ici pour éviter de perturber d'autres validations
+#         # attrs.pop('category_id', None)
+
+#         # Validation de l'owner
+#         request = self.context.get('request')
+#         skip_auth = self.context.get('skip_auth_validation', False)
+#         if not skip_auth and request and hasattr(request, 'user') and request.user.is_authenticated:
+#             user = request.user
+#             if user.user_type != 'owner':
+#                 print(f"❌ DEBUG - Type utilisateur incorrect: {user.user_type}")
+#                 raise serializers.ValidationError({
+#                     "error": {
+#                         "non_field_errors": [_("Seul un utilisateur de type 'owner' peut créer ou modifier un projet.")]
+#                     }
+#                 })
+#             try:
+#                 owner = Owner.objects.get(user=user)
+#                 attrs['owner'] = owner
+#                 if owner.commercial:
+#                     attrs['commercial'] = owner.commercial
+#                 print("✅ DEBUG - Owner validé")
+#             except Owner.DoesNotExist:
+#                 print("❌ DEBUG - Profil Owner non trouvé")
+#                 raise serializers.ValidationError({
+#                     "error": {
+#                         "non_field_errors": [_("Aucun profil Owner associé à cet utilisateur.")]
+#                     }
+#                 })
+                
+#         print("✅ DEBUG ProjectSerializer.validate - Validation terminée")
+#         return attrs
+    
+
+#     def create(self, validated_data):
+#         print("🔍 DEBUG ProjectSerializer.create - Début création")
+#         # Retirer category_id après validation pour éviter un conflit avec le champ category
+#         validated_data.pop('category_id', None)
+#         print(f"🔍 DEBUG - Données validées pour création: {list(validated_data.keys())}")
+#         project = super().create(validated_data)
+#         if not project.slug:
+#             project.slug = slugify(f"{project.project_title}-{project.project_id}")
+#             project.save()
+            
+#         print(f"✅ DEBUG - Projet créé avec ID: {project.project_id}")
+
+#         return project
+
+#     def update(self, instance, validated_data):
+#         print("🔍 DEBUG ProjectSerializer.update - Début mise à jour")
+#         print(f"🔍 DEBUG - Données pour mise à jour: {list(validated_data.keys())}")
+        
+#         validated_data.pop('platform_status', None)
+#         validated_data.pop('admin_comment', None)
+#         validated_data.pop('category_id', None)  # Retirer category_id pour l'update
+        
+#         # Gérer spécialement les fichiers - ne supprimer que si un nouveau fichier est fourni
+#         for file_field in ['image', 'file']:
+#             if file_field in validated_data:
+#                 file_value = validated_data[file_field]
+#                 if file_value is None:
+#                     # Si explicitement None, garder l'ancien fichier
+#                     validated_data.pop(file_field, None)
+#                     print(f"🔍 DEBUG - Fichier {file_field} maintenu (valeur None ignorée)")
+#                 elif hasattr(file_value, 'read'):
+#                     # Nouveau fichier fourni
+#                     print(f"🔍 DEBUG - Nouveau fichier {file_field}: {getattr(file_value, 'name', 'unknown')}")
+#                 else:
+#                     print(f"🔍 DEBUG - Fichier {file_field}: {file_value}")
+        
+#         updated_instance = super().update(instance, validated_data)
+        
+#         # Régénérer le slug si le titre a changé
+#         if 'project_title' in validated_data and updated_instance.project_title:
+#             new_slug = slugify(f"{updated_instance.project_title}-{updated_instance.project_id}")
+#             if new_slug != updated_instance.slug:
+#                 updated_instance.slug = new_slug
+#                 updated_instance.save(update_fields=['slug'])
+#                 print(f"🔍 DEBUG - Slug mis à jour: {new_slug}")
+        
+#         print(f"✅ DEBUG - Projet mis à jour: {updated_instance.project_id}")
+#         return updated_instance
+
+#     def to_representation(self, instance):
+#         representation = super().to_representation(instance)
+#         if instance.category:
+#             representation['category'] = CategorySerializer(instance.category).data
+#         return representation
+    
+#     def __init__(self, *args, **kwargs):
+#         super(ProjectCreateUpdateSerializer, self).__init__(*args, **kwargs)
+#         request = self.context.get("request")
+#         if request and request.method == "POST":
+#             self.Meta.depth = 0
+#         else:
+#             self.Meta.depth = 3
+    
+
 class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
+    # Rendre category_id optionnel
     category_id = serializers.CharField(
         max_length=20,
-        required=True,
+        required=False,  # Changé de True à False
+        allow_blank=True,
         write_only=True,
         error_messages={
-        "required": "Vous devez obligatoirement choisir une catégorie pour le projet.",
-        "blank": "Le champ catégorie ne peut pas être vide.",
-        "max_length": "L’identifiant de catégorie est trop long."
-    }
+            "max_length": "L'identifiant de catégorie est trop long."
+        }
     )
+    
+    # Nouveau champ pour le nom de catégorie personnalisée
+    custom_category_name = serializers.CharField(
+        max_length=100,
+        required=False,
+        allow_blank=True,
+        write_only=True,
+        help_text="Nom d'une catégorie personnalisée si category_id n'est pas fourni"
+    )
+    
     owner_id = serializers.PrimaryKeyRelatedField(
         read_only=True,
         source='owner'
@@ -319,29 +524,20 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = [
-            'project_id', 'category_id', 'owner_id', 'file', 'image',
-            'project_title', 'local_area_impact', 'main_objective', 'solution',
-            'description', 'estimated_budget', 'target_audience', 'progress_report',
-            'owner_project_status'
+            'project_id', 'category_id', 'custom_category_name', 'owner_id', 
+            'file', 'image', 'project_title', 'local_area_impact', 
+            'main_objective', 'solution', 'description', 'estimated_budget', 
+            'target_audience', 'progress_report', 'owner_project_status'
         ]
         read_only_fields = ['project_id', 'owner_id']
-        
         
     def to_internal_value(self, data):
         print(f"🔍 DEBUG ProjectSerializer - Type de data reçu: {type(data)}")
         print(f"🔍 DEBUG ProjectSerializer - Data: {data}")
-        print(f"🔍 DEBUG ProjectSerializer - Fichiers image/file: {data.get('image')} / {data.get('file')}")
-        print(f"🔍 DEBUG ProjectSerializer - Data keys: {list(data.keys()) if hasattr(data, 'keys') else 'N/A'}")
+        print(f"🔍 DEBUG ProjectSerializer - category_id: {data.get('category_id')}")
+        print(f"🔍 DEBUG ProjectSerializer - custom_category_name: {data.get('custom_category_name')}")
 
-        # Si les fichiers sont dans le contexte parent, les récupérer
-        # request = self.context.get('request')
-        # if request and hasattr(request, 'FILES'):
-        #     for file_field in ['image', 'file']:
-        #         if file_field in request.FILES and file_field not in data:
-        #             data[file_field] = request.FILES[file_field]
-        #             print(f"🔍 DEBUG ProjectCreateUpdate - Fichier {file_field} ajouté depuis FILES")
-        
-        # Si les fichiers sont dans le contexte parent, les récupérer
+        # Gérer les fichiers depuis request.FILES
         request = self.context.get('request')
         if request and hasattr(request, 'FILES'):
             for file_field in ['image', 'file']:
@@ -355,7 +551,6 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
                     data[file_field] = request.FILES[file_field]
                     print(f"🔍 DEBUG ProjectSerializer - Fichier {file_field} ajouté depuis FILES")
 
-                          
         try:
             result = super().to_internal_value(data)
             print("✅ DEBUG ProjectSerializer - to_internal_value réussi")
@@ -363,7 +558,6 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
         except serializers.ValidationError as e:
             print(f"❌ DEBUG ProjectSerializer - Erreurs de validation: {e.detail}")
             
-            # Reformater les erreurs pour une meilleure lisibilité
             formatted_errors = {}
             for field, messages in e.detail.items():
                 if isinstance(messages, list):
@@ -377,50 +571,89 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
                 }
             })
 
-
     def validate(self, attrs):
-        print(f"🔍 DEBUG ProjectCreateUpdate - Validation attrs: {list(attrs.keys())}")
-        # Valider category_id (ShortUUIDField)
+        print(f"🔍 DEBUG ProjectSerializer.validate - Attrs reçus: {list(attrs.keys())}")
         
-        print(f"🔍 DEBUG ProjectSerializer.validate - Attrs reçus: {attrs}")
         category_id = attrs.get('category_id')
-        print("category_id =", category_id)
-        if not category_id:
-            print("❌ DEBUG - Category_id manquant")
+        custom_category_name = attrs.get('custom_category_name')
+        
+        print(f"🔍 DEBUG - category_id: {category_id}")
+        print(f"🔍 DEBUG - custom_category_name: {custom_category_name}")
+        
+        # Vérifier qu'au moins l'un des deux est fourni
+        if not category_id and not custom_category_name:
+            print("❌ DEBUG - Ni category_id ni custom_category_name fourni")
             raise serializers.ValidationError({
-                "error": ["Vous devez obligatoirement choisir une catégorie pour le projet."],
+                "error": ["Vous devez fournir soit un category_id existant, soit un custom_category_name."]
             })
         
-        try:
-            category = Category.objects.get(category_id=category_id, active=True)
-            attrs['category'] = category
-            print("Found category:", category.category_name)  # Débogage
-        except Category.DoesNotExist:
-            print(f"❌ DEBUG - Catégorie non trouvée: {category_id}")
-            raise serializers.ValidationError({
-                "error": {
-                    "project" :{
-                        "category_id": _("La catégorie sélectionnée n'existe pas ou n'est pas active.")
+        # Si les deux sont fournis, category_id a la priorité
+        if category_id and custom_category_name:
+            print("⚠️ DEBUG - Les deux fournis, category_id prioritaire")
+            attrs.pop('custom_category_name', None)
+            custom_category_name = None
+        
+        # Cas 1: Utiliser une catégorie existante
+        if category_id:
+            try:
+                category = Category.objects.get(category_id=category_id, active=True)
+                attrs['category'] = category
+                print(f"✅ DEBUG - Catégorie existante trouvée: {category.category_name}")
+            except Category.DoesNotExist:
+                print(f"❌ DEBUG - Catégorie non trouvée: {category_id}")
+                raise serializers.ValidationError({
+                    "error": {
+                        "category_id": "La catégorie sélectionnée n'existe pas ou n'est pas active."
                     }
-                }
-                
-            })
-
-        # Ne pas retirer category_id ici pour éviter de perturber d'autres validations
-        # attrs.pop('category_id', None)
+                })
+        
+        # Cas 2: Créer une catégorie personnalisée
+        elif custom_category_name:
+            print(f"🔍 DEBUG - Création catégorie personnalisée: {custom_category_name}")
+            
+            # Vérifier si une catégorie avec ce nom existe déjà
+            existing_category = Category.objects.filter(
+                category_name__iexact=custom_category_name.strip()
+            ).first()
+            
+            if existing_category:
+                # Utiliser la catégorie existante
+                attrs['category'] = existing_category
+                print(f"✅ DEBUG - Catégorie existante réutilisée: {existing_category.category_name}")
+            else:
+                # Marquer pour création ultérieure
+                attrs['_create_custom_category'] = custom_category_name.strip()
+                print(f"🔍 DEBUG - Catégorie marquée pour création: {custom_category_name}")
 
         # Validation de l'owner
         request = self.context.get('request')
         skip_auth = self.context.get('skip_auth_validation', False)
+        
         if not skip_auth and request and hasattr(request, 'user') and request.user.is_authenticated:
             user = request.user
             if user.user_type != 'owner':
                 print(f"❌ DEBUG - Type utilisateur incorrect: {user.user_type}")
                 raise serializers.ValidationError({
                     "error": {
-                        "non_field_errors": [_("Seul un utilisateur de type 'owner' peut créer ou modifier un projet.")]
+                        "non_field_errors": ["Seul un utilisateur de type 'owner' peut créer ou modifier un projet."]
                     }
                 })
+            # try:
+            #     owner = Owner.objects.get(user=user)
+            #     # Pour les updates, ne pas écraser l'owner existant
+            #     if not hasattr(self, 'instance') or not self.instance:
+            #         attrs['owner'] = owner
+            #     if owner.commercial and (not hasattr(self, 'instance') or not self.instance.commercial):
+            #         attrs['commercial'] = owner.commercial
+            #     print("✅ DEBUG - Owner validé")
+            # except Owner.DoesNotExist:
+            #     print("❌ DEBUG - Profil Owner non trouvé")
+            #     raise serializers.ValidationError({
+            #         "error": {
+            #             "non_field_errors": ["Aucun profil Owner associé à cet utilisateur."]
+            #         }
+            #     })
+            
             try:
                 owner = Owner.objects.get(user=user)
                 attrs['owner'] = owner
@@ -435,45 +668,75 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
                     }
                 })
                 
+        
         print("✅ DEBUG ProjectSerializer.validate - Validation terminée")
         return attrs
-    
 
+    @transaction.atomic
     def create(self, validated_data):
         print("🔍 DEBUG ProjectSerializer.create - Début création")
-        # Retirer category_id après validation pour éviter un conflit avec le champ category
+        
+        # Nettoyer les champs temporaires
         validated_data.pop('category_id', None)
+        validated_data.pop('custom_category_name', None)
+        create_custom_category = validated_data.pop('_create_custom_category', None)
+        
+        # Créer une catégorie personnalisée si nécessaire
+        if create_custom_category and 'category' not in validated_data:
+            print(f"🔍 DEBUG - Création de la catégorie personnalisée: {create_custom_category}")
+            
+            custom_category = Category.objects.create(
+                category_name=create_custom_category,
+                active=True,
+                is_custom=True,  # Ajoutez ce champ à votre modèle Category si nécessaire
+                created_by=validated_data.get('owner')  # Optionnel: tracer qui a créé la catégorie
+            )
+            validated_data['category'] = custom_category
+            print(f"✅ DEBUG - Catégorie personnalisée créée: {custom_category.category_id}")
+        
         print(f"🔍 DEBUG - Données validées pour création: {list(validated_data.keys())}")
         project = super().create(validated_data)
+        
         if not project.slug:
             project.slug = slugify(f"{project.project_title}-{project.project_id}")
             project.save()
             
         print(f"✅ DEBUG - Projet créé avec ID: {project.project_id}")
-
         return project
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         print("🔍 DEBUG ProjectSerializer.update - Début mise à jour")
         print(f"🔍 DEBUG - Données pour mise à jour: {list(validated_data.keys())}")
         
+        # Nettoyer les champs
         validated_data.pop('platform_status', None)
         validated_data.pop('admin_comment', None)
-        validated_data.pop('category_id', None)  # Retirer category_id pour l'update
+        validated_data.pop('category_id', None)
+        validated_data.pop('custom_category_name', None)
+        create_custom_category = validated_data.pop('_create_custom_category', None)
         
-        # Gérer spécialement les fichiers - ne supprimer que si un nouveau fichier est fourni
+        # Créer une catégorie personnalisée si nécessaire pour l'update
+        if create_custom_category and 'category' not in validated_data:
+            print(f"🔍 DEBUG - Création de la catégorie personnalisée pour update: {create_custom_category}")
+            
+            custom_category = Category.objects.create(
+                category_name=create_custom_category,
+                active=True,
+                is_custom=True,
+            )
+            validated_data['category'] = custom_category
+            print(f"✅ DEBUG - Catégorie personnalisée créée: {custom_category.category_id}")
+        
+        # Gérer les fichiers
         for file_field in ['image', 'file']:
             if file_field in validated_data:
                 file_value = validated_data[file_field]
                 if file_value is None:
-                    # Si explicitement None, garder l'ancien fichier
                     validated_data.pop(file_field, None)
                     print(f"🔍 DEBUG - Fichier {file_field} maintenu (valeur None ignorée)")
                 elif hasattr(file_value, 'read'):
-                    # Nouveau fichier fourni
                     print(f"🔍 DEBUG - Nouveau fichier {file_field}: {getattr(file_value, 'name', 'unknown')}")
-                else:
-                    print(f"🔍 DEBUG - Fichier {file_field}: {file_value}")
         
         updated_instance = super().update(instance, validated_data)
         
@@ -491,7 +754,11 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         if instance.category:
-            representation['category'] = CategorySerializer(instance.category).data
+            category_data = CategorySerializer(instance.category).data
+            # Ajouter un indicateur si c'est une catégorie personnalisée
+            if hasattr(instance.category, 'is_custom'):
+                category_data['is_custom'] = instance.category.is_custom
+            representation['category'] = category_data
         return representation
     
     def __init__(self, *args, **kwargs):
@@ -501,7 +768,7 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
-    
+
 
 class ProjectPaymentSerializer(serializers.Serializer):
     """Serializer pour les informations de paiement de projet"""

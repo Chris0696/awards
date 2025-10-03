@@ -15,7 +15,7 @@ class CommercialAdmin(admin.ModelAdmin):
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('category_name', 'active', 'slug')
+    list_display = ('category_name', 'created_by', 'is_custom', 'active', 'slug')
     search_fields = ('category_name', 'owner__full_name')
     prepopulated_fields = {'slug': ('category_name',)}
 

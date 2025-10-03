@@ -51,6 +51,9 @@ class Category(models.Model):
     slug = models.SlugField(unique=True, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     category_id = ShortUUIDField(unique=True, length=8, max_length=20, alphabet="1234567890ABCDEF")
+    is_custom = models.BooleanField(default=False, verbose_name="Catégorie personnalisée",
+        help_text="Indique si cette catégorie a été créée par un utilisateur")
+    created_by = models.ForeignKey('projectowner.Owner', null=True, blank=True, related_name='custom_categories', verbose_name="Créée par", on_delete=models.SET_NULL)
     
     class Meta:
         ordering = ['category_name']
