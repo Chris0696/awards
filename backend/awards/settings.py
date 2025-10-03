@@ -68,6 +68,9 @@ else:
     BASE_PROD_URL = os.environ.get('BASE_PROD_URL')
     FRONTEND_SITE_AFFILIATE_URL = os.environ.get('FRONTEND_SITE_AFFILIATE_URL')
     BASE_URL = os.environ.get('BASE_URL')
+    NEXT_PUBLIC_API_URL=https://projectawards.scarsoft.net/api
+    NEXT_PUBLIC_BASE_URL=https://projectawards.scarsoft.net
+
 # Configuration HTTPS
 # SECURE_SSL_REDIRECT = True
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
