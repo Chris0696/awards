@@ -35,7 +35,10 @@ urlpatterns = [
 
     path('auth/profile/<int:user_id>/', ApiViews.UserProfileAPIView.as_view(), name='user_profile'),
 
-
+    # path('contact/', UserViews.ContactMessageView.as_view(), name='contact'),
+    
+    path('contact/', UserViews.ContactMessageListCreateView.as_view(), name='contact-list-create'),
+    path('contact/<int:pk>/', UserViews.ContactMessageDetailView.as_view(), name='contact-detail'),
     
     path('owner/profile/update/<int:user_id>/', OwnerViews.UpdateOwnerProfileAPIView.as_view(), name='update-owner-profile'),
 

@@ -5,7 +5,7 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
 
 from rest_framework import serializers
-from .models import Profile, User
+from .models import ContactMessage, Profile, User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.utils.translation import gettext_lazy as _
 import re
@@ -188,6 +188,21 @@ class AdminUserUpdateSerializer(serializers.ModelSerializer):
         return value
     
 
+class ContactMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactMessage
+        fields = ['id', 'full_name', 'email', 'phone', 'subject', 'message', 'created_at']
+
+    def validate_phone(self, value):
+        """Valider le numéro de téléphone avec code pays inclus"""
+        if not value.startswith('+'):
+            raise serializers.ValidationError(_("Le numéro de téléphone doit commencer par + (ex: +2290155662555)."))
+        if len(value) < 8 or len(value) > 20:
+            raise serializers.ValidationError(_("Le numéro de téléphone doit contenir entre 8 et 20 caractères."))
+        return value
+        
+    
+    
 # === SERIALIZERS STATISTIQUES ===
 class DashboardStatsSerializer(serializers.Serializer):
     """Serializer pour les statistiques générales du dashboard"""

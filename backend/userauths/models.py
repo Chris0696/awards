@@ -47,6 +47,21 @@ class User(AbstractUser):
         super(User, self).save(*args, **kwargs)
 
 
+class ContactMessage(models.Model):
+    full_name = models.CharField(max_length=150)
+    email = models.EmailField()
+    phone = models.CharField(max_length=30)
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.full_name} - {self.subject}"
+    
+    
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to="user_folder", default="default-user.jpg", null=True, blank=True)

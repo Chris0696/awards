@@ -1,10 +1,14 @@
 from django.contrib import admin
-from userauths.models import User, Profile
+from userauths.models import ContactMessage, User, Profile
 from django.contrib.auth.admin import UserAdmin
 
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'full_name', 'phone', 'profession', 'date')
+
+
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'email', 'subject', 'message', 'phone')
 
 
 class CustomUserAdmin(UserAdmin):
@@ -17,4 +21,4 @@ class CustomUserAdmin(UserAdmin):
 
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Profile, ProfileAdmin)
-
+admin.site.register(ContactMessage, ContactMessageAdmin)

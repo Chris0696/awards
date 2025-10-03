@@ -1,15 +1,15 @@
 from django.shortcuts import render
 
 from userauths.utils import send_otp_email
-from .models import Profile, User
+from .models import ContactMessage, Profile, User
 from userauths import serializers as api_serializer
 from api import serializers as register_serializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from django.contrib.auth.hashers import check_password
 from rest_framework.response import Response
-from .serializers import AdminRegisterSerializer, ProfileSerializer
+from .serializers import AdminRegisterSerializer, ContactMessageSerializer, ProfileSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework.views import APIView
@@ -461,7 +461,48 @@ class ChangePasswordAPIView(generics.CreateAPIView):
         else:
             return Response({"message": "Cet utilisateur n'existe pas", "icon": "error"})
         
+
+# class ContactMessageView(generics.CreateAPIView):
+#     queryset = ContactMessage.objects.all()
+#     serializer_class = ContactMessageSerializer
+#     def post(self, request, *args, **kwargs):
+#         serializer = ContactMessageSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({
+#                 "message": ["Votre message a été envoyé avec succès."]
+#             }, status=status.HTTP_201_CREATED)
+#         return Response({
+#             "success": False,
+#             "error": serializer.errors
+#         }, status=status.HTTP_400_BAD_REQUEST)
         
+
+class ContactMessageListCreateView(generics.ListCreateAPIView):
+    """
+    - GET: Liste tous les messages de contact (admin uniquement)
+    - POST: Crée un nouveau message (ouvert à tous les utilisateurs)
+    """
+    queryset = ContactMessage.objects.all()
+    serializer_class = ContactMessageSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            # Seuls les admins peuvent voir les messages
+            return [permissions.IsAdminUser()]
+        return [permissions.AllowAny()]
+
+
+class ContactMessageDetailView(generics.RetrieveDestroyAPIView):
+    """
+    - GET: Récupère un message précis (admin uniquement)
+    - DELETE: Supprime un message (admin uniquement)
+    """
+    queryset = ContactMessage.objects.all()
+    serializer_class = ContactMessageSerializer
+    permission_classes = [IsAdminUser]
+    
+          
 class ProfileAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
