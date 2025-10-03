@@ -31,7 +31,7 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 # on DEBUG, allow every host
 if DEBUG:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "scarsoft.net", "awardprojectvoting.scarsoft.net", "185.98.136.244", "backend"]
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "scarsoft.net", "awardprojectvoting.scarsoft.net", "projectawards.scarsoft.net", "185.98.136.244", "backend"]
     CSRF_TRUSTED_ORIGINS = [
         "http://localhost:8000",
     ]
@@ -39,7 +39,9 @@ else:
     ALLOWED_HOSTS = [
         'scarsoft.net',
         'awardprojectvoting.scarsoft.net',
+        'projectawards.scarsoft.net',
         'https://awardprojectvoting.scarsoft.net/admin/',
+        'https://projectawards.scarsoft.net/admin/',
         '185.98.136.244',
         'vps114277.serveur-vps.net',
         'localhost',
@@ -50,6 +52,8 @@ else:
         'https://scarsoft.net',
         'https://awardprojectvoting.scarsoft.net',
         'https://awardprojectvoting.scarsoft.net/admin/',
+        'https://projectawards.scarsoft.net/admin/',
+        'https://projectawards.scarsoft.net/',
         'http://185.98.136.244',
         'http://185.98.136.244:8080',
         'http://185.98.136.244:8081',

@@ -2,7 +2,7 @@
 
 set -e
 
-DOMAIN="awardprojectvoting.scarsoft.net"
+DOMAIN="projectawards.scarsoft.net"
 EMAIL="contact@scarsoft.net"
 
 echo "🚀 Démarrage du déploiement..."
@@ -28,7 +28,7 @@ http {
 
     server {
         listen 80;
-        server_name awardprojectvoting.scarsoft.net;
+        server_name projectawards.scarsoft.net;
         
         # Pour Let's Encrypt
         location /.well-known/acme-challenge/ {

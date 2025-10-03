@@ -239,7 +239,7 @@ class Commercial(models.Model):
                 frontend_site_affiliate = getattr(settings, 'FRONTEND_SITE_AFFILIATE_URL', settings.FRONTEND_SITE_AFFILIATE_URL)
                 self.affiliate_link = f"{frontend_site_affiliate}/?affiliate={affiliate_id}"
             except Exception:
-                frontend_site_affiliate = getattr(settings, 'FRONTEND_SITE_AFFILIATE_URL', 'https://awardprojectvoting.scarsoft.net/submit')
+                frontend_site_affiliate = getattr(settings, 'FRONTEND_SITE_AFFILIATE_URL', 'https://projectawards.scarsoft.net/submit')
                 self.affiliate_link = f"{frontend_site_affiliate}/?affiliate={affiliate_id}"
         super().save(*args, **kwargs)
     
