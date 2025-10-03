@@ -124,7 +124,7 @@ export default function AdminTable({ projects }: Props) {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                  {project.total_votes}
+                  {project.active_votes_count}
                 </td>
                 <td className="px-6 py-4 text-gray-600 whitespace-nowrap">1</td>
                 {user?.user_type === "user" && (

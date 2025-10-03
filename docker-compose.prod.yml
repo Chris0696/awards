@@ -354,13 +354,14 @@ services:
     networks:
       - awards-bridge
 
-
   web:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
     depends_on:
       - backend
+    environment:
+      - API_URL=http://backend:8000/api/v1/
     networks:
       - awards-bridge
 

@@ -5,7 +5,7 @@ import NumberField from "../NumberField";
 import SelectField from "../SelectField";
 import TextField from "../TextField";
 import { useFormContext } from "react-hook-form";
-import Image from "next/image";
+
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
 
 export default function Step2({
@@ -19,10 +19,11 @@ export default function Step2({
   project?: any;
   adminProject?: any;
 }) {
-  const { trigger } = useFormContext();
+  const { trigger, watch } = useFormContext();
   const user = useUserSessionStore((state) => state.user);
   const isOnEditMode = Boolean(project) || Boolean(adminProject);
-  console.log(user, "userherre");
+  const cat = watch("category_id");
+  console.log(cat, "cat");
 
   return (
     <FormCard isOnEditMode={isOnEditMode} step={2}>
@@ -47,10 +48,16 @@ export default function Step2({
           />
         </div>
       </div>
+      {cat === "other" && (
+        <div className="mt-4">
+          <TextField
+            name="custom_category_name"
+            label="Nom de votre catégorie"
+            placeholder="Saisissez le nom de la catégorie qui correspond le mieux à votre projet "
+          />
+        </div>
+      )}
       <div className="mt-10">
-        {preview && (
-          <Image src={preview} alt="preview image" width={90} height={90} />
-        )}
         <FileInputField />
       </div>
       <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row justify-between items-center mt-6">
@@ -65,12 +72,16 @@ export default function Step2({
         <button
           type="button"
           onClick={async () => {
-            const valid = await trigger([
+            const fields = [
               "project_title",
               "local_area_impact",
               "category_id",
               "estimated_budget",
-            ]);
+            ];
+            if (cat === "other") {
+              fields.push("custom_category_name");
+            }
+            const valid = await trigger(fields);
             if (valid) setStep(3);
           }}
           className="bg-secondary px-10 w-full md:w-auto  py-2.5 cursor-pointer text-lg rounded-md text-white"

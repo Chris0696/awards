@@ -11,7 +11,7 @@ export default function DiscoverProjects() {
     queryFn: () => getPublicProjects(),
   });
   return (
-    <section className="my-16 md:my-20 bg-gray-50">
+    <section className="mt-64 mb-16 md:my-20 bg-gray-50">
       <div className="w-4/5 md:w-2/5 mx-auto text-center py-12">
         {" "}
         <h4 className="text-lg text-gray-500 font-medium">

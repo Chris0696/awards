@@ -1,19 +1,52 @@
 import CameraIcon from "@/assets/camera.svg";
 import Image from "next/image";
 import { Controller, useFormContext } from "react-hook-form";
+import { useWatch } from "react-hook-form";
+import { useEffect, useRef } from "react";
 
 export default function FileInputField() {
   const { control } = useFormContext();
+  const imageFiles = useWatch({ control, name: "image" });
+  const previewRef = useRef<string | null>(null);
+
+  // Create preview URL and cleanup
+  useEffect(() => {
+    if (imageFiles && imageFiles.length > 0) {
+      const url = URL.createObjectURL(imageFiles[0]);
+      previewRef.current = url;
+      return () => {
+        if (previewRef.current) {
+          URL.revokeObjectURL(previewRef.current);
+          previewRef.current = null;
+        }
+      };
+    }
+  }, [imageFiles]);
+
+  const preview =
+    imageFiles && imageFiles.length > 0 ? previewRef.current : null;
+
   return (
     <div>
-      <label className="block text-gray-800 text-lg font-medium">
-        <span>Image illustrative</span>
-      </label>
       <label
         htmlFor="file-upload"
-        className="border-dashed border-2 border-gray-300 py-8 px-2 rounded-md text-center cursor-pointer bg-gray-100 hover:bg-gray-200 flex items-center justify-center  "
+        className="border-dashed border-2 border-gray-300 rounded-md text-center cursor-pointer bg-gray-100 hover:bg-gray-200 flex items-center justify-center w-full h-40 relative overflow-hidden"
+        style={{ minHeight: "10rem" }}
       >
-        <Image src={CameraIcon} alt="Upload file" className="w-10 h-10" />
+        {preview ? (
+          <Image
+            src={preview}
+            alt="preview image"
+            fill
+            className="object-cover w-full h-full"
+            style={{ position: "absolute", inset: 0 }}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center w-full h-full">
+            <Image src={CameraIcon} alt="Upload file" className="w-10 h-10" />
+            <span className="text-gray-500 mt-2">Ajouter une image</span>
+          </div>
+        )}
       </label>
       <Controller
         control={control}

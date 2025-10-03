@@ -28,7 +28,7 @@ export default function Footer() {
           />
         </div>
       </div>
-      <div className="flex flex-col md:flex-row md:justify-around items-center py-16  border-t border-b border-gray-50/35 md:px-56">
+      <div className="flex flex-col md:flex-row md:justify-around items-center py-16  border-t border-b border-gray-50/35 ">
         <div className="space-y-6">
           <Link href={"/"}>
             {" "}
@@ -100,7 +100,7 @@ export default function Footer() {
           nouveautés de la plateforme et les projets lauréats. Pas de spam, que
           de l'inspiration.
         </p>
-        <form className="flex flex-col md:flex-row items-center space-x-2">
+        <form className="flex flex-col md:flex-row items-center justify-center space-x-2">
           <input
             type="email"
             placeholder="Entrez votre adresse email"

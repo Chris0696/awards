@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
 
     return res;
   } catch (err) {
+    console.error("Refresh handler failed:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

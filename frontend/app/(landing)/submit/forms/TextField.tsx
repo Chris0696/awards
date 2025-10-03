@@ -27,7 +27,7 @@ export default function TextField({ label, placeholder, name }: Props) {
               name={label}
               id={label}
               placeholder={placeholder}
-              className="border-none outline-none bg-gray-100 px-2 py-3 rounded-md w-full"
+              className="border-none outline-none bg-gray-100 px-2 py-3 rounded-md w-full "
             />
             <p className="text-sm text-red-500">{error?.message} </p>
           </>
