@@ -144,6 +144,8 @@ export default function MakeVoteModal({
               <Image
                 src={fixBackendUrl(project.image) ?? ArtworkImg}
                 alt="Project image"
+                width={25}
+                height={25}
                 className="w-[85%] md:mx-auto rounded-lg h-20 object-cover"
               />
             </div>
@@ -197,10 +199,10 @@ export default function MakeVoteModal({
             </form>
           </FormProvider>
         ) : (
-          <div className="pt-16 bg-primary">
+          <div className="pt-16 ">
             <FedaCheckoutContainer
               options={checkoutEmbedOptions}
-              style={{ height: 500, width: 500 }}
+              style={{ height: 500, width: "100%" }}
             />
           </div>
         )}

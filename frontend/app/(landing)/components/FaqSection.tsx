@@ -24,15 +24,15 @@ export default function FaqSection({ title }: { title: string }) {
           />
           <AccordionItem
             title="Le service est-il payant ?"
-            content="Non, le dépôt de projet est entièrement gratuit."
+            content="Pour la toute première soumission de projet, des frais de 2000 FCFA sont requis."
           />
           <AccordionItem
             title="Qui peut voter ?"
-            content="Toute personne inscrite sur la plateforme peut voter pour son projet favori."
+            content="Toute personne ayant accès à la plateforme peut exprimer son vote pour le projet de son choix."
           />
         </div>
         <div className="flex justify-center mt-16">
-          <ColoredOutlineLink text="Contactez notre équipe" url="" />
+          <ColoredOutlineLink text="Contactez notre équipe" url="/contact-us" />
         </div>
       </div>
     </section>

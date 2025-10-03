@@ -50,6 +50,7 @@ export default function SubmitProjectFormContainer() {
       main_objective: "",
       solution: "",
       target_audience: "",
+      custom_category_name: "",
       progress_report: "",
       affiliate: "",
       owner_project_status: "brouillon",
@@ -313,7 +314,7 @@ export const CheckoutModal = ({
     >
       <FedaCheckoutContainer
         options={checkoutEmbedOptions}
-        style={{ height: 500, width: 500 }}
+        style={{ height: 500, width: "100%" }}
       />
     </Popover>
   );

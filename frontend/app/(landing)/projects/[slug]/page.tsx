@@ -10,6 +10,7 @@ import { dateToMonth, formatDate } from "@/app/common/types/common";
 import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
 import CallToVoteAction from "./CallToVoteAction";
 import CallToAction2 from "./CallToAction2";
+import CopyBtn from "./CopyBtn";
 
 export interface Project {
   project_id: string;
@@ -26,6 +27,7 @@ export interface Project {
   created_at: string;
   validated_at: string;
   owner_name: string;
+  owner_image: string;
   image: string | null;
   image_url: string | null;
   file: string | null;
@@ -83,8 +85,10 @@ export default async function page({
               <div className="flex items-center space-x-1">
                 {project.image && (
                   <Image
-                    src={fixBackendUrl(project.image) ?? ProfilImg}
+                    src={fixBackendUrl(project.owner_image) ?? ProfilImg}
                     alt="Profil"
+                    width={4}
+                    height={4}
                     className="w-10 h-10 rounded-full"
                   />
                 )}
@@ -103,20 +107,28 @@ export default async function page({
           <p className="text-gray-200">{project.description}</p>
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 items-center space-x-4 mt-8">
             <CallToAction2 project={project} />
-            <button className="flex items-center border border-white px-6 py-2 rounded-md space-x-2 hover:bg-white hover:text-primary transition-colors cursor-pointer">
-              <Image src={ShareLinkIcon} alt="Partager" className="w-4 h-4" />
+            <Link
+              href={"/https://web.whatsapp.com/"}
+              className="flex items-center border border-white px-6 py-2 rounded-md space-x-2 hover:bg-white hover:text-primary transition-colors cursor-pointer"
+            >
+              <Image
+                src={ShareLinkIcon}
+                alt="Partager"
+                width={4}
+                height={4}
+                className="w-4 h-4"
+              />
               <span>Partager</span>
-            </button>
-            <button className="flex items-center border border-white px-6 py-2 rounded-md space-x-2 hover:bg-white hover:text-primary transition-colors cursor-pointer">
-              <Image src={CopyLinkIcon} alt="Copier" className="w-4 h-4" />
-              <span>Copier</span>
-            </button>
+            </Link>
+            <CopyBtn />
           </div>
         </div>
 
         {project.image && (
           <Image
             src={fixBackendUrl(project.image) ?? ProjectImg}
+            width={25}
+            height={25}
             alt="Projet"
             className="w-[85%] md:w-[75%] md:h-[350px] object-cover mx-auto rounded-lg absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2"
           />

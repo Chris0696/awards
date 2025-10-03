@@ -322,7 +322,7 @@ export default function CreateNewAuthProjectModal({
       visible={showModal}
       onClose={() => setShowModal(false)}
     >
-      <div className="p-6">
+      <div className="p-6 lg:h-auto">
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             {step === 2 && (

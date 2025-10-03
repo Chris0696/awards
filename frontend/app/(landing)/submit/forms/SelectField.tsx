@@ -34,6 +34,7 @@ export default function SelectField({ name }: { name: string }) {
                     {category.category_name}{" "}
                   </option>
                 ))}
+                <option value="other">Autre</option>
               </select>
               <span className="absolute right-2 top-1/2 transform -translate-y-1/2">
                 <ChevronDown size={20} />

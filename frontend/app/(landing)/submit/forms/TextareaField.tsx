@@ -14,8 +14,9 @@ export default function TextareaField({ name }: { name: string }) {
         render={({ field, fieldState: { error } }) => (
           <>
             <textarea
+              rows={7}
               {...field}
-              className="border-none outline-none bg-gray-100 p-2 h-24 rounded-md w-full"
+              className="border-none outline-none bg-gray-100 p-2  rounded-md w-full"
               placeholder="Que voulez-vous réaliser ? Pourquoi ? Comment ?(1500 à 2000 caractères max)"
             />
             <p className="text-sm text-red-500">{error?.message} </p>

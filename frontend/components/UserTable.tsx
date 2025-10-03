@@ -92,7 +92,7 @@ export default function UserTable({ users }: { users: User[] }) {
               </td>
 
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.country_code + user.phone}
+                {user.phone}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {user.profession}

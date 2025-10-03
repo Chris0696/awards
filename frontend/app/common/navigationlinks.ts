@@ -15,6 +15,10 @@ export const landingpagelinks = [
     page: "Comment ça marche",
     url: "/how-it-works",
   },
+  {
+    page: "Contactez-nous",
+    url: "/contact-us",
+  },
 ];
 
 export const dashboardlinks = [

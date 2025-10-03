@@ -29,7 +29,10 @@ export const projectSchema = z.object({
   age: z.coerce
     .number<number>("Entrer votre age")
     .min(18, "Vous devez avoir au moins 18 ans pour postuler"),
-  category_id: z.string("Choisissez la catégorie du projet"),
+  category_id: z.string().nonempty("Choisissez la catégorie du projet"),
+  custom_category_name: z.string(
+    "Entrer la catégorie qui correspond à votre projet"
+  ),
   project_title: z.string().nonempty("Entrez le nom du projet"),
   local_area_impact: z
     .string()
