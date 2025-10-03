@@ -187,7 +187,7 @@ class ProjectSubmissionPayment(models.Model):
     @classmethod
     def get_submission_price(cls):
         """Prix fixe pour la soumission d'un projet"""
-        return 5000.00
+        return 2000.00
     
 
 class ProjectSubmissionSettings(models.Model):
