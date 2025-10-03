@@ -137,6 +137,10 @@ ENV/
 env.bak/
 venv.bak/
 
+# Django migrations (ignore all except __init__.py)
+**/migrations/*
+!**/migrations/__init__.py
+
 # Spyder project settings
 .spyderproject
 .spyproject
