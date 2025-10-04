@@ -4,11 +4,21 @@ import { useUserSessionStore } from "@/stores/useUserSessionStore";
 import { createSession } from "@/services/session";
 import { useEffect } from "react";
 
+async function fetchSession() {
+  const res = await fetch("/api/v1/auth/session", {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("No session");
+  return res.json();
+}
+
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const setUserSession = useUserSessionStore((state) => state.setUserSession);
   const { data } = useQuery({
     queryKey: ["userSession"],
     queryFn: () => createSession(),
+    //retry: false,
   });
 
   useEffect(() => {

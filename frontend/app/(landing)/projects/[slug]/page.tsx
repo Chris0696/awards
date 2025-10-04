@@ -37,7 +37,7 @@ export interface Project {
   total_revenue: number;
 }
 
-export default async function page({
+export default async function age({
   params,
 }: {
   params: Promise<{ slug: string }>;
