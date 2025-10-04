@@ -40,9 +40,9 @@ export interface Project {
 export default async function page({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string } | Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug } = await Promise.resolve(params);
   const isProd = process.env.NODE_ENV === "production";
   const baseUrl = isProd ? process.env.PROD_API_URL : process.env.API_URL;
   const response = await fetch(`${baseUrl}public/projects/${slug}`, {
