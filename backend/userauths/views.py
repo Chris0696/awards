@@ -438,30 +438,67 @@ class PasswordChangeAPIView(generics.CreateAPIView):
             return Response({"message": "Reconnectez-vous pour changer votre mot de passe.", "icon": "error"}, status=status.HTTP_404_NOT_FOUND)
 
 
-class ChangePasswordAPIView(generics.CreateAPIView):
-    serializer_class = api_serializer.UserSerializer
+class ChangePasswordAPIView(generics.UpdateAPIView):
+   
+    serializer_class = api_serializer.ChangePasswordSerializer
     permission_classes = [IsAuthenticated]
-
-    def create(self, request, *args, **kwargs):
-        user_id = request.data.get('user_id')
-        old_password = request.data.get('old_password')
-        new_password = request.data.get('new_password')
-
-        if not user_id:
-            return Response({"message": "User ID is missing.", "icon": "error"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = User.objects.get(id=user_id)
-        if user is not None:
-            if check_password(old_password, user.password):
-                user.set_password(new_password)
-                user.save()
-                return Response({"message": "Mot de passe changé avec succès", "icon": "success"})
-            else:
-                return Response({"message": "L'ancien mot  de passe est incorrecte", "icon": "warning"})
+    
+    def format_validation_errors(self, detail):
+        errors = []
+        if isinstance(detail, dict):
+            for _, messages in detail.items():
+                if isinstance(messages, list):
+                    errors.extend(messages)
+                else:
+                    errors.append(str(messages))
+        elif isinstance(detail, list):
+            errors = detail
         else:
-            return Response({"message": "Cet utilisateur n'existe pas", "icon": "error"})
+            errors = [str(detail)]
+        return errors
+    
+    def get_object(self):
+        # Retourne automatiquement l'utilisateur connecté
+        return self.request.user
+    
+    def update(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(data=request.data)
         
-
+        # Valider les données avec le serializer
+        if not serializer.is_valid():
+            return Response(
+                {"message": "Données invalides.", "errors": serializer.errors, "icon": "error"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        old_password = serializer.validated_data.get('old_password')
+        new_password = serializer.validated_data.get('new_password')
+        
+        # Vérifier l'ancien mot de passe
+        if not check_password(old_password, user.password):
+            return Response(
+                {"message": "L'ancien mot de passe est incorrect.", "icon": "error"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Vérifier que le nouveau mot de passe est différent de l'ancien
+        if check_password(new_password, user.password):
+            return Response(
+                {"message": "Le nouveau mot de passe ne peut pas être identique à l'ancien.", "icon": "warning"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Changer le mot de passe
+        user.set_password(new_password)
+        user.save()
+        
+        return Response(
+            {"message": "Mot de passe changé avec succès.", "icon": "success"},
+            status=status.HTTP_200_OK
+        )
+        
+        
 # class ContactMessageView(generics.CreateAPIView):
 #     queryset = ContactMessage.objects.all()
 #     serializer_class = ContactMessageSerializer

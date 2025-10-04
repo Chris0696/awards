@@ -155,6 +155,77 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
         
 
+# class ChangePasswordSerializer(serializers.Serializer):
+#     old_password = serializers.CharField(required=True, write_only=True)
+#     new_password = serializers.CharField(required=True, write_only=True, min_length=8)
+#     confirm_password = serializers.CharField(required=True, write_only=True)
+    
+#     def validate_new_password(self, value):
+#         """Validation personnalisée du nouveau mot de passe"""
+#         if len(value) < 8:
+#             raise serializers.ValidationError(
+#                 "Le mot de passe doit contenir au moins 8 caractères."
+#             )
+        
+#         # Ajouter d'autres validations si besoin
+#         if not any(char.isdigit() for char in value):
+#             raise serializers.ValidationError(
+#                 "Le mot de passe doit contenir au moins un chiffre."
+#             )
+        
+#         if not any(char.isupper() for char in value):
+#             raise serializers.ValidationError(
+#                 "Le mot de passe doit contenir au moins une lettre majuscule."
+#             )
+        
+#         return value
+    
+#     def validate(self, attrs):
+#         if attrs['new_password'] != attrs['confirm_password']:
+#             raise serializers.ValidationError({
+#                 "confirm_password": "Les mots de passe ne correspondent pas."
+#             })
+#         return attrs
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(
+        required=True,
+        write_only=True,
+        error_messages={
+            'required': 'L\'ancien mot de passe est requis.',
+            'blank': 'L\'ancien mot de passe ne peut pas être vide.'
+        }
+    )
+    
+    new_password = serializers.CharField(
+        required=True,
+        write_only=True,
+        min_length=8,
+        error_messages={
+            'required': 'Le nouveau mot de passe est requis.',
+            'blank': 'Le nouveau mot de passe ne peut pas être vide.',
+            'min_length': 'Le mot de passe doit contenir au moins 8 caractères.'
+        }
+    )
+    
+    confirm_password = serializers.CharField(
+        required=True,
+        write_only=True,
+        error_messages={
+            'required': 'La confirmation du mot de passe est requise.',
+            'blank': 'La confirmation ne peut pas être vide.'
+        }
+    )
+    
+    def validate(self, attrs):
+        # Vérifier que les mots de passe correspondent
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({
+                "confirm_password": "Les mots de passe ne correspondent pas."
+            })
+        return attrs
+    
+    
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
