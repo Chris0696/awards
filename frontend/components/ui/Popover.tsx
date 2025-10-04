@@ -26,7 +26,7 @@ export default function Popover({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white  rounded-lg  relative w-full max-w-2xl h-[80vh] overflow-y-auto lg:h-auto"
+        className="bg-white  rounded-lg  relative w-full max-w-2xl max-h-[85vh] overflow-y-auto lg:max-h-full"
       >
         <div className="flex items-center justify-between rounded-t-lg bg-primary px-10 py-2 text-white">
           {!isLogin ? (

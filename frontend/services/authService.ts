@@ -2,6 +2,7 @@ import { AuthForm } from "@/app/(landing)/login/LoginForm";
 
 import { clearTokens, getTokens, saveTokens } from "./session";
 import apiClient from "./apiClient";
+import { ChangePwForm } from "@/app/admin/settings/page";
 
 export const loginUser = async (credentials: AuthForm) => {
   const res = await apiClient.post("auth/login/", credentials);
@@ -14,5 +15,21 @@ export const logoutUser = async () => {
   const refresh = tokens.refresh;
   const res = await apiClient.post("auth/logout/", { refresh });
   await clearTokens();
+  return res.data;
+};
+
+export const resetPassword = async (email: string) => {
+  const res = await apiClient.get(`auth/password-reset/${email}/`);
+  return res.data;
+};
+
+type PasswordData = {
+  old_password: string;
+  new_password: string;
+  password_confirmation: string;
+};
+
+export const changePassword = async (data: PasswordData) => {
+  const res = await apiClient.post(`auth/password-change/`, data);
   return res.data;
 };

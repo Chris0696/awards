@@ -65,6 +65,12 @@ export const dashboardlinks = [
     canCommercialAccess: false,
   },
   {
+    page: "Messages",
+    url: "/admin/messages",
+    isRequireAdmin: true,
+    canCommercialAccess: false,
+  },
+  {
     page: "Mon compte",
     url: "/admin/account",
     isRequireAdmin: false,

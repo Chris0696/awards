@@ -16,7 +16,7 @@ export const submitFirstProject = async (data: FormData) => {
 };
 
 export const submitNewProject = async (data: FormData) => {
-  const res = await apiClient.post("projects/submit-with-payment/", data, {
+  const res = await apiClient.post("projects/", data, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

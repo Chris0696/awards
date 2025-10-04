@@ -7,13 +7,16 @@ import CreateCategoryModal from "./CreateCategoryModal";
 import CategoryCard from "./CategoryCard";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAdminCategories } from "@/services/categoryService";
+import { useUserSessionStore } from "@/stores/useUserSessionStore";
 
 export default function page() {
   const [showModal, setShowModal] = useState(false);
+  const user = useUserSessionStore((state) => state.user);
 
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: () => fetchAdminCategories(),
+    enabled: user?.user_type === "user",
   });
 
   return (

@@ -1,15 +1,14 @@
-import Step1 from "@/app/(landing)/submit/forms/steps/Step1";
 import Step2 from "@/app/(landing)/submit/forms/steps/Step2";
 import Step3 from "@/app/(landing)/submit/forms/steps/Step3";
 import Step4 from "@/app/(landing)/submit/forms/steps/Step4";
 import Step5 from "@/app/(landing)/submit/forms/steps/Step5";
-import { CheckoutModal } from "@/app/(landing)/submit/forms/SubmitProjectFormContainer";
+
 import { AdminProjectInfo, ProjectInfo } from "@/app/common/types/project";
 import Popover from "@/components/ui/Popover";
 import { authProjectSchema } from "@/frontendlib/schemas";
-import { projectService } from "@/frontendlib/services/projectService";
+
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
-import { mapServerErrors } from "@/frontendlib/utils/mapServerErrors";
+
 import { useImagePreview } from "@/hooks/useImagePreview";
 import {
   submitNewProject,
@@ -47,6 +46,7 @@ export default function CreateNewAuthProjectModal({
     mode: "onChange",
     defaultValues: {
       category_id: "",
+      custom_category_name: "",
       project_title: "",
       local_area_impact: "",
       estimated_budget: undefined,
@@ -63,21 +63,10 @@ export default function CreateNewAuthProjectModal({
   });
   const user = useUserSessionStore((state) => state.user);
   const { handleSubmit, reset, setError, watch } = methods;
-  const [isWidgetOpen, setIsWidgetOpen] = useState(false);
   const [step, setStep] = useState(2);
   const imageFile: FileList | null = watch("image");
-  const category_id = watch("category_id");
-  const project_title = watch("project_title");
-  const local_area_impact = watch("local_area_impact");
-  const estimated_budget = watch("estimated_budget");
-  const description = watch("description");
-  const main_objective = watch("main_objective");
-  const solution = watch("solution");
-  const target_audience = watch("target_audience");
-  const progress_report = watch("progress_report");
-  const acceptReformulation = watch("acceptReformulation");
+
   const acceptTerms = watch("acceptTerms");
-  const image = watch("image");
 
   const preview = useImagePreview(imageFile);
 
@@ -122,119 +111,7 @@ export default function CreateNewAuthProjectModal({
       toast.error(msg);
     },
   });
-  const checkoutEmbedOptions = {
-    public_key: process.env.NEXT_PUBLIC_FEDAPAY_PUBLIC_KEY,
-    transaction: {
-      amount: 5000,
-      description: "Soummission de projet sur Project Awards",
-      custom_metadata: {
-        context: "soumissionProjet",
-      },
-    },
-    customer: {
-      email: user?.email ? user.email : "",
-      firstname: user?.full_name ? user.full_name : "",
-    },
-    currency: {
-      iso: "XOF",
-    },
-    onComplete(resp) {
-      const FedaPay = window["FedaPay"];
-      if (resp.reason === FedaPay.DIALOG_DISMISSED) {
-        setIsWidgetOpen(false);
-        const transactionId = resp.transaction.id;
-        const status = resp.transaction.status;
-        const paymentReference = resp.transaction.reference;
-        const formData = new FormData();
-
-        formData.append("affiliate", "");
-        formData.append(
-          "accept_project_reformulation",
-          acceptReformulation ? "1" : "0"
-        );
-        formData.append("accept_terms_of_use", acceptTerms ? "1" : "0");
-        formData.append(
-          "project",
-          JSON.stringify({
-            category_id: category_id,
-            project_title: project_title,
-            local_area_impact: local_area_impact,
-            main_objective: main_objective,
-            solution: solution,
-            description: description,
-            estimated_budget: estimated_budget,
-            target_audience: target_audience,
-            progress_report: progress_report,
-            owner_project_status: "brouillon",
-          })
-        );
-
-        if (image && image.length > 0) {
-          formData.append("project.image", image[0]);
-        }
-
-        formData.append(
-          "payment",
-          JSON.stringify({
-            payer_name: user?.full_name,
-            payer_email: user?.email,
-            payer_phone: "",
-            payment_reference: paymentReference,
-            payment_status: status,
-            payment_method: "pending",
-            external_transaction_id: String(transactionId),
-          })
-        );
-        submissionMutation.mutate(formData);
-      } else {
-        setIsWidgetOpen(false);
-        const transactionId = resp.transaction.id;
-        const status = resp.transaction.status;
-        const paymentReference = resp.transaction.reference;
-        const formData = new FormData();
-
-        formData.append("affiliate", "");
-        formData.append(
-          "accept_project_reformulation",
-          acceptReformulation ? "1" : "0"
-        );
-        formData.append("accept_terms_of_use", acceptTerms ? "1" : "0");
-        formData.append(
-          "project",
-          JSON.stringify({
-            category_id: category_id,
-            project_title: project_title,
-            local_area_impact: local_area_impact,
-            main_objective: main_objective,
-            solution: solution,
-            description: description,
-            estimated_budget: estimated_budget,
-            target_audience: target_audience,
-            progress_report: progress_report,
-            owner_project_status: "brouillon",
-          })
-        );
-
-        if (image && image.length > 0) {
-          formData.append("project.image", image[0]);
-        }
-
-        formData.append(
-          "payment",
-          JSON.stringify({
-            payer_name: user?.full_name,
-            payer_email: user?.email,
-            payer_phone: "",
-            payment_reference: paymentReference,
-            payment_status: status,
-            payment_method: "pending",
-            external_transaction_id: String(transactionId),
-          })
-        );
-        submissionMutation.mutate(formData);
-      }
-    },
-  };
+  console.log(project, "projects");
 
   const onSubmit = async (data: AuthProjectInput) => {
     const formData = new FormData();
@@ -242,8 +119,13 @@ export default function CreateNewAuthProjectModal({
       "accept_project_reformulation",
       data.acceptReformulation ? "1" : "0"
     );
+    formData.append("accept_terms_of_use", acceptTerms ? "1" : "0");
     formData.append("accept_terms_of_use", data.acceptTerms ? "1" : "0");
-    formData.append("category_id", String(data.category_id));
+    formData.append(
+      "category_id",
+      data.custom_category_name ? "" : String(data.category_id)
+    );
+    formData.append("custom_category_name", String(data.custom_category_name));
     formData.append("project_title", String(data.project_title));
     formData.append("local_area_impact", String(data.local_area_impact));
     formData.append("estimated_budget", String(data.estimated_budget));
@@ -258,8 +140,10 @@ export default function CreateNewAuthProjectModal({
     if (data.image && data.image.length > 0) {
       formData.append("project.image", data.image[0]);
     }
-
+    console.log("yoppp1111");
     if (project) {
+      console.log("yoppp");
+
       ownerUpdateMutation.mutate({
         project: formData,
         id: String(project.project_id),
@@ -269,6 +153,8 @@ export default function CreateNewAuthProjectModal({
         project: formData,
         id: String(adminProject.project_id),
       });
+    } else {
+      submissionMutation.mutate(formData);
     }
   };
   useEffect(() => {
@@ -276,10 +162,10 @@ export default function CreateNewAuthProjectModal({
       reset({
         category_id: project.category.category_id ?? "",
         project_title: project.project_title ?? "",
-        local_area_impact: project.local_area_impact ?? "Agla",
+        local_area_impact: project.local_area_impact ?? "",
         estimated_budget: Number(project.estimated_budget ?? undefined),
         description: project.description ?? "",
-        main_objective: project.main_objective ?? "Main objective edited",
+        main_objective: project.main_objective ?? "",
         solution: project.solution ?? "Solution edited",
         target_audience: project.target_audience ?? "Jeune edited",
         progress_report: project.progress_report ?? "Début edited",
@@ -310,11 +196,6 @@ export default function CreateNewAuthProjectModal({
       });
     }
   }, [adminProject, reset]);
-
-  const showStep5 = user?.user_type === "owner" && step === 5;
-  const showActionButtonsForAdmin =
-    (user?.user_type === "user" && step === 4) ||
-    (user?.user_type === "owner" && project && step === 4);
 
   return (
     <Popover
@@ -347,27 +228,8 @@ export default function CreateNewAuthProjectModal({
                 setStep={setStep}
               />
             )}
-            {showStep5 && (
-              <>
-                <Step5 />
-                <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 justify-between items-center mt-20">
-                  <button
-                    onClick={() => setStep(4)}
-                    className="border w-full md:w-auto border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
-                  >
-                    <ChevronLeft /> <span>Retourner</span>
-                  </button>
-                  <button
-                    onClick={() => setIsWidgetOpen(true)}
-                    type="button"
-                    className="bg-secondary w-full md:w-auto px-10  py-2.5 cursor-pointer text-lg rounded-md text-white disabled:cursor-not-allowed"
-                  >
-                    Payer et valider
-                  </button>
-                </div>
-              </>
-            )}
-            {showActionButtonsForAdmin && (
+
+            {step === 4 && (
               <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 justify-between items-center mt-20">
                 <button
                   onClick={() => setStep(3)}
@@ -385,11 +247,6 @@ export default function CreateNewAuthProjectModal({
             )}
           </form>
         </FormProvider>
-        <CheckoutModal
-          showModal={isWidgetOpen}
-          setShowModal={setIsWidgetOpen}
-          checkoutEmbedOptions={checkoutEmbedOptions}
-        />
       </div>
     </Popover>
   );

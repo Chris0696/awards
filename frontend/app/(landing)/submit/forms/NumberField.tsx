@@ -4,9 +4,15 @@ type Props = {
   name: string;
   label: string;
   placeholder?: string;
+  disabled?: boolean;
 };
 
-export default function NumberField({ label, placeholder, name }: Props) {
+export default function NumberField({
+  label,
+  placeholder,
+  name,
+  disabled,
+}: Props) {
   const { control } = useFormContext();
   return (
     <div>
@@ -20,6 +26,7 @@ export default function NumberField({ label, placeholder, name }: Props) {
           <>
             <input
               {...field}
+              disabled={disabled}
               type="number"
               value={field.value ?? ""}
               placeholder={placeholder}
