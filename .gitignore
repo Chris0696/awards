@@ -140,6 +140,8 @@ venv.bak/
 # Ignore les fichiers .pyc dans migrations
 **/migrations/__pycache__/
 **/migrations/*.pyc
+**/migrations/*
+!**/migrations/__init__.py
 
 # Spyder project settings
 .spyderproject
