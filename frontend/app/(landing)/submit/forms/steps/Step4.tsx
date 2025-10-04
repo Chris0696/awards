@@ -20,8 +20,7 @@ export default function Step4({
     control,
   } = useFormContext();
   const user = useUserSessionStore((state) => state.user);
-  const showStepUpBtns =
-    !Boolean(user) || (user?.user_type === "owner" && !project);
+  const showStepUpBtns = !Boolean(user);
   const isOnEditMode = Boolean(project) || Boolean(adminProject);
   return (
     <FormCard isOnEditMode={isOnEditMode} step={4}>
@@ -39,6 +38,8 @@ export default function Step4({
                   <input
                     {...field}
                     type="checkbox"
+                    disabled={project || adminProject}
+                    checked={project || adminProject}
                     id="acceptReformulation"
                     className="w-8 h-8 rounded-md border border-secondary appearance-none checked:bg-secondary checked:border-secondary checked:ring-2 checked:ring-secondary focus:outline-none transition cursor-pointer"
                   />
@@ -68,6 +69,8 @@ export default function Step4({
                   <input
                     {...field}
                     type="checkbox"
+                    disabled={project || adminProject}
+                    checked={project || adminProject}
                     id="acceptTerms"
                     className="w-7 h-7 rounded-md border border-secondary appearance-none checked:bg-secondary checked:border-secondary checked:ring-2 checked:ring-secondary focus:outline-none transition"
                   />

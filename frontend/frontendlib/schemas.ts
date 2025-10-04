@@ -1,67 +1,82 @@
 import z from "zod";
 
-export const projectSchema = z.object({
-  full_name: z.string().nonempty("Entrez votre nom et prénoms"),
-  email: z.string().nonempty("Entrez une adresse email valide"),
-  country_code: z.string().nonempty("Entrez l'indicatif du pays").optional(),
-  phone: z.string().nonempty("Entrez un numéro de téléphone"),
-  profession: z.string().nonempty("Entrez votre profession"),
-  image: z
-    .any()
-    .refine(
-      (files) => !files || files instanceof FileList,
-      "L'image doit être un fichier valide"
-    )
-    .refine(
-      (files) =>
-        !files || files.length === 0 || files[0].size < 5 * 1024 * 1024,
-      "Image trop lourde (max 5Mo)"
-    )
-    .refine(
-      (files) =>
-        !files ||
-        files.length === 0 ||
-        ["image/jpeg", "image/png"].includes(files[0].type),
-      "Format invalide (JPEG/PNG uniquement)"
-    )
-    .optional(),
-  password: z.string().nonempty("Entrez un mot de passe"),
-  age: z.coerce
-    .number<number>("Entrer votre age")
-    .min(18, "Vous devez avoir au moins 18 ans pour postuler"),
-  category_id: z.string().nonempty("Choisissez la catégorie du projet"),
-  custom_category_name: z.string(
-    "Entrer la catégorie qui correspond à votre projet"
-  ),
-  project_title: z.string().nonempty("Entrez le nom du projet"),
-  local_area_impact: z
-    .string()
-    .nonempty("Entrez la zone d'intervention du projet"),
-  description: z.string().nonempty("Donnez une brève description du projet"),
+export const projectSchema = z
+  .object({
+    full_name: z.string().nonempty("Entrez votre nom et prénoms"),
+    email: z.string().nonempty("Entrez une adresse email valide"),
+    country_code: z.string().nonempty("Entrez l'indicatif du pays").optional(),
+    phone: z.string().nonempty("Entrez un numéro de téléphone"),
+    profession: z.string().nonempty("Entrez votre profession"),
+    image: z
+      .any()
+      .refine(
+        (files) => !files || files instanceof FileList,
+        "L'image doit être un fichier valide"
+      )
+      .refine(
+        (files) =>
+          !files || files.length === 0 || files[0].size < 5 * 1024 * 1024,
+        "Image trop lourde (max 5Mo)"
+      )
+      .refine(
+        (files) =>
+          !files ||
+          files.length === 0 ||
+          ["image/jpeg", "image/png"].includes(files[0].type),
+        "Format invalide (JPEG/PNG uniquement)"
+      )
+      .optional(),
+    password: z.string().nonempty("Entrez un mot de passe"),
+    age: z.coerce
+      .number<number>("Entrer votre age")
+      .min(18, "Vous devez avoir au moins 18 ans pour postuler"),
+    category_id: z.string().nonempty("Choisissez la catégorie du projet"),
+    custom_category_name: z
+      .string("Entrer la catégorie qui correspond à votre projet")
+      .optional(),
+    project_title: z.string().nonempty("Entrez le nom du projet"),
+    local_area_impact: z
+      .string()
+      .nonempty("Entrez la zone d'intervention du projet"),
+    description: z.string().nonempty("Donnez une brève description du projet"),
 
-  solution: z.string().nonempty("Quel est le but du projet ?"),
-  estimated_budget: z.coerce.number<number>(
-    "Entrez le budget prévu pour le projet"
-  ),
-  affiliate: z.string(),
-  owner_project_status: z.string(),
-  main_objective: z.string().nonempty("Quel problème résout le projet ?"),
-  target_audience: z.string().nonempty("Quelle est la cible du projet"),
-  progress_report: z
-    .string()
-    .nonempty("Quel est le niveau d'avancement du projet"),
+    solution: z.string().nonempty("Quel est le but du projet ?"),
+    estimated_budget: z.coerce.number<number>(
+      "Entrez le budget prévu pour le projet"
+    ),
+    affiliate: z.string(),
+    owner_project_status: z.string(),
+    main_objective: z.string().nonempty("Quel problème résout le projet ?"),
+    target_audience: z.string().nonempty("Quelle est la cible du projet"),
+    progress_report: z
+      .string()
+      .nonempty("Quel est le niveau d'avancement du projet"),
 
-  acceptReformulation: z.boolean().refine((val) => val === true, {
-    message: "Acceptez-vous qu'on reformule votre projet ?",
-  }),
-  acceptTerms: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter les termes",
-  }),
-});
+    acceptReformulation: z.boolean().refine((val) => val === true, {
+      message: "Acceptez-vous qu'on reformule votre projet ?",
+    }),
+    acceptTerms: z.boolean().refine((val) => val === true, {
+      message: "Vous devez accepter les termes",
+    }),
+  })
+  .superRefine((data, ctx) => {
+    if (data.category_id === "other" && !data.custom_category_name) {
+      ctx.addIssue({
+        path: ["custom_category_name"],
+        code: z.ZodIssueCode.custom,
+        message: "Entrer la catégorie qui correspond à votre projet",
+      });
+    }
+  });
 
 export const authProjectSchema = z.object({
   project_id: z.string().optional(),
-  category_id: z.string("Choisissez la catégorie du projet"),
+  category_id: z
+    .string("Choisissez la catégorie du projet")
+    .nonempty("Choisissez une catégorie"),
+  custom_category_name: z
+    .string("Entrer la catégorie qui correspond à votre projet")
+    .optional(),
   project_title: z.string().nonempty("Entrez le nom du projet"),
   local_area_impact: z
     .string()
@@ -144,3 +159,31 @@ export const voteFormSchema = z.object({
   ),
   email: z.email("Email invalide").nonempty("Entrer votre email"),
 });
+
+export const messageFormSchema = z.object({
+  full_name: z.string().nonempty("Entrez votre nom complet"),
+
+  email: z.string().nonempty("Entrez votre email"),
+  phone: z.string().nonempty("Entrez votre numéro de téléphone"),
+  subject: z.string().nonempty("Entrez le sujet de votre message"),
+  message: z.string().nonempty("Entrez votre message"),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.email("Email invalide").nonempty("Remplissez le champs"),
+});
+
+export const changePasswordSchema = z
+  .object({
+    old_password: z.string().min(1, "Entrez votre ancien mot de passe"),
+    new_password: z
+      .string()
+      .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+    password_confirmation: z
+      .string()
+      .min(6, "Confirmez votre nouveau mot de passe"),
+  })
+  .refine((data) => data.new_password === data.password_confirmation, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ["password_confirmation"],
+  });

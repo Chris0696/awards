@@ -81,6 +81,7 @@ export default function SubmitProjectFormContainer() {
   const solution = watch("solution");
   const target_audience = watch("target_audience");
   const progress_report = watch("progress_report");
+  const custom_category_name = watch("custom_category_name");
   const image: FileList | null = watch("image");
 
   const submissionMutation = useMutation({
@@ -100,7 +101,7 @@ export default function SubmitProjectFormContainer() {
   const checkoutEmbedOptions = {
     public_key: process.env.NEXT_PUBLIC_FEDAPAY_PUBLIC_KEY,
     transaction: {
-      amount: 5000,
+      amount: 2000,
       description: "Soummission de projet sur Project Awards",
       custom_metadata: {
         context: "soumissionProjet",
@@ -117,9 +118,9 @@ export default function SubmitProjectFormContainer() {
       const FedaPay = window["FedaPay"];
       if (resp.reason === FedaPay.DIALOG_DISMISSED) {
         toast.error("Paiement annulé");
+        setIsWidgetOpen(true);
 
-        /*  
-        const transactionId = resp.transaction.id;
+        /* const transactionId = resp.transaction.id;
         const status = resp.transaction.status;
         const paymentReference = resp.transaction.reference;
         const formData = new FormData();
@@ -145,7 +146,8 @@ export default function SubmitProjectFormContainer() {
         formData.append(
           "project",
           JSON.stringify({
-            category_id: category_id,
+            category_id: custom_category_name ? "" : category_id,
+            custom_category_name: custom_category_name,
             project_title: project_title,
             local_area_impact: local_area_impact,
             main_objective: main_objective,
@@ -202,7 +204,8 @@ export default function SubmitProjectFormContainer() {
         formData.append(
           "project",
           JSON.stringify({
-            category_id: category_id,
+            category_id: custom_category_name ? "" : category_id,
+            custom_category_name: custom_category_name,
             project_title: project_title,
             local_area_impact: local_area_impact,
             main_objective: main_objective,
@@ -312,10 +315,20 @@ export const CheckoutModal = ({
       title="Paiement soumission de projet"
       onClose={() => setShowModal(false)}
     >
-      <FedaCheckoutContainer
-        options={checkoutEmbedOptions}
-        style={{ height: 500, width: "100%" }}
-      />
+      <div className="relative min-h-[500px] flex items-center justify-center">
+        {/* {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+            <span className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-secondary"></span>
+            <span className="ml-4 text-secondary">
+              Chargement du paiement...
+            </span>
+          </div>
+        )} */}
+        <FedaCheckoutContainer
+          options={checkoutEmbedOptions}
+          style={{ height: 500, width: "100%" }}
+        />
+      </div>
     </Popover>
   );
 };

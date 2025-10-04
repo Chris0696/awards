@@ -15,9 +15,11 @@ import z from "zod";
 import { voteFormSchema } from "@/frontendlib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TextField from "@/app/(landing)/submit/forms/TextField";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { makeVote } from "@/services/voteService";
 import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
+import { toast } from "sonner";
 
 type Props = {
   showModal: boolean;
@@ -31,6 +33,7 @@ export default function MakeVoteModal({
   project,
 }: Props) {
   const [isWidgetOpen, setIsWidgetOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const methods = useForm<VoteForm>({
     resolver: zodResolver(voteFormSchema),
@@ -54,8 +57,12 @@ export default function MakeVoteModal({
       setIsWidgetOpen(false);
       setShowModal(false);
       reset();
+      queryClient.invalidateQueries({ queryKey: ["publicProject"] });
     },
-    onError: () => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
 
   useEffect(() => {
@@ -94,7 +101,7 @@ export default function MakeVoteModal({
           vote_count: voteCount ? voteCount : 0,
           voter_name: fullname ? fullname : "",
           voter_email: email ? email : "",
-          phone: "+229610101010",
+          phone: "",
           payment_method: resp.transaction.payment_method ?? "pending",
           external_transaction_id: resp.transaction.id.toString(),
         });
@@ -106,7 +113,7 @@ export default function MakeVoteModal({
           vote_count: voteCount ? voteCount : 0,
           voter_name: fullname ? fullname : "",
           voter_email: email ? email : "",
-          phone: "+229610101010",
+          phone: "",
           payment_method: resp.transaction.mode ?? "pending",
           external_transaction_id: resp.transaction.id.toString(),
         });
@@ -175,6 +182,7 @@ export default function MakeVoteModal({
                 <NumberField
                   name="amount"
                   label="Montant(XOF)"
+                  disabled={true}
                   placeholder="200"
                 />
               </div>

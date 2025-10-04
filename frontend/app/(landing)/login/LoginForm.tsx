@@ -1,16 +1,18 @@
 "use client";
 import EmailField from "@/app/(landing)/submit/forms/EmailField";
 import PasswordField from "@/app/(landing)/submit/forms/PasswordField";
-import { userSchema } from "@/frontendlib/schemas";
+import Popover from "@/components/ui/Popover";
+import { resetPasswordSchema, userSchema } from "@/frontendlib/schemas";
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 
-import { loginUser } from "@/services/authService";
+import { loginUser, resetPassword } from "@/services/authService";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -25,6 +27,7 @@ export default function LoginForm() {
       password: "",
     },
   });
+  const [showModal, setShowModal] = useState(false);
 
   const {
     handleSubmit,
@@ -65,9 +68,13 @@ export default function LoginForm() {
               label="Mot de passe"
               placeholder="Mot de passe"
             />
-            <Link href={""} className="text-secondary">
+            <button
+              type="button"
+              onClick={() => setShowModal(true)}
+              className="text-secondary cursor-pointer"
+            >
               Mot de passe oublié ?
-            </Link>
+            </button>
           </div>
         </div>
         <div className="mt-10">
@@ -87,6 +94,60 @@ export default function LoginForm() {
           </button>
         </div>
       </form>
+      <ResetPasswordModal showModal={showModal} setShowModal={setShowModal} />
     </FormProvider>
   );
 }
+type ResetForm = z.infer<typeof resetPasswordSchema>;
+export const ResetPasswordModal = ({
+  setShowModal,
+  showModal,
+}: {
+  showModal: boolean;
+  setShowModal: (show: boolean) => void;
+}) => {
+  const methods = useForm<ResetForm>({
+    resolver: zodResolver(resetPasswordSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+    },
+  });
+  const { handleSubmit, reset } = methods;
+  const resetMutation = useMutation({
+    mutationFn: resetPassword,
+    onSuccess: () => {
+      reset();
+      setShowModal(false);
+      toast.success("Un message vous a été envoyé dans votre boite email");
+    },
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
+  });
+  const onSubmit = (data: ResetForm) => {
+    resetMutation.mutate(data.email);
+  };
+
+  return (
+    <Popover
+      title={"Récupération mot de passe"}
+      visible={showModal}
+      onClose={() => setShowModal(false)}
+    >
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-7 p-10">
+          <EmailField
+            name="email"
+            label="Entrez votre adresse email"
+            placeholder="Adresse email"
+          />
+          <button className="w-full cursor-pointer hover:bg-white hover:border hover:border-secondary hover:text-secondary transition-colors text-center py-2 bg-secondary text-white rounded-md">
+            Valider
+          </button>
+        </form>
+      </FormProvider>
+    </Popover>
+  );
+};

@@ -42,7 +42,7 @@ export default function AdminProjectList() {
   });
 
   const { data: categories } = useQuery({
-    queryKey: ["ownerProjects"],
+    queryKey: ["categories"],
     queryFn: () => fetchAdminCategories(),
     enabled: user?.user_type === "user",
   });
@@ -70,14 +70,16 @@ export default function AdminProjectList() {
       {ownerProjects ? (
         <div>
           <Table projects={ownerProjects} />
-          <div className="mt-2">
-            <button
-              onClick={() => setShowModal(true)}
-              className="bg-primary px-4 py-5 rounded-lg text-gray-50 flex items-center space-x-2 mt-6 text-lg cursor-pointer hover:border hover:border-primary hover:bg-white hover:text-primary transition-colors ml-auto"
-            >
-              <span>Soumettre un nouveau projet</span> <ChevronRight />
-            </button>
-          </div>
+          {ownerProjects.length < 2 && (
+            <div className="mt-2">
+              <button
+                onClick={() => setShowModal(true)}
+                className="bg-primary px-4 py-5 rounded-lg text-gray-50 flex items-center space-x-2 mt-6 text-lg cursor-pointer hover:border hover:border-primary hover:bg-white hover:text-primary transition-colors ml-auto"
+              >
+                <span>Soumettre un nouveau projet</span> <ChevronRight />
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="mt-28 text-center space-y-6">

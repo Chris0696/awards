@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import Script from "next/script";
 import Providers from "./providers";
+import { SessionProvider } from "./admin/SessionProvider";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -31,7 +32,9 @@ export default function RootLayout({
     <html lang="en" className={`${outfit.variable}`}>
       <body className="font-outfit ">
         <Providers>
-          <main className=" ">{children}</main>
+          <SessionProvider>
+            <main className=" ">{children}</main>
+          </SessionProvider>
           <Toaster richColors position="top-right" />
         </Providers>
         <Script
