@@ -120,7 +120,7 @@ export default function SubmitProjectFormContainer() {
         toast.error("Paiement annulé");
         setIsWidgetOpen(true);
 
-        /* const transactionId = resp.transaction.id;
+        const transactionId = resp.transaction.id;
         const status = resp.transaction.status;
         const paymentReference = resp.transaction.reference;
         const formData = new FormData();
@@ -176,7 +176,7 @@ export default function SubmitProjectFormContainer() {
             external_transaction_id: String(transactionId),
           })
         );
-        submissionMutation.mutate(formData); */
+        submissionMutation.mutate(formData);
       } else {
         const transactionId = resp.transaction.id;
         const status = resp.transaction.status;
