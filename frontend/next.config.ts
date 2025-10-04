@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "awardprojectvoting.scarsoft.net",
+        hostname: "projectawards.scarsoft.net",
       },
     ],
     unoptimized: process.env.NODE_ENV === "development",
