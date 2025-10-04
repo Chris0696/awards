@@ -173,17 +173,19 @@ export const resetPasswordSchema = z.object({
   email: z.email("Email invalide").nonempty("Remplissez le champs"),
 });
 
+export const confirmResetSchema = z.object({
+  password: z.string().nonempty("Entrer le mot de passe"),
+});
+
 export const changePasswordSchema = z
   .object({
     old_password: z.string().min(1, "Entrez votre ancien mot de passe"),
     new_password: z
       .string()
       .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-    password_confirmation: z
-      .string()
-      .min(6, "Confirmez votre nouveau mot de passe"),
+    confirm_password: z.string().min(6, "Confirmez votre nouveau mot de passe"),
   })
-  .refine((data) => data.new_password === data.password_confirmation, {
+  .refine((data) => data.new_password === data.confirm_password, {
     message: "Les mots de passe ne correspondent pas",
     path: ["password_confirmation"],
   });

@@ -74,11 +74,11 @@ export const ChangePasswordModal = ({
     defaultValues: {
       old_password: "",
       new_password: "",
-      password_confirmation: "",
+      confirm_password: "",
     },
   });
   const { handleSubmit, reset } = methods;
-  const resetMutation = useMutation({
+  const changePwMutation = useMutation({
     mutationFn: changePassword,
     onSuccess: () => {
       reset();
@@ -94,9 +94,9 @@ export const ChangePasswordModal = ({
     const payload = {
       old_password: data.old_password,
       new_password: data.new_password,
-      password_confirmation: data.password_confirmation,
+      confirm_password: data.confirm_password,
     };
-    resetMutation.mutate(payload);
+    changePwMutation.mutate(payload);
   };
 
   return (
@@ -120,7 +120,7 @@ export const ChangePasswordModal = ({
           <PasswordField
             label="Confirmation mot de passe"
             placeholder="Confirmez votre nouveau mot de passe"
-            name="password_confirmation"
+            name="confirm_password"
           />
           <button
             type="submit"

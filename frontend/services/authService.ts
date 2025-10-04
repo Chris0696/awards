@@ -23,13 +23,18 @@ export const resetPassword = async (email: string) => {
   return res.data;
 };
 
+export const confirmPassword = async () => {
+  const res = await apiClient.post(`auth/password-change/`);
+  return res.data;
+};
+
 type PasswordData = {
   old_password: string;
   new_password: string;
-  password_confirmation: string;
+  confirm_password: string;
 };
 
 export const changePassword = async (data: PasswordData) => {
-  const res = await apiClient.post(`auth/password-change/`, data);
+  const res = await apiClient.patch(`auth/change-password/`, data);
   return res.data;
 };

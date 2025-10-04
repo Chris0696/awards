@@ -143,7 +143,10 @@ export const ResetPasswordModal = ({
             label="Entrez votre adresse email"
             placeholder="Adresse email"
           />
-          <button className="w-full cursor-pointer hover:bg-white hover:border hover:border-secondary hover:text-secondary transition-colors text-center py-2 bg-secondary text-white rounded-md">
+          <button
+            type="submit"
+            className="w-full cursor-pointer hover:bg-white hover:border hover:border-secondary hover:text-secondary transition-colors text-center py-2 bg-secondary text-white rounded-md"
+          >
             Valider
           </button>
         </form>
