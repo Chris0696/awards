@@ -65,6 +65,10 @@ export default function ProjectsList() {
     queryKey: ["publicProject"],
     queryFn: () => getPublicProjects(),
   });
+  const filteredProjects =
+    activeTab === "all"
+      ? projects
+      : projects?.filter((project) => project.category_name === activeTab);
 
   return (
     <section className="py-16 bg-gray-100  ">
@@ -96,9 +100,13 @@ export default function ProjectsList() {
       </p>
       <div className="flex justify-center">
         <div className="flex flex-wrap gap-8 justify-center w-5/6">
-          {projects?.map((project, idx) => (
-            <ProjectCard project={project} key={idx} />
-          ))}
+          {filteredProjects?.length ? (
+            filteredProjects?.map((project, idx) => (
+              <ProjectCard project={project} key={idx} />
+            ))
+          ) : (
+            <p className="text-red-500 text-xl">Aucun projet trouvé</p>
+          )}
         </div>
       </div>
       <div className="mt-16 flex justify-center">

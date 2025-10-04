@@ -16,7 +16,7 @@ import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 
 type MessageForm = z.infer<typeof messageFormSchema>;
 
-export default function page() {
+export default function Page() {
   const methods = useForm<MessageForm>({
     resolver: zodResolver(messageFormSchema),
     mode: "onChange",
@@ -54,7 +54,7 @@ export default function page() {
     <section>
       <ContactUsHero />
       <div className="py-16 space-y-12">
-        <div className="flex justify-center space-x-10">
+        <div className="flex flex-col items-center space-y-10 md:space-y-0 md:flex-row md:justify-center md:space-x-10">
           <div className="pt-4 pl-5  rounded-md bg-gray-200/50 h-40 w-52">
             <div className="pl-2">
               <Image
@@ -105,9 +105,9 @@ export default function page() {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="bg-gray-200/50 rounded-md grid grid-cols-2 w-[80%] mx-auto px-60 gap-4 py-24"
+          className="bg-gray-200/50 rounded-md grid grid-cols-2 w-[80%] mx-auto px-5 md:px-15 lg:px-60 gap-4 py-24"
         >
-          <div className="w-full col-span-1">
+          <div className="w-full col-span-2 md:col-span-1">
             <p>
               {" "}
               <input
@@ -124,7 +124,7 @@ export default function page() {
               </span>
             )}
           </div>
-          <div className="w-full">
+          <div className="w-full col-span-2 md:col-span-1">
             <div>
               <input
                 type="email"
@@ -141,7 +141,7 @@ export default function page() {
             )}
           </div>
 
-          <div className="w-full">
+          <div className="w-full col-span-2 md:col-span-1">
             <p>
               <input
                 type="tel"
@@ -157,7 +157,7 @@ export default function page() {
               </span>
             )}
           </div>
-          <div className="w-full">
+          <div className="w-full col-span-2 md:col-span-1">
             <p>
               <input
                 type="text"
