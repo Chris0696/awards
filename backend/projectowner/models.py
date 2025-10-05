@@ -10,7 +10,7 @@ import re
 class Owner(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to="owner-files", blank=True, null=True, default="default.jpg")
-    profile = models.OneToOneField(Profile, related_name='profile', on_delete=models.CASCADE, null=True, blank=True)
+    profile = models.OneToOneField(Profile, related_name='owner_profile', on_delete=models.CASCADE, null=True, blank=True)
     full_name = models.CharField(max_length=100, verbose_name=_("Nom complet"))
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
     country_code = models.CharField(max_length=5, blank=True, null=True, verbose_name=_("Code pays"))
@@ -30,6 +30,33 @@ class Owner(models.Model):
     def __str__(self):
         return self.profile.full_name if self.profile else self.user.full_name
 
+    @property
+    def get_image(self):
+        """Retourne l'image du Profile en priorité, sinon celle d'Owner"""
+        if self.profile and self.profile.image:
+            return self.profile.image
+        return self.image
+    
+    @property
+    def get_full_name(self):
+        """Retourne le nom du Profile en priorité"""
+        if self.profile and self.profile.full_name:
+            return self.profile.full_name
+        return self.full_name
+    
+    @property
+    def get_phone(self):
+        """Retourne le téléphone du Profile en priorité"""
+        if self.profile and self.profile.phone:
+            return self.profile.phone
+        return self.phone
+    
+    @property
+    def get_profession(self):
+        """Retourne la profession du Profile en priorité"""
+        if self.profile and self.profile.profession:
+            return self.profile.profession
+        return self.profession
     
     def clean(self):
         # Valider le format du code pays (ex. + suivi de 1 à 3 chiffres)

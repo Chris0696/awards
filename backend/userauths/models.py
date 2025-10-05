@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.utils.translation import gettext_lazy as _
+from django.dispatch import receiver
 from rest_framework import serializers
 
 USER_TYPES = (
@@ -77,14 +78,42 @@ class Profile(models.Model):
         if not self.full_name:
             self.full_name = self.user.full_name
         super(Profile, self).save(*args, **kwargs)
+        
+        try:
+            from projectowner.models import Owner
+            owner = Owner.objects.get(user=self.user)
+            # Mettre à jour les champs de Owner
+            owner.image = self.image
+            owner.full_name = self.full_name
+            owner.phone = self.phone
+            owner.profession = self.profession
+            if owner.profile != self:
+                owner.profile = self
+            owner.save()
+        except Owner.DoesNotExist:
+            # Ne pas créer de Owner ici
+            pass
 
-
+@receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
+    """Crée automatiquement un Profile quand un User est créé"""
     if created:
-        Profile.objects.create(user=instance)
+        Profile.objects.create(
+            user=instance,
+            full_name=instance.full_name or instance.username,
+            phone=instance.phone
+        )
 
+@receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    """Sauvegarde le Profile quand le User est modifié"""
+    if hasattr(instance, 'profile'):
+        # Mettre à jour les informations du Profile depuis le User
+        if instance.profile.full_name != instance.full_name:
+            instance.profile.full_name = instance.full_name
+        if instance.profile.phone != instance.phone:
+            instance.profile.phone = instance.phone
+        instance.profile.save()
 
 post_save.connect(create_user_profile, sender=User)
 post_save.connect(save_user_profile, sender=User)

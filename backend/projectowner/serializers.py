@@ -21,7 +21,7 @@ class OwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Owner
         fields = [
-            'id', 'user', 'image', 'full_name', 'phone', 'country_code', 'profession', 'age', 'commercial',
+            'id', 'user', 'full_name', 'phone', 'country_code', 'profession', 'age', 'commercial',
             'created_at', 'total_projects', 'published_projects', 'rejected_projects', 'total_votes_received'
         ]
 
@@ -51,16 +51,55 @@ class OwnerListSerializer(serializers.ModelSerializer):
     published_projects = serializers.SerializerMethodField()
     rejected_projects = serializers.SerializerMethodField()
     total_votes_received = serializers.SerializerMethodField()
-    
+    # display_image = serializers.SerializerMethodField()
+    # Utiliser les propriétés au lieu des champs directs
+    image = serializers.SerializerMethodField()
+    full_name = serializers.SerializerMethodField()
+    phone = serializers.SerializerMethodField()
+    profession = serializers.SerializerMethodField()
+
     class Meta:
         model = Owner
         fields = [
-            'id', 'user', 'full_name', 'phone', 'country_code', 
+            'id', 'user', 'image', 'full_name', 'phone', 'country_code',
             'profession', 'age', 'commercial', 'created_at',
             'accept_project_reformulation', 'accept_terms_of_use',
             'total_projects', 'published_projects', 'rejected_projects', 'total_votes_received'
         ]
         read_only_fields = ['id', 'created_at']
+
+    # def get_display_image(self, obj):
+    #     """Retourne l'image du Profile si disponible, sinon celle d'Owner"""
+    #     if obj.profile and obj.profile.image:
+    #         request = self.context.get('request')
+    #         if request:
+    #             return request.build_absolute_uri(obj.profile.image.url)
+    #         return obj.profile.image.url
+    #     elif obj.image:
+    #         request = self.context.get('request')
+    #         if request:
+    #             return request.build_absolute_uri(obj.image.url)
+    #         return obj.image.url
+    #     return None
+    
+    def get_image(self, obj):
+        """Retourne l'URL de l'image du Profile en priorité"""
+        image = obj.get_image
+        if image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        return None
+    
+    def get_full_name(self, obj):
+        return obj.get_full_name
+    
+    def get_phone(self, obj):
+        return obj.get_phone
+    
+    def get_profession(self, obj):
+        return obj.get_profession
     
     def get_total_projects(self, obj):
         return obj.total_projects()
@@ -76,7 +115,13 @@ class OwnerListSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        # Formater les erreurs dans le style souhaité si nécessaire
+        # Remplacer 'image' par l'image du Profile si disponible
+        if instance.profile and instance.profile.image:
+            request = self.context.get('request')
+            if request:
+                data['image'] = request.build_absolute_uri(instance.profile.image.url)
+            else:
+                data['image'] = instance.profile.image.url
         return data
 
 
@@ -85,16 +130,25 @@ class OwnerDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     commercial = CommercialSerializer(read_only=True)
     projects = serializers.SerializerMethodField()
+    profile_image = serializers.SerializerMethodField()
     
     class Meta:
         model = Owner
         fields = [
-            'id', 'user', 'image', 'full_name', 'phone', 'country_code',
+            'id', 'user', 'profile_image', 'full_name', 'phone', 'country_code',
             'profession', 'age', 'commercial', 'created_at',
             'accept_project_reformulation', 'accept_terms_of_use',
             'projects'
         ]
         read_only_fields = ['id', 'created_at']
+    
+    def get_profile_image(self, obj):
+        """Récupère l'image du profil si elle existe"""
+        if obj.profile and obj.profile.image:
+            request = self.context.get('request')
+            image_url = obj.profile.image.url
+            return request.build_absolute_uri(image_url) if request else image_url
+        return None
     
     def get_projects(self, obj):
         """Retourner la liste des projets de cet owner"""

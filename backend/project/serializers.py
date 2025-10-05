@@ -62,7 +62,8 @@ class CategoryAdminSerializer(serializers.ModelSerializer):
 
 class ProjectAdminSerializer(serializers.ModelSerializer):
     """Serializer complet pour l'administration des projets"""
-    owner_name = serializers.CharField(source='owner.user.full_name', read_only=True)
+    owner_image = serializers.SerializerMethodField()
+    owner_name = serializers.SerializerMethodField()
     owner_email = serializers.CharField(source='owner.user.email', read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
     commercial_name = serializers.CharField(source='commercial.user.full_name', read_only=True, allow_null=True)
@@ -83,7 +84,7 @@ class ProjectAdminSerializer(serializers.ModelSerializer):
             'platform_status', 'owner_project_status', 'featured',
             'created_at', 'updated_at', 'validated_at', 'admin_comment',
             # Relations
-            'category', 'category_id', 'category_name', 'owner', 'owner_name', 'owner_email',
+            'category', 'category_id', 'category_name', 'owner', 'owner_image', 'owner_name', 'owner_email',
             'commercial', 'commercial_name',
             # Fichiers
             'file', 'image',
@@ -92,6 +93,25 @@ class ProjectAdminSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['project_id', 'slug', 'created_at', 'updated_at', 'owner']
 
+    def get_owner_name(self, obj):
+        """Récupère le nom depuis owner.get_full_name"""
+        return obj.owner.get_full_name if obj.owner else None
+
+    def get_owner_image(self, obj):
+        """Récupère l'image du Profile de l'Owner"""
+        if not obj.owner:
+            return None
+        
+        # Utiliser la propriété get_image de l'Owner qui gère déjà la priorité Profile > Owner
+        image = obj.owner.get_image
+        
+        if image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        return None
+    
     def get_total_votes(self, obj):
         return obj.vote_set.filter(active=True).count()
 
@@ -172,8 +192,8 @@ class PublicProjectSerializer(serializers.ModelSerializer):
 class PublicProjectListSerializer(serializers.ModelSerializer):
     """Serializer léger pour la liste des projets (sans tous les détails)"""
     category_name = serializers.CharField(source='category.category_name', read_only=True)
-    owner_name = serializers.CharField(source='owner.user.full_name', read_only=True)
-    owner_image = serializers.CharField(source='owner.image', read_only=True)
+    owner_name = serializers.SerializerMethodField()
+    owner_image = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
     total_votes = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
@@ -187,6 +207,34 @@ class PublicProjectListSerializer(serializers.ModelSerializer):
             'average_rating', 'total_votes'
         ]
 
+    def get_owner_name(self, obj):
+        """Récupère le nom depuis owner.get_full_name"""
+        return obj.owner.get_full_name if obj.owner else None
+
+    def get_owner_image(self, obj):
+        """Récupère l'image du Profile de l'Owner"""
+        if not obj.owner:
+            return None
+        
+        # Utiliser la propriété get_image de l'Owner qui gère déjà la priorité Profile > Owner
+        image = obj.owner.get_image
+        
+        if image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        return None
+    
+    def get_image_url(self, obj):
+        """URL de l'image du projet"""
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+    
     def get_average_rating(self, obj):
         return obj.average_rating()
 

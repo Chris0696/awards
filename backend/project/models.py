@@ -133,6 +133,15 @@ class Project(models.Model):
             
         super().save(*args, **kwargs)
 
+    @property
+    def owner_image(self):
+        """Accède à l'image via owner.get_image"""
+        return self.owner.get_image
+    
+    def owner_full_name(self):
+        """Accède au nom via owner.get_full_name"""
+        return self.owner.get_full_name
+    
     def average_rating(self):
         avg = self.vote_set.filter(active=True).aggregate(avg_rating=Avg('vote'))
         return round(avg['avg_rating'], 2) if avg['avg_rating'] else 0.0
