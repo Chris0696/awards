@@ -11,8 +11,6 @@ export default function page() {
     queryFn: () => getMessages(),
   });
 
-  console.log(messages, "messages");
-
   return (
     <div>
       <DashboardHeader pageTitle="Les messages reçus" />

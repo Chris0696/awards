@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
         pathname: "/media/**",
       },
     ],
-    unoptimized: true, //process.env.NODE_ENV === "development",
+    unoptimized: true,
   },
   webpack: (config) => {
     config.resolve.alias["@"] = path.resolve(__dirname, ".");

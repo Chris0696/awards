@@ -28,6 +28,7 @@ export interface Project {
   validated_at: string;
   owner_name: string;
   owner_image: string;
+  category_name: string;
   image: string | null;
   image_url: string | null;
   file: string | null;
@@ -69,7 +70,7 @@ export default async function age({
               <ArrowDown className="md:hidden" size={16} />
             </span>
             <span className="flex flex-col  md:flex-row items-center space-x-2">
-              <span>Éducation & Formation</span>
+              <span>{project.category_name} </span>
               <ArrowRight className="hidden md:block" size={16} />
               <ArrowDown className="md:hidden" size={16} />
             </span>
@@ -85,7 +86,7 @@ export default async function age({
               <div className="flex items-center space-x-1">
                 {project.image && (
                   <Image
-                    src={fixBackendUrl(project.owner_image) ?? ProfilImg}
+                    src={fixBackendUrl(project.owner_image) ?? ""}
                     alt="Profil"
                     width={4}
                     height={4}

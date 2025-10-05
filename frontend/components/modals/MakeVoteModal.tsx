@@ -73,9 +73,6 @@ export default function MakeVoteModal({
   useEffect(() => {
     if (!showModal) setIsWidgetOpen(false);
   }, [showModal]);
-  useEffect(() => {
-    console.log("Image URL:", fixBackendUrl(project.image));
-  });
 
   const checkoutEmbedOptions = {
     public_key: process.env.NEXT_PUBLIC_FEDAPAY_PUBLIC_KEY,
@@ -152,7 +149,7 @@ export default function MakeVoteModal({
           {project.image && (
             <div>
               <Image
-                src={fixBackendUrl(project.image) ?? ArtworkImg}
+                src={fixBackendUrl(project.image) ?? ""}
                 alt="Project image"
                 width={25}
                 height={25}

@@ -86,7 +86,7 @@ export default function Sidebar({
         <div className="flex justify-between mt-auto">
           <div className="flex space-x-2 items-center">
             <Image
-              src={fixBackendUrl(userInfo?.image) ?? ProfilImg}
+              src={fixBackendUrl(userInfo?.image) ?? ""}
               alt="Profil image"
               className=" rounded-full w-10 h-10"
               width={80}

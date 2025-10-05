@@ -67,7 +67,6 @@ export default function StatisticPage() {
     })
     .sort((a, b) => b.total_votes - a.total_votes);
 
-  console.log(ownerStats?.recent_projects, "ownerStat");
   const chartData = ownerStats?.recent_projects?.map((project) => ({
     label: project.project_title,
     votes: project.votes_count ?? 0,

@@ -85,7 +85,7 @@ export default function CommercialHome() {
           <div className="flex items-center space-x-2">
             <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
               <Image
-                src={fixBackendUrl(userInfo?.image) ?? UserAvatar}
+                src={fixBackendUrl(userInfo?.image) ?? ""}
                 alt="User avatar"
                 width={180}
                 height={180}

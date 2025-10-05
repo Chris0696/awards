@@ -35,8 +35,6 @@ export function VotesChart({
   chartData: any;
   metric: "votes" | "revenue" | "transactions";
 }) {
-  console.log(chartData, "chartData");
-
   return (
     <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
       <BarChart

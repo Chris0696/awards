@@ -111,7 +111,6 @@ export default function CreateNewAuthProjectModal({
       toast.error(msg);
     },
   });
-  console.log(project, "projects");
 
   const onSubmit = async (data: AuthProjectInput) => {
     const formData = new FormData();
@@ -140,10 +139,8 @@ export default function CreateNewAuthProjectModal({
     if (data.image && data.image.length > 0) {
       formData.append("project.image", data.image[0]);
     }
-    console.log("yoppp1111");
-    if (project) {
-      console.log("yoppp");
 
+    if (project) {
       ownerUpdateMutation.mutate({
         project: formData,
         id: String(project.project_id),

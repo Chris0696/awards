@@ -23,7 +23,6 @@ export default function Step2({
   const user = useUserSessionStore((state) => state.user);
   const isOnEditMode = Boolean(project) || Boolean(adminProject);
   const cat = watch("category_id");
-  console.log(cat, "cat");
 
   return (
     <FormCard isOnEditMode={isOnEditMode} step={2}>
