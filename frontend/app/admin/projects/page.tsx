@@ -22,6 +22,7 @@ import { useUserSessionStore } from "@/stores/useUserSessionStore";
 import { fetchAdminCategories } from "@/services/categoryService";
 import { Category } from "@/app/common/types/category";
 import { AdminProjectInfo, ProjectInfo } from "@/app/common/types/project";
+import Loader from "@/components/Loader";
 
 export default function AdminProjectList() {
   const [showModal, setShowModal] = useState(false);
@@ -35,7 +36,7 @@ export default function AdminProjectList() {
     enabled: user?.user_type === "user" || user?.user_type === "admin",
   });
 
-  const { data: ownerProjects } = useQuery({
+  const { data: ownerProjects, isLoading } = useQuery({
     queryKey: ["ownerProjects"],
     queryFn: () => getProjectsAsOwner(),
     enabled: user?.user_type === "owner",
@@ -63,78 +64,86 @@ export default function AdminProjectList() {
       return true;
     }
   );
-
-  return user?.user_type === "owner" ? (
-    <section>
-      <DashboardHeader pageTitle="Mes projets" />
-      {ownerProjects ? (
-        <div>
-          <Table projects={ownerProjects} />
-          {ownerProjects.length < 2 && (
-            <div className="mt-2">
-              <button
-                onClick={() => setShowModal(true)}
-                className="bg-primary px-4 py-5 rounded-lg text-gray-50 flex items-center space-x-2 mt-6 text-lg cursor-pointer hover:border hover:border-primary hover:bg-white hover:text-primary transition-colors ml-auto"
-              >
-                <span>Soumettre un nouveau projet</span> <ChevronRight />
-              </button>
+  if (isLoading) {
+    return <Loader message="Chargement de vos projets..." />;
+  }
+  return (
+    <>
+      {" "}
+      {user?.user_type === "owner" && (
+        <section>
+          <DashboardHeader pageTitle="Mes projets" />
+          {ownerProjects ? (
+            <div>
+              <Table projects={ownerProjects} />
+              {ownerProjects.length < 2 && (
+                <div className="mt-2">
+                  <button
+                    onClick={() => setShowModal(true)}
+                    className="bg-primary px-4 py-5 rounded-lg text-gray-50 flex items-center space-x-2 mt-6 text-lg cursor-pointer hover:border hover:border-primary hover:bg-white hover:text-primary transition-colors ml-auto"
+                  >
+                    <span>Soumettre un nouveau projet</span> <ChevronRight />
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="mt-28 text-center space-y-6">
+              <h2 className="text-6xl font-bold">
+                Vous n'avez encore soumis aucun projet.
+              </h2>
+              <p className="text-xl text-gray-900">
+                Cliquez sur le bouton ci-dessous pour proposer votre première
+                idée et participer à l'aventure Project Awards
+              </p>
+              <div>
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="bg-primary p-4 rounded-lg text-gray-50 flex items-center space-x-2 mt-6 text-lg cursor-pointer hover:border hover:border-primary hover:bg-white hover:text-primary transition-colors mx-auto"
+                >
+                  <span>Soumettre un nouveau projet</span> <ChevronRight />
+                </button>
+              </div>
             </div>
           )}
-        </div>
-      ) : (
-        <div className="mt-28 text-center space-y-6">
-          <h2 className="text-6xl font-bold">
-            Vous n'avez encore soumis aucun projet.
-          </h2>
-          <p className="text-xl text-gray-900">
-            Cliquez sur le bouton ci-dessous pour proposer votre première idée
-            et participer à l'aventure Project Awards
-          </p>
-          <div>
-            <button
-              onClick={() => setShowModal(true)}
-              className="bg-primary p-4 rounded-lg text-gray-50 flex items-center space-x-2 mt-6 text-lg cursor-pointer hover:border hover:border-primary hover:bg-white hover:text-primary transition-colors mx-auto"
-            >
-              <span>Soumettre un nouveau projet</span> <ChevronRight />
-            </button>
-          </div>
-        </div>
+          <CreateNewAuthProjectModal
+            showModal={showModal}
+            setShowModal={setShowModal}
+          />
+        </section>
       )}
-      <CreateNewAuthProjectModal
-        showModal={showModal}
-        setShowModal={setShowModal}
-      />
-    </section>
-  ) : (
-    <section>
-      <DashboardHeader pageTitle="Projets" />
-      <div>
-        <div className=" flex justify-end space-x-3  mb-5">
-          {/* <FilterBtn
+      {user?.user_type === "user" && (
+        <section>
+          <DashboardHeader pageTitle="Projets" />
+          <div>
+            <div className=" flex justify-end space-x-3  mb-5">
+              {/* <FilterBtn
             defaultText="Date"
             options={["Date", "Statut", "Catégorie"]}
           /> */}
-          <FilterBtn
-            onChange={(value) => setSelectedStatus(value)}
-            defaultText="Statut"
-            options={[
-              { value: "brouillon", text: "Brouillon" },
-              { value: "publie", text: "Publiée" },
-              { value: "rejete", text: "Rejetée" },
-            ]}
-          />
-          <FilterBtn
-            onChange={(value) => setSelectedCategory(value)}
-            defaultText="Catégorie"
-            options={cleanedCategories}
-          />
-        </div>
+              <FilterBtn
+                onChange={(value) => setSelectedStatus(value)}
+                defaultText="Statut"
+                options={[
+                  { value: "brouillon", text: "Brouillon" },
+                  { value: "publie", text: "Publiée" },
+                  { value: "rejete", text: "Rejetée" },
+                ]}
+              />
+              <FilterBtn
+                onChange={(value) => setSelectedCategory(value)}
+                defaultText="Catégorie"
+                options={cleanedCategories}
+              />
+            </div>
 
-        <div className="overflow-x-auto">
-          <AdminTable projects={filteredProjects ?? []} />
-          <SwitchPageBtn />
-        </div>
-      </div>
-    </section>
+            <div className="overflow-x-auto">
+              <AdminTable projects={filteredProjects ?? []} />
+              <SwitchPageBtn />
+            </div>
+          </div>
+        </section>
+      )}
+    </>
   );
 }

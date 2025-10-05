@@ -149,7 +149,7 @@ export default function MakeVoteModal({
           {project.image && (
             <div>
               <Image
-                src={fixBackendUrl(project.image) ?? ""}
+                src={`${fixBackendUrl(project.image)}`}
                 alt="Project image"
                 width={25}
                 height={25}

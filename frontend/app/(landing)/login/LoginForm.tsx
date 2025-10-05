@@ -9,7 +9,7 @@ import { loginUser, resetPassword } from "@/services/authService";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronRightIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -28,6 +28,7 @@ export default function LoginForm() {
     },
   });
   const [showModal, setShowModal] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const {
     handleSubmit,
@@ -39,6 +40,7 @@ export default function LoginForm() {
   const mutateLogin = useMutation({
     mutationFn: loginUser,
     onSuccess: () => {
+      setIsNavigating(true);
       router.replace("/admin");
     },
     onError: (err) => {
@@ -80,11 +82,14 @@ export default function LoginForm() {
         <div className="mt-10">
           <button
             type="submit"
-            disabled={mutateLogin.isPending}
+            disabled={mutateLogin.isPending || isNavigating}
             className="flex items-center justify-center space-x-2 bg-secondary text-white px-4 py-4 text-lg rounded-md w-full cursor-pointer disabled:bg-gray-200 disabled:text-gray-800"
           >
-            {mutateLogin.isPending ? (
-              "En cours..."
+            {mutateLogin.isPending || isNavigating ? (
+              <>
+                <span>Connexion en cours...</span>
+                <Loader2 className="animate-spin ml-2" size={18} />
+              </>
             ) : (
               <>
                 <span>Se connecter</span>

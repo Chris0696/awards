@@ -89,7 +89,7 @@ export default function page() {
           <div className="flex items-center space-x-3">
             {!preview ? (
               <Image
-                src={fixBackendUrl(userInfo?.image) ?? ""}
+                src={`${fixBackendUrl(userInfo?.image)}`}
                 alt="Photo de profil"
                 width={100}
                 height={100}

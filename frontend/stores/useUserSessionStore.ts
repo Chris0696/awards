@@ -17,18 +17,30 @@ export type AdditionalUserInfo = {
   user: number;
 };
 type SessionStore = {
+  isLoading: boolean;
+  isLoadingUserInfo: boolean;
   user: User | null;
   additionalInfo?: AdditionalUserInfo | null;
   setUserSession: (user: User | null) => void;
   setAdditionalInfo?: (info: AdditionalUserInfo | null) => void;
+  setIsLoadingUser: (isLoading: boolean) => void;
+  setIsLoadingAditionnalInfo: (isLoading: boolean) => void;
 };
 
 export const useUserSessionStore = create<SessionStore>((set) => ({
   user: null,
+  isLoading: false,
+  isLoadingUserInfo: false,
   setUserSession: (user) => {
     set({ user });
   },
   setAdditionalInfo: (info) => {
     set({ additionalInfo: info });
+  },
+  setIsLoadingUser: (isLoading) => {
+    set({ isLoading });
+  },
+  setIsLoadingAditionnalInfo: (isLoading) => {
+    set({ isLoading });
   },
 }));

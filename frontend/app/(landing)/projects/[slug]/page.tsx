@@ -84,9 +84,9 @@ export default async function age({
             <h2 className="text-5xl font-bold">{project.project_title}</h2>
             <div className="flex  items-center justify-between my-7">
               <div className="flex items-center space-x-1">
-                {project.image && (
+                {project.owner_image && (
                   <Image
-                    src={fixBackendUrl(project.owner_image) ?? ""}
+                    src={`${fixBackendUrl(project.owner_image)}`}
                     alt="Profil"
                     width={4}
                     height={4}
@@ -127,7 +127,7 @@ export default async function age({
 
         {project.image && (
           <Image
-            src={fixBackendUrl(project.image) ?? ProjectImg}
+            src={`${fixBackendUrl(project.image)}`}
             width={25}
             height={25}
             alt="Projet"

@@ -6,11 +6,16 @@ import { useQuery } from "@tanstack/react-query";
 import { getProjectsAsOwner } from "@/services/projectService";
 import { getOwnerStats } from "@/services/statsService";
 import MyProjectCard from "@/components/dashboard/project-owner/MyProjectCard";
+import Loader from "@/components/Loader";
 
 export default function OwnerHome() {
   const user = useUserSessionStore((state) => state.user);
 
-  const { data: projects } = useQuery({
+  const {
+    data: projects,
+    isLoading: isLoadingProjects,
+    isPending: isPendingProjects,
+  } = useQuery({
     queryKey: ["projects"],
     queryFn: () => getProjectsAsOwner(),
     enabled: user?.user_type === "owner",
@@ -25,6 +30,16 @@ export default function OwnerHome() {
     queryFn: () => getOwnerStats(),
     enabled: user?.user_type === "owner",
   });
+
+  const isLoading =
+    isLoadingProjects ||
+    isPendingProjects ||
+    isLoadingOwnerStats ||
+    isPendingOwnerStats;
+
+  if (isLoading) {
+    return <Loader message="Chargement de votre tableau de bord..." />;
+  }
   return (
     <section className="space-y-24">
       <DashboardHeader

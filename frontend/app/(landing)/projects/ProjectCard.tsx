@@ -9,22 +9,28 @@ import ColoredOutlineBtn from "@/components/ui/ColoredOutlineBtn";
 import MakeVoteModal from "@/components/modals/MakeVoteModal";
 import { PublicProject } from "./ProjectsList";
 import { dateToMonth } from "@/app/common/types/common";
+import { toast } from "sonner";
 
 export default function ProjectCard({ project }: { project: PublicProject }) {
   const [showModal, setShowModal] = useState(false);
+  const isVotesTime = false;
   return (
     <div className="bg-white rounded-2xl w-xl  p-12">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center">
         <div className="flex items-center space-x-3">
           {project?.image ? (
             <Image
-              src={ProfilImg}
+              src={project?.image}
+              width={12}
+              height={12}
               alt="Project owner profil image"
               className="w-12 h-12 rounded-full object-cover border border-gray-400"
             />
           ) : (
             <Image
               src={ProfilImg}
+              width={12}
+              height={12}
               alt="Project owner profil image"
               className="w-12 h-12 rounded-full object-cover border border-gray-400"
             />
@@ -45,7 +51,12 @@ export default function ProjectCard({ project }: { project: PublicProject }) {
       <div className="flex  flex-col space-y-3 md:space-y-0 md:flex-row md:justify-between">
         <ColoredOutlineBtn
           text="Je vote pour ce projet"
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            if (!isVotesTime) {
+              return toast.error("Les votes ne sont pas encore lancés");
+            }
+            setShowModal(true);
+          }}
         />
         <Link
           href={`/projects/${project?.slug}`}
