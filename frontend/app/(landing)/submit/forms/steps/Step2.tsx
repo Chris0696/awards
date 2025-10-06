@@ -1,3 +1,4 @@
+"use client";
 import { ChevronLeft } from "lucide-react";
 import FileInputField from "../FileInputField";
 import FormCard from "../FormCard";
@@ -7,6 +8,7 @@ import TextField from "../TextField";
 import { useFormContext } from "react-hook-form";
 
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
+import { useEffect, useState } from "react";
 
 export default function Step2({
   setStep,
@@ -19,10 +21,14 @@ export default function Step2({
   project?: any;
   adminProject?: any;
 }) {
-  const { trigger, watch } = useFormContext();
+  const { trigger, watch, setValue } = useFormContext();
   const user = useUserSessionStore((state) => state.user);
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
   const isOnEditMode = Boolean(project) || Boolean(adminProject);
   const cat = watch("category_id");
+  useEffect(() => {
+    if (cat === "other") setShowCustomCategory(true);
+  }, [cat]);
 
   return (
     <FormCard isOnEditMode={isOnEditMode} step={2}>
@@ -38,7 +44,22 @@ export default function Step2({
           placeholder='Ex: "Cotonou", "Nord du Bénin", "Afrique francophone" '
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SelectField name="category_id" />
+          {showCustomCategory && (
+            <div>
+              <TextField
+                showSpecialIcon
+                onClick={() => {
+                  setShowCustomCategory(false);
+                  setValue("category_id", "");
+                }}
+                name="custom_category_name"
+                label="Nom de votre catégorie"
+                placeholder="Saisissez le nom de la catégorie qui correspond le mieux à votre projet "
+              />
+            </div>
+          )}
+
+          {!showCustomCategory && <SelectField name="category_id" />}
 
           <NumberField
             name="estimated_budget"
@@ -47,15 +68,7 @@ export default function Step2({
           />
         </div>
       </div>
-      {cat === "other" && (
-        <div className="mt-4">
-          <TextField
-            name="custom_category_name"
-            label="Nom de votre catégorie"
-            placeholder="Saisissez le nom de la catégorie qui correspond le mieux à votre projet "
-          />
-        </div>
-      )}
+
       <div className="mt-10">
         <FileInputField />
       </div>

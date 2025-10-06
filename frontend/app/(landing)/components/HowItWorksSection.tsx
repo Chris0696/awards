@@ -16,14 +16,14 @@ export default function HowItWorksSection() {
             <ColoredOutlineLink url="/submit" text="Soumettre mon projet" />
           </div>
           <div className="mt-16 md:relative  w-full">
-            <div className="hidden w-full md:flex md:w-[80%] lg:w-full  md:absolute left-2/5 -translate-x-1/2 -translate-y-1/2 -z-40">
+            <div className="hidden w-full md:flex md:w-[80%] lg:w-[75%] xl:w-full  md:absolute left-2/5 -translate-x-1/2 -translate-y-1/2 -z-40">
               <Image
                 src={CurveImg}
                 alt="selection process curve img"
                 className="mx-auto"
               />
             </div>
-            <div className="mb-12 md:mb-0 md:absolute -bottom-80 -left-10 lg:left-32 w-md lg:-bottom-96 ">
+            <div className="mb-12 md:mb-0 md:absolute -bottom-80   xl:left-16 w-md lg:-bottom-96 ">
               <div className="relative">
                 <div>
                   <h2 className="text-primary font-medium text-lg">
@@ -59,7 +59,7 @@ export default function HowItWorksSection() {
                 </h3>
               </div>
             </div>
-            <div className="w-md md:absolute -right-60  2xl:-right-0 -top-60 ">
+            <div className=" w-md md:absolute -right-60 md:-top-40 lg:-top-40  xl:-right-48 2xl:-right-0 xl:-top-60 ">
               <div className="relative">
                 <div>
                   <h2 className="text-primary font-medium text-lg">

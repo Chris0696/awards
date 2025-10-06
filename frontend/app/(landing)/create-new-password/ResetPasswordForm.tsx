@@ -42,9 +42,9 @@ export default function ResetPasswordForm() {
   const onSubmit = (data: Form) => {
     if (otp && uuidb64 && refreshToken && data.password) {
       const payload = {
-        Otp: otp,
-        Password: data.password,
-        Uuidb64: uuidb64,
+        otp: otp,
+        password: data.password,
+        uuidb64: uuidb64,
       };
       saveMutation.mutate(payload);
     }

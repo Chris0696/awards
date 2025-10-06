@@ -24,9 +24,9 @@ export const resetPassword = async (email: string) => {
 };
 
 type ConfirmResetForm = {
-  Otp: string;
-  Password: string;
-  Uuidb64: string;
+  otp: string;
+  password: string;
+  uuidb64: string;
 };
 export const confirmPasswordReseting = async (data: ConfirmResetForm) => {
   const res = await apiClient.post(`auth/password-change/`, data);

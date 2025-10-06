@@ -6,22 +6,41 @@ import LightBulbIcon from "@/assets/lightbulb.svg";
 import OrangeCircle from "@/assets/orangecircle.svg";
 import Popover from "../ui/Popover";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function WelcomeModal() {
   const [mounted, setMounted] = useState(false);
   const [showModal, setShowModal] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
-    const closed = localStorage.getItem("hasClosedModal") === "true";
+  }, []);
+
+  useEffect(() => {
+    if (mounted && pathname === "/") {
+      setShowModal(true);
+    } else {
+      setShowModal(false);
+    }
+  }, [pathname, mounted]);
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+  if (!mounted) return null;
+
+  /* useEffect(() => {
+    setMounted(true);
+    const closed = sessionStorage.getItem("hasClosedModal") === "true";
     setShowModal(!closed);
   }, []);
 
   if (!mounted) return null;
   const handleCloseModal = () => {
-    localStorage.setItem("hasClosedModal", "true");
+    sessionStorage.setItem("hasClosedModal", "true");
     setShowModal(false);
-  };
+  }; */
   return (
     <Popover
       title="Date importante à retenir-Project Awards 2025 !"
