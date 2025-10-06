@@ -143,8 +143,8 @@ class ProjectAdminSerializer(serializers.ModelSerializer):
 class PublicProjectSerializer(serializers.ModelSerializer):
     """Affichage public des projets"""
     category_name = serializers.CharField(source='category.category_name', read_only=True)
-    owner_name = serializers.CharField(source='owner.user.full_name', read_only=True)
-    owner_image = serializers.CharField(source='owner.image', read_only=True)
+    owner_name = serializers.SerializerMethodField()
+    owner_image = serializers.SerializerMethodField()
 
     # Statistiques des votes
     average_rating = serializers.SerializerMethodField()
@@ -169,6 +169,34 @@ class PublicProjectSerializer(serializers.ModelSerializer):
             # Statistiques
             'average_rating', 'total_votes', 'vote_count', 'total_revenue'
         ]
+        
+    def get_owner_name(self, obj):
+        """Récupère le nom depuis owner.get_full_name"""
+        return obj.owner.get_full_name if obj.owner else None
+
+    def get_owner_image(self, obj):
+        """Récupère l'image du Profile de l'Owner"""
+        if not obj.owner:
+            return None
+        
+        # Utiliser la propriété get_image de l'Owner qui gère déjà la priorité Profile > Owner
+        image = obj.owner.get_image
+        
+        if image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        return None
+    
+    def get_image_url(self, obj):
+        """URL de l'image du projet"""
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
 
     def get_average_rating(self, obj):
         return obj.average_rating()
@@ -181,12 +209,6 @@ class PublicProjectSerializer(serializers.ModelSerializer):
 
     def get_total_revenue(self, obj):
         return float(obj.total_votes_revenue())
-
-    def get_image_url(self, obj):
-        request = self.context.get('request')
-        if obj.image and hasattr(obj.image, 'url'):
-            return request.build_absolute_uri(obj.image.url) if request else obj.image.url
-        return None
 
 
 class PublicProjectListSerializer(serializers.ModelSerializer):
