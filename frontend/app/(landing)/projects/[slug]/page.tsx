@@ -109,7 +109,8 @@ export default async function age({
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 items-center space-x-4 mt-8">
             <CallToAction2 project={project} />
             <Link
-              href={"/https://web.whatsapp.com/"}
+              target="_blank"
+              href={"https://web.whatsapp.com/"}
               className="flex items-center border border-white px-6 py-2 rounded-md space-x-2 hover:bg-white hover:text-primary transition-colors cursor-pointer"
             >
               <Image
