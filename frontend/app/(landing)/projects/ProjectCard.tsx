@@ -18,9 +18,9 @@ export default function ProjectCard({ project }: { project: PublicProject }) {
     <div className="bg-white rounded-2xl w-xl  p-12">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center">
         <div className="flex items-center space-x-3">
-          {project?.image ? (
+          {project?.owner_image ? (
             <Image
-              src={project?.image}
+              src={project?.owner_image}
               width={12}
               height={12}
               alt="Project owner profil image"
