@@ -30,7 +30,7 @@ const steps: StepProps[] = [
   {
     id: 5,
     title: "Payer les frais de soumission ",
-    desc: "Avant de valider, payez les frais de soumission de projet qui s'élèvent à 5000 FCFA",
+    desc: "Avant de valider, payez les frais de soumission de projet qui s'élèvent à 2000 FCFA",
   },
 ];
 
