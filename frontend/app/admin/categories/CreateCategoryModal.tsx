@@ -96,10 +96,13 @@ export default function CreateCategoryModal({
           />
           <div className="mt-6">
             <button
+              disabled={updateMutation.isPending || createMutation.isPending}
               type="submit"
               className="bg-secondary w-full  px-10  py-2.5 cursor-pointer text-lg rounded-md text-white"
             >
-              {isSubmitting ? "En cours..." : "Enregistrer"}
+              {updateMutation.isPending || createMutation.isPending
+                ? "En cours..."
+                : "Enregistrer"}
             </button>
           </div>
         </form>

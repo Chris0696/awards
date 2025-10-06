@@ -20,7 +20,8 @@ export async function middleware(req: NextRequest) {
     (role === "commercial" && pathname === "/admin/team") ||
     (role === "commercial" && pathname === "/admin/statistics") ||
     (role === "commercial" && pathname === "/admin/categories") ||
-    (role === "commercial" && pathname === "/admin/membership")
+    (role === "commercial" && pathname === "/admin/membership") ||
+    (role === "commercial" && pathname === "/admin/messages")
   ) {
     return NextResponse.redirect(new URL("/admin", req.url));
   }
@@ -29,7 +30,8 @@ export async function middleware(req: NextRequest) {
     (role === "owner" && pathname === "/admin/users") ||
     (role === "owner" && pathname === "/admin/team") ||
     (role === "owner" && pathname === "/admin/categories") ||
-    (role === "owner" && pathname === "/admin/membership")
+    (role === "owner" && pathname === "/admin/membership") ||
+    (role === "owner" && pathname === "/admin/messages")
   ) {
     return NextResponse.redirect(new URL("/admin", req.url));
   }

@@ -167,6 +167,7 @@ export default function page() {
             </div>
             <div className="">
               <button
+                disabled={updateMutation.isPending}
                 type="submit"
                 className="bg-primary text-white px-2 py-2 cursor-pointer rounded-md"
               >

@@ -37,44 +37,55 @@ export default function page() {
               </tr>
             </thead>
             <tbody>
-              {messages?.map((message: Message, idx: number) => (
-                <tr
-                  key={idx}
-                  className="hover:bg-white hover:rounded-full transition-colors"
-                >
-                  <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {message?.full_name}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {message?.email}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {message.phone ? message.phone : "-"}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    <Tooltip>
-                      <TooltipTrigger>{message?.subject}</TooltipTrigger>
-                      <TooltipContent>
-                        <p className="bg-primary text-white p-4 rounded-md">
-                          {message?.subject}{" "}
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    <Tooltip>
-                      <TooltipTrigger>
-                        {message?.message.slice(0, 12)}...
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="bg-primary text-white p-4 rounded-md">
-                          {message?.message}{" "}
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
+              {messages?.length > 0 ? (
+                messages?.map((message: Message, idx: number) => (
+                  <tr
+                    key={idx}
+                    className="hover:bg-white hover:rounded-full transition-colors"
+                  >
+                    <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                      {message?.full_name}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                      {message?.email}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                      {message.phone ? message.phone : "-"}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                      <Tooltip>
+                        <TooltipTrigger>{message?.subject}</TooltipTrigger>
+                        <TooltipContent>
+                          <p className="bg-primary text-white p-4 rounded-md">
+                            {message?.subject}{" "}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                      <Tooltip>
+                        <TooltipTrigger>
+                          {message?.message.slice(0, 12)}...
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="bg-primary text-white p-4 rounded-md">
+                            {message?.message}{" "}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="text-center py-4 text-xl font-semibold text-red-500"
+                  >
+                    Aucun message pour le moment
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

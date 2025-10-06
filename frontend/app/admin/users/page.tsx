@@ -5,12 +5,17 @@ import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
 import UserTable from "@/components/UserTable";
 import { useQuery } from "@tanstack/react-query";
 import { getOwnersList } from "@/services/userService";
+import Loader from "@/components/Loader";
 
 export default function page() {
-  const { data: users } = useQuery({
+  const { data: users, isLoading } = useQuery({
     queryKey: ["owners"],
     queryFn: () => getOwnersList(),
   });
+
+  if (isLoading) {
+    return <Loader message="Chargement des utilisateurs..." />;
+  }
 
   return (
     <div className="overflow-x-hidden">

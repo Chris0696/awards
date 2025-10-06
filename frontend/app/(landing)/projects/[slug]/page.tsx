@@ -58,6 +58,7 @@ export default async function age({
     throw new Error("Impossible de charger le projet");
   }
   const project: Project = await response.json();
+  console.log(project, "je log");
 
   return (
     <section className="pb-72">
