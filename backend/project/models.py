@@ -32,7 +32,7 @@ PAYMENT_STATUS = (
     ("pending", _("En attente")),
     ("approved", _("Payé")),
     ("declined", _("Déclinée")),
-    ("cancel", _("Échec")),
+    ("canceled", _("Échec")),
 )
 
 VOTE_CHOICES = (
