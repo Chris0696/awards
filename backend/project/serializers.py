@@ -1079,6 +1079,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
     vote_count = serializers.SerializerMethodField()
     total_revenue = serializers.SerializerMethodField()
+    rank = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -1087,7 +1088,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
             'estimated_budget', 'target_audience', 'solution', 'progress_report', 'platform_status', 'owner_project_status',
             'featured', 'created_at', 'updated_at', 'validated_at',
             'category', 'owner', 'commercial', 'average_rating', 
-            'vote_count', 'total_revenue'
+            'vote_count', 'total_revenue', 'rank'
         ]
 
     def get_average_rating(self, obj):
@@ -1098,6 +1099,10 @@ class ProjectListSerializer(serializers.ModelSerializer):
     
     def get_total_revenue(self, obj):
         return obj.total_votes_revenue()
+    
+    def get_rank(self, obj):
+        """Récupère le rang depuis la méthode du modèle"""
+        return obj.get_rank()
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
