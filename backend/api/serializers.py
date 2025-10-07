@@ -494,4 +494,10 @@ class OwnerDashboardSerializer(serializers.Serializer):
     recent_votes = RecentVoteSerializer(many=True)
     owner_ranking = serializers.DictField()
     top_project_votes = serializers.IntegerField()
+    
+    rank_display =  serializers.SerializerMethodField()
+
+    def get_rank_display(self, obj):
+        total_projects = Project.objects.filter(platform_status='publie').count()
+        return f"{obj.rank}e / {total_projects} projets"
 

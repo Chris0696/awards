@@ -708,21 +708,6 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
                         "non_field_errors": ["Seul un utilisateur de type 'owner' peut créer ou modifier un projet."]
                     }
                 })
-            # try:
-            #     owner = Owner.objects.get(user=user)
-            #     # Pour les updates, ne pas écraser l'owner existant
-            #     if not hasattr(self, 'instance') or not self.instance:
-            #         attrs['owner'] = owner
-            #     if owner.commercial and (not hasattr(self, 'instance') or not self.instance.commercial):
-            #         attrs['commercial'] = owner.commercial
-            #     print("✅ DEBUG - Owner validé")
-            # except Owner.DoesNotExist:
-            #     print("❌ DEBUG - Profil Owner non trouvé")
-            #     raise serializers.ValidationError({
-            #         "error": {
-            #             "non_field_errors": ["Aucun profil Owner associé à cet utilisateur."]
-            #         }
-            #     })
             
             try:
                 owner = Owner.objects.get(user=user)

@@ -10,7 +10,7 @@ from commercial.serializers import CommercialSerializer
 from project.models import Commercial, Project, Category, ProjectSubmissionPayment, User, Vote, VotePayment, VotePriceSettings
 from django.db.models.expressions import Window
 # from django.db.models.functions import Avg
-from django.db.models.functions import Rank
+from django.db.models.functions import Rank, Coalesce
 from rest_framework.renderers import JSONRenderer
 
 from rest_framework import generics, status
@@ -21,8 +21,7 @@ from rest_framework import generics, permissions
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from datetime import datetime, timedelta, date
-
-from django.db.models import Q, Sum, Count, Avg, F
+from django.db.models import Q, Sum, Count, Avg, F, Max
 from collections import defaultdict
 import calendar
 
@@ -588,39 +587,65 @@ class OwnerDashboardAPIView(generics.RetrieveAPIView):
             )
         }
         
-        # Classement de l'Owner
-        owner_ranking_query = Owner.objects.annotate(
-            total_votes=Sum('project__vote__vote_count', filter=Q(project__vote__active=True))
-        ).order_by('-total_votes')
+        # Classement des owners selon leur total de votes
+        owner_ranking_query = (
+            Owner.objects.annotate(
+                total_votes=Coalesce(
+                    Sum('project__vote__vote_count', filter=Q(project__vote__active=True)),
+                    0
+                )
+            )
+            .order_by('-total_votes', 'id')
+        )
         
-        owner_ranking = {
-            'rank': None,
-            'total_owners': owner_ranking_query.count()
-        }
-        
+        # Calcul du rang actuel de cet owner
+        owner_rank = None
         for index, ranked_owner in enumerate(owner_ranking_query, start=1):
             if ranked_owner.id == owner.id:
-                owner_ranking['rank'] = index
+                owner_rank = index
                 break
+
+        owner_ranking = {
+            "rank": owner_rank or owner_ranking_query.count(),  # Par défaut dernier
+            "total_owners": owner_ranking_query.count()
+        }
         
         # Nombre de votes du projet le mieux classé
-        top_project = Project.objects.filter(
-            platform_status='publie'
-        ).annotate(
-            total_votes=Sum('vote__vote_count', filter=Q(vote__active=True))
-        ).order_by('-total_votes').first()
+        # top_project = Project.objects.filter(
+        #     platform_status='publie'
+        # ).annotate(
+        #     total_votes=Sum('vote__vote_count', filter=Q(vote__active=True))
+        # ).order_by('-total_votes').first()
         
-        top_project_votes = top_project.total_votes if top_project and top_project.total_votes else 0
+        # top_project_votes = top_project.total_votes if top_project and top_project.total_votes else 0
+        
+        top_project_votes = (
+            Project.objects.filter(platform_status='publie')
+            .annotate(total_votes=Coalesce(Sum('vote__vote_count', filter=Q(vote__active=True)), 0))
+            .aggregate(max_votes=Max('total_votes'))
+        )['max_votes'] or 0
         
         # Projets récents de cet owner avec statistiques
-        recent_projects = owner.project_set.annotate(
-            votes_count=Sum('vote__vote_count', filter=Q(vote__active=True)),
-        ).annotate(
-            rank=Window(
-                expression=Rank(),
-                order_by=F('votes_count').desc()
+        # recent_projects = owner.project_set.annotate(
+        #     votes_count=Sum('vote__vote_count', filter=Q(vote__active=True)),
+        # ).annotate(
+        #     rank=Window(
+        #         expression=Rank(),
+        #         order_by=F('votes_count').desc()
+        #     )
+        # ).select_related('category').order_by('-created_at')[:5]
+        
+        recent_projects = (
+            Project.objects.filter(platform_status='publie')
+            .annotate(votes_count=Coalesce(Sum('vote__vote_count', filter=Q(vote__active=True)), 0))
+            .annotate(
+                rank=Window(
+                    expression=Rank(),
+                    order_by=F('votes_count').desc()
+                )
             )
-        ).select_related('category').order_by('-created_at')[:5]
+            .select_related('category', 'owner')
+        )
         
         # Votes récents reçus sur les projets de cet owner
         recent_votes = Vote.objects.filter(
