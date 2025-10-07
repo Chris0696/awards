@@ -74,6 +74,7 @@ class ProjectAdminSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
     total_revenue = serializers.SerializerMethodField()
     active_votes_count = serializers.SerializerMethodField()
+    rank = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -89,7 +90,7 @@ class ProjectAdminSerializer(serializers.ModelSerializer):
             # Fichiers
             'file', 'image',
             # Statistiques
-            'total_votes', 'average_rating', 'total_revenue', 'active_votes_count'
+            'total_votes', 'average_rating', 'total_revenue', 'active_votes_count', 'rank'
         ]
         read_only_fields = ['project_id', 'slug', 'created_at', 'updated_at', 'owner']
 
@@ -123,6 +124,10 @@ class ProjectAdminSerializer(serializers.ModelSerializer):
 
     def get_active_votes_count(self, obj):
         return obj.vote_count()
+    
+    def get_rank(self, obj):
+        """Récupère le rang depuis la méthode du modèle"""
+        return obj.get_rank()
 
     def validate_platform_status(self, value):
         """Validation du statut avec gestion de la date de validation"""
@@ -219,6 +224,7 @@ class PublicProjectListSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
     total_votes = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
+    rank = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -226,7 +232,7 @@ class PublicProjectListSerializer(serializers.ModelSerializer):
             'project_id', 'slug', 'project_title', 'description',
             'estimated_budget', 'featured', 'created_at', 'validated_at',
             'category_name', 'owner_name', 'owner_image', 'image', 'image_url',
-            'average_rating', 'total_votes'
+            'average_rating', 'total_votes', 'rank'
         ]
 
     def get_owner_name(self, obj):
@@ -263,6 +269,10 @@ class PublicProjectListSerializer(serializers.ModelSerializer):
     def get_total_votes(self, obj):
         return obj.vote_set.filter(active=True).count()
 
+    def get_rank(self, obj):
+        """Récupère le rang depuis la méthode du modèle"""
+        return obj.get_rank()
+    
     def get_image_url(self, obj):
         request = self.context.get('request')
         if obj.image and hasattr(obj.image, 'url'):

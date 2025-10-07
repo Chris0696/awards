@@ -151,27 +151,25 @@ class Project(models.Model):
         Exemple : 1 = premier, 2 = deuxième, etc.
         """
         
-        # Annoter tous les projets avec leur total de votes
-        projects = (
-            Project.objects.filter(platform_status='publie')
-            .annotate(
-                total_votes=Coalesce(
-                    Sum('vote__vote_count', filter=Q(vote__active=True)),
-                    0
-                )
-            )
-            .order_by('-total_votes', 'id')
-        )
+        """
+        Retourne le rang du projet parmi tous les projets publiés,
+        classés selon le nombre total de votes.
+        """
 
-        # Trouver la position actuelle du projet
-        rank = 0
-        for index, p in enumerate(projects, start=1):
-            if p.id == self.id:
-                rank = index
-                break
+        higher_rank_count = Project.objects.filter(
+            platform_status='publie'
+        ).annotate(
+            total_votes=Coalesce(Sum('vote__vote_count', filter=Q(vote__active=True)), 0)
+        ).filter(
+            total_votes__gt=self.vote_count()
+        ).count()
 
-        return rank or None  # None si le projet n’est pas trouvé
+        return higher_rank_count + 1 if self.vote_count() > 0 else None
     
+    # @property
+    # def rank(self):
+    #     return self.get_rank()
+
     def average_rating(self):
         avg = self.vote_set.filter(active=True).aggregate(avg_rating=Avg('vote'))
         return round(avg['avg_rating'], 2) if avg['avg_rating'] else 0.0
