@@ -372,7 +372,7 @@ class AdminDashboardAPIView(generics.RetrieveAPIView):
     def get(self, request):
         if not request.user.is_staff and request.user.user_type != 'admin':
             return Response(
-                {"error": _("Accès non autorisé")}, 
+                {"error": [_("Accès non autorisé")]}, 
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -395,12 +395,13 @@ class AdminDashboardAPIView(generics.RetrieveAPIView):
         
         # Statistiques votes
         vote_stats = {
-            'total_votes': Vote.objects.filter(active=True).count(),
+            'total_votes': Vote.objects.filter(active=True).aggregate(total=Sum('vote_count'))['total'] or 0,
             'total_revenue': float(VotePayment.objects.filter(status='approved').aggregate(total=Sum('amount'))['total'] or 0),
-            'pending_payments': VotePayment.objects.filter(status='en_attente').count(),
-            'recent_votes': Vote.objects.filter(created_at__gte=timezone.now() - timedelta(days=30), active=True).count(),
+            'pending_payments': VotePayment.objects.filter(status='pending').count(),
+            'recent_votes': Vote.objects.filter(created_at__gte=timezone.now() - timedelta(days=30), active=True) \
+                        .aggregate(total=Sum('vote_count'))['total'] or 0
         }
-        vote_stats['average_revenue_per_vote'] = round(vote_stats['total_revenue'] / vote_stats['total_votes'], 2) if vote_stats['total_votes'] > 0 else 0
+        vote_stats['average_revenue_per_vote'] = round(float(vote_stats['total_revenue']) / vote_stats['total_votes'], 2) if vote_stats['total_votes'] > 0 else 0
         
         # Activité récente
         recent_activity = {
@@ -409,15 +410,23 @@ class AdminDashboardAPIView(generics.RetrieveAPIView):
             'recent_users': user_stats['recent_users']
         }
         
-        # Top catégories
-        top_categories = Category.objects.annotate(project_count=Count('project')).order_by('-project_count')[:5]
+        # Top catégories — total votes par catégorie (somme des vote_count)
+        # top_categories = Category.objects.annotate(project_count=Count('project')).order_by('-project_count')[:5]
         
-        # Top commerciaux
-        top_commercials = Commercial.objects.annotate(
+        top_categories_qs = Category.objects.annotate(
+            project_count=Count('project'),
+            total_votes=Sum('project__vote__vote_count', filter=Q(project__vote__active=True))
+        ).order_by('-project_count')[:5]
+        top_categories = list(top_categories_qs.values('category_name', 'project_count', 'slug', 'total_votes'))
+
+        
+        # Top commerciaux — somme des vote_count de leurs projets
+        top_commercials_qs = Commercial.objects.annotate(
             projects_brought=Count('project'),
-            total_votes=Count('project__vote', filter=Q(project__vote__active=True))
+            total_votes=Sum('project__vote__vote_count', filter=Q(project__vote__active=True))
         ).order_by('-projects_brought')[:5]
-        
+        top_commercials = list(top_commercials_qs.values('full_name', 'projects_brought', 'total_votes', 'affiliate_link'))
+
         data = {
             'general_stats': project_stats,
             'user_stats': user_stats,
@@ -547,7 +556,7 @@ class OwnerDashboardAPIView(generics.RetrieveAPIView):
             total=Count('id'),
             validated=Count('id', filter=Q(platform_status='publie')),
             rejected=Count('id', filter=Q(platform_status='rejete')),
-            pending=Count('id', filter=Q(platform_status='en_attente')),
+            pending=Count('id', filter=Q(platform_status='padding')),
             draft=Count('id', filter=Q(platform_status='brouillon'))
         )
         

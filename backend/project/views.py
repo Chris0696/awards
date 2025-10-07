@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from userauths.mixin import CustomErrorResponseMixin
 from rest_framework.decorators import action, api_view, permission_classes
 from datetime import datetime, timedelta
 # from django_filters.rest_framework import DjangoFilterBackend
@@ -816,7 +817,7 @@ def trending_projects(request):
 # === VUES VOTE ===
         
 
-class VoteAndPaymentCreateAPIView(generics.CreateAPIView):
+class VoteAndPaymentCreateAPIView(CustomErrorResponseMixin, generics.CreateAPIView):
     """
     API pour créer un vote et traiter le paiement en une seule requête
     """
@@ -826,7 +827,16 @@ class VoteAndPaymentCreateAPIView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError as e:
+            # Utiliser le mixin pour formater les erreurs
+            formatted_errors = self.format_error_response(e.detail)
+            return Response(
+                formatted_errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         try:
             with transaction.atomic():
@@ -847,9 +857,7 @@ class VoteAndPaymentCreateAPIView(generics.CreateAPIView):
             
         except Exception as e:
             return Response({
-                'success': False,
-                'message': _('Erreur lors de la création du vote'),
-                'error': str(e)
+                {"error": [str(e)]},
             }, status=status.HTTP_400_BAD_REQUEST)
 
 

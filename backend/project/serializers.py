@@ -843,7 +843,7 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
 class ProjectPaymentSerializer(serializers.Serializer):
     """Serializer pour les informations de paiement de projet"""
     # Informations du payeur
-    payer_name = serializers.CharField(max_length=100, required=True)
+    payer_name = serializers.CharField(max_length=100, required=False, allow_blank=True)
     payer_email = serializers.EmailField(required=True)
     payer_phone = serializers.CharField(
         max_length=20,
@@ -1141,7 +1141,8 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
     """Serializer pour créer un vote avec les informations de paiement"""
     phone = serializers.CharField(
         max_length=20,
-        required=True,
+        required=False, 
+        allow_blank=True
         # validators=[RegexValidator(r'^\d{7,15}$', message=_("Le numéro de téléphone doit être au format +XXXXXXX avec le code pays."))]
     )
     # country_code = serializers.CharField(
@@ -1154,12 +1155,12 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
     vote_count = serializers.IntegerField(min_value=1, write_only=True)
     
     # Informations du votant
-    voter_name = serializers.CharField(max_length=100, required=True, help_text="Nom complet du votant")
+    voter_name = serializers.CharField(max_length=100, required=False, allow_blank=True, help_text="Nom complet du votant")
     voter_email = serializers.EmailField(required=True, help_text="Email du votant")
-    payment_reference = serializers.CharField(max_length=50, required=True, help_text="Référence de paiement")
+    payment_reference = serializers.CharField(max_length=50, required=False, allow_blank=True, help_text="Référence de paiement")
     
     # Informations de paiement envoyées par le frontend
-    payment_method = serializers.CharField(max_length=50, required=True, help_text="Méthode de paiement utilisée")
+    payment_method = serializers.CharField(max_length=50, required=False, allow_blank=True, help_text="Méthode de paiement utilisée")
     payment_status = serializers.ChoiceField(
         choices=PAYMENT_STATUS, 
         required=True, 
@@ -1188,13 +1189,13 @@ class VoteAndPaymentSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
         
     
-    def validate_phone(self, value):
-        """Valider le numéro de téléphone avec code pays inclus"""
-        if not value.startswith('+'):
-            raise serializers.ValidationError(_("Le numéro de téléphone doit commencer par + (ex: +2290155662555)."))
-        if len(value) < 8 or len(value) > 20:
-            raise serializers.ValidationError(_("Le numéro de téléphone doit contenir entre 8 et 20 caractères."))
-        return value
+    # def validate_phone(self, value):
+    #     """Valider le numéro de téléphone avec code pays inclus"""
+    #     if not value.startswith('+'):
+    #         raise serializers.ValidationError(_("Le numéro de téléphone doit commencer par + (ex: +2290155662555)."))
+    #     if len(value) < 8 or len(value) > 20:
+    #         raise serializers.ValidationError(_("Le numéro de téléphone doit contenir entre 8 et 20 caractères."))
+    #     return value
 
     def validate_project_id(self, value):
         """Valider que le project_id string correspond à un projet existant"""
