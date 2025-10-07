@@ -29,59 +29,66 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
-# on DEBUG, allow every host
+# ALLOWED_HOSTS configuration
 if DEBUG:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "scarsoft.net", "awardprojectvoting.scarsoft.net", "projectawards.scarsoft.net", "185.98.136.244", "backend"]
+    ALLOWED_HOSTS = [
+        "localhost",
+        "127.0.0.1",
+        "scarsoft.net",
+        "awardprojectvoting.scarsoft.net",
+        "projectawards.scarsoft.net",
+        "185.98.136.244",
+        "backend"
+    ]
     CSRF_TRUSTED_ORIGINS = [
         "http://localhost:8000",
+        "http://localhost:3000",
     ]
 else:
     ALLOWED_HOSTS = [
         'scarsoft.net',
         'awardprojectvoting.scarsoft.net',
         'projectawards.scarsoft.net',
-        'https://awardprojectvoting.scarsoft.net/admin/',
-        'https://projectawards.scarsoft.net/admin/',
-        'https://projectawards.scarsoft.net/djadmin/',
         '185.98.136.244',
         'vps114277.serveur-vps.net',
         'localhost',
         '127.0.0.1',
-         "backend"
+        'backend'
     ]
+    # IMPORTANT: CSRF_TRUSTED_ORIGINS ne doit contenir QUE les origines (protocole + domaine)
+    # PAS de chemins comme /admin/ ou /djadmin/
     CSRF_TRUSTED_ORIGINS = [
         'https://scarsoft.net',
         'https://awardprojectvoting.scarsoft.net',
-        'https://awardprojectvoting.scarsoft.net/admin/',
-        'https://projectawards.scarsoft.net/admin/',
-        'https://projectawards.scarsoft.net/djadmin/',
-        'https://projectawards.scarsoft.net/',
+        'https://projectawards.scarsoft.net',
         'http://185.98.136.244',
-        'http://185.98.136.244:8080',
-        'http://185.98.136.244:8081',
         'http://vps114277.serveur-vps.net',
-        'http://vps114277.serveur-vps.net:8080',
-        'http://vps114277.serveur-vps.net:8081',
     ]
 
+
+# Base URL configuration
 if DEBUG:
-    BASE_URL = os.environ.get('BASE_URL')
+    BASE_URL = os.environ.get('BASE_URL', 'http://localhost:8000')
 else:
-    BASE_PROD_URL = os.environ.get('BASE_PROD_URL')
+    BASE_PROD_URL = os.environ.get('BASE_PROD_URL', 'https://projectawards.scarsoft.net')
     FRONTEND_SITE_AFFILIATE_URL = os.environ.get('FRONTEND_SITE_AFFILIATE_URL')
-    BASE_URL = os.environ.get('BASE_URL')
-    # NEXT_PUBLIC_API_URL=https://projectawards.scarsoft.net/api
-    # NEXT_PUBLIC_BASE_URL=https://projectawards.scarsoft.net
+    BASE_URL = os.environ.get('BASE_URL', 'https://projectawards.scarsoft.net')
 
-# Configuration HTTPS
-# SECURE_SSL_REDIRECT = True
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-SESSION_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = True
+# Configuration HTTPS pour la production
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = False  # Nginx gère déjà la redirection
     
+# Cookie configuration
+SESSION_COOKIE_SAMESITE = 'Lax'  # Changé de 'None' à 'Lax' pour l'admin
+SESSION_COOKIE_SECURE = not DEBUG  # True en production, False en dev
+CSRF_COOKIE_SAMESITE = 'Lax'  # Changé de 'None' à 'Lax' pour l'admin
+CSRF_COOKIE_SECURE = not DEBUG  # True en production, False en dev
+ 
+# Pour l'admin Django avec un reverse proxy
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Application definition
 
 INSTALLED_APPS = [
