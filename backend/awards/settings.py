@@ -51,6 +51,8 @@ print(f"🔍 CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")  # Pour vérifier
 # Base URL configuration
 if DEBUG:
     BASE_URL = os.environ.get('BASE_URL', 'http://localhost:8000')
+    FRONTEND_SITE_AFFILIATE_URL = os.environ.get('FRONTEND_SITE_AFFILIATE_URL')
+    print("FRONTEND_SITE_AFFILIATE_URL :", FRONTEND_SITE_AFFILIATE_URL)
 else:
     BASE_PROD_URL = os.environ.get('BASE_PROD_URL', 'https://projectawards.scarsoft.net')
     FRONTEND_SITE_AFFILIATE_URL = os.environ.get('FRONTEND_SITE_AFFILIATE_URL')
