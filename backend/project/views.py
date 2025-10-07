@@ -178,7 +178,7 @@ class CategoryAdminViewSet(viewsets.ModelViewSet):
 
 class ProjectAdminViewSet(viewsets.ModelViewSet):
     """ViewSet pour l'administration complète des projets"""
-    queryset = Project.objects.all().select_related(
+    queryset = Project.objects.filter(owner_project_status='publie').select_related(
         'category', 'owner__user', 'commercial__user'
     ).prefetch_related('vote_set')
     serializer_class = ProjectAdminSerializer
