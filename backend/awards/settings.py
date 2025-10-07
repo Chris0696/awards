@@ -54,6 +54,7 @@ if DEBUG:
 else:
     BASE_PROD_URL = os.environ.get('BASE_PROD_URL', 'https://projectawards.scarsoft.net')
     FRONTEND_SITE_AFFILIATE_URL = os.environ.get('FRONTEND_SITE_AFFILIATE_URL')
+    print("FRONTEND_SITE_AFFILIATE_URL :", FRONTEND_SITE_AFFILIATE_URL)
     BASE_URL = os.environ.get('BASE_URL', 'https://projectawards.scarsoft.net')
 
 
