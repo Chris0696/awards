@@ -16,55 +16,37 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG")
-DEVELOPMENT_PROTECTION = os.environ.get("DEVELOPMENT_PROTECTION")
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
+DEVELOPMENT_PROTECTION = os.environ.get("DEVELOPMENT_PROTECTION", "False").lower() in ("true", "1", "yes")
 
-ALLOWED_HOSTS = []
-
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
-EMAIL_HOST = os.environ.get('EMAIL_HOST')
-EMAIL_PORT = os.environ.get('EMAIL_PORT')
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+print(f"🔍 DEBUG Mode: {DEBUG}")  # Pour vérifier au démarrage
+print(f"🔍 DEVELOPMENT_PROTECTION: {DEVELOPMENT_PROTECTION}")
 
 # ALLOWED_HOSTS configuration
-if DEBUG:
-    ALLOWED_HOSTS = [
-        "localhost",
-        "127.0.0.1",
-        "scarsoft.net",
-        "awardprojectvoting.scarsoft.net",
-        "projectawards.scarsoft.net",
-        "185.98.136.244",
-        "backend"
-    ]
-    CSRF_TRUSTED_ORIGINS = [
-        "http://localhost:8000",
-        "http://localhost:3000",
-    ]
-else:
-    ALLOWED_HOSTS = [
-        'scarsoft.net',
-        'awardprojectvoting.scarsoft.net',
-        'projectawards.scarsoft.net',
-        '185.98.136.244',
-        'vps114277.serveur-vps.net',
-        'localhost',
-        '127.0.0.1',
-        'backend'
-    ]
-    # IMPORTANT: CSRF_TRUSTED_ORIGINS ne doit contenir QUE les origines (protocole + domaine)
-    # PAS de chemins comme /admin/ ou /djadmin/
-    CSRF_TRUSTED_ORIGINS = [
-        'https://scarsoft.net',
-        'https://awardprojectvoting.scarsoft.net',
-        'https://projectawards.scarsoft.net',
-        'http://185.98.136.244',
-        'http://vps114277.serveur-vps.net',
-    ]
+ALLOWED_HOSTS = [
+    'scarsoft.net',
+    'awardprojectvoting.scarsoft.net',
+    'projectawards.scarsoft.net',
+    '185.98.136.244',
+    'vps114277.serveur-vps.net',
+    'localhost',
+    '127.0.0.1',
+    'backend'
+]
 
+# CSRF TRUSTED ORIGINS - Toujours actif
+CSRF_TRUSTED_ORIGINS = [
+    'https://scarsoft.net',
+    'https://awardprojectvoting.scarsoft.net',
+    'https://projectawards.scarsoft.net',
+    'http://localhost:8000',
+    'http://localhost:3000',
+    'http://127.0.0.1:8000',
+    'http://185.98.136.244',
+    'http://vps114277.serveur-vps.net',
+]
+
+print(f"🔍 CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")  # Pour vérifier
 
 # Base URL configuration
 if DEBUG:
@@ -74,17 +56,74 @@ else:
     FRONTEND_SITE_AFFILIATE_URL = os.environ.get('FRONTEND_SITE_AFFILIATE_URL')
     BASE_URL = os.environ.get('BASE_URL', 'https://projectawards.scarsoft.net')
 
+
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_PORT = os.environ.get('EMAIL_PORT')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
+
+# ALLOWED_HOSTS configuration
+# if DEBUG:
+#     ALLOWED_HOSTS = [
+#         "localhost",
+#         "127.0.0.1",
+#         "scarsoft.net",
+#         "awardprojectvoting.scarsoft.net",
+#         "projectawards.scarsoft.net",
+#         "185.98.136.244",
+#         "backend"
+#     ]
+#     CSRF_TRUSTED_ORIGINS = [
+#         "http://localhost:8000",
+#         "http://localhost:3000",
+#     ]
+# else:
+#     ALLOWED_HOSTS = [
+#         'scarsoft.net',
+#         'awardprojectvoting.scarsoft.net',
+#         'projectawards.scarsoft.net',
+#         '185.98.136.244',
+#         'vps114277.serveur-vps.net',
+#         'localhost',
+#         '127.0.0.1',
+#         'backend'
+#     ]
+#     # IMPORTANT: CSRF_TRUSTED_ORIGINS ne doit contenir QUE les origines (protocole + domaine)
+#     # PAS de chemins comme /admin/ ou /djadmin/
+#     CSRF_TRUSTED_ORIGINS = [
+#         'https://scarsoft.net',
+#         'https://awardprojectvoting.scarsoft.net',
+#         'https://projectawards.scarsoft.net',
+#         'http://185.98.136.244',
+#         'http://vps114277.serveur-vps.net',
+#     ]
+
 # Configuration HTTPS pour la production
 if not DEBUG:
+    # Pour un reverse proxy comme Nginx
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = False  # Nginx gère déjà la redirection
-    
+    SECURE_SSL_REDIRECT = False  # Nginx gère la redirection
+    USE_X_FORWARDED_HOST = True
+    USE_X_FORWARDED_PORT = True
+
 # Cookie configuration
-SESSION_COOKIE_SAMESITE = 'Lax'  # Changé de 'None' à 'Lax' pour l'admin
-SESSION_COOKIE_SECURE = not DEBUG  # True en production, False en dev
-CSRF_COOKIE_SAMESITE = 'Lax'  # Changé de 'None' à 'Lax' pour l'admin
-CSRF_COOKIE_SECURE = not DEBUG  # True en production, False en dev
- 
+if DEBUG:
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SECURE = False
+else:
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = False  # Doit être False pour que JavaScript puisse le lire
+    
 # Pour l'admin Django avec un reverse proxy
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
