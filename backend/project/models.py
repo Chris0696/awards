@@ -10,7 +10,9 @@ from django.db import models
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.db.models import Sum, Avg
+from django.db.models import Sum, Avg, Q
+from django.db.models.functions import Rank, Coalesce
+
 from shortuuid.django_fields import ShortUUIDField
 from django.utils.module_loading import import_string
 
@@ -141,6 +143,34 @@ class Project(models.Model):
     def owner_full_name(self):
         """Accède au nom via owner.get_full_name"""
         return self.owner.get_full_name
+    
+    def get_rank(self):
+        """
+        Retourne le rang du projet parmi tous les projets publiés,
+        classés selon le nombre total de votes actifs.
+        Exemple : 1 = premier, 2 = deuxième, etc.
+        """
+        
+        # Annoter tous les projets avec leur total de votes
+        projects = (
+            Project.objects.filter(platform_status='publie')
+            .annotate(
+                total_votes=Coalesce(
+                    Sum('vote__vote_count', filter=Q(vote__active=True)),
+                    0
+                )
+            )
+            .order_by('-total_votes', 'id')
+        )
+
+        # Trouver la position actuelle du projet
+        rank = 0
+        for index, p in enumerate(projects, start=1):
+            if p.id == self.id:
+                rank = index
+                break
+
+        return rank or None  # None si le projet n’est pas trouvé
     
     def average_rating(self):
         avg = self.vote_set.filter(active=True).aggregate(avg_rating=Avg('vote'))
