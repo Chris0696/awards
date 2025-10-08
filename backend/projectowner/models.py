@@ -75,7 +75,7 @@ class Owner(models.Model):
         ordering = ['-created_at']
     
     def total_projects(self):
-        return self.project_set.filter(owner_status='publie').count()
+        return self.project_set.filter(owner_project_status='publie').count()
     
     def published_projects(self):
         return self.project_set.filter(platform_status='publie').count()

@@ -103,7 +103,7 @@ class AdminProjectsManagementAPIView(generics.ListAPIView):
 def general_stats_api(request):
     """API pour obtenir des statistiques générales de la plateforme"""
     
-    total_projects = Project.objects.filter(owner_status='publie').count()
+    total_projects = Project.objects.filter(owner_project_status='publie').count()
     total_published = Project.objects.filter(platform_status='publie').count()
     total_votes = Vote.objects.filter(active=True).count()
     total_users = User.objects.filter(is_active=True).count()
