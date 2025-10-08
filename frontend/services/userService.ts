@@ -53,6 +53,11 @@ export const toggleOwnerAccountAsAdmin = async (id: number) => {
   return res.data;
 };
 
-export const deleteOwner = (id: number) => {
-  return apiClient.delete(`admin/owners/${id}/delete/`);
+export const deleteOwner = async (id: number) => {
+  return await apiClient.delete(`admin/owners/${id}/delete/`);
+};
+
+export const getAffiliateDetails = async (id: number) => {
+  const res = await apiClient.get(`admin/users/commercial/${id}/`);
+  return res.data;
 };

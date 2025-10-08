@@ -43,7 +43,7 @@ export default function OwnerHome() {
   return (
     <section className="space-y-24">
       <DashboardHeader
-        pageTitle={`Bienvenu sur votre espace personnel, ${user?.full_name} `}
+        pageTitle={`Bienvenue sur votre espace personnel, ${user?.full_name} `}
       />
       <div className="space-y-10 lg:space-y-24">
         <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0  lg:space-x-14">

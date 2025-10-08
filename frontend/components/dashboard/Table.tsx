@@ -64,6 +64,13 @@ export default function Table({ projects, isSecondProject }: Props) {
   const handleDelete = () => {
     if (projectToDelete) deleteMutation.mutate(projectToDelete);
   };
+  const isAlreadyPublished = (project: ProjectInfo) => {
+    return (
+      project.owner_project_status === "publie" &&
+      project.platform_status === "publie"
+    );
+  };
+
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">
       <table className=" w-full">
@@ -130,7 +137,7 @@ export default function Table({ projects, isSecondProject }: Props) {
                 >
                   {project.owner_project_status === "publie" &&
                   project.platform_status === "brouillon"
-                    ? "en cours de traitement"
+                    ? "en cours de validation"
                     : project.owner_project_status === "publie" &&
                       project.platform_status === "publie"
                     ? "publie"
@@ -162,20 +169,22 @@ export default function Table({ projects, isSecondProject }: Props) {
                         </button>
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem>
-                      <button
-                        onClick={() =>
-                          updateMutation.mutate({
-                            project_id: project.project_id,
-                            owner_project_status: "publie",
-                            category_id: project.category.category_id,
-                          })
-                        }
-                        className="cursor-pointer"
-                      >
-                        Publier
-                      </button>
-                    </DropdownMenuItem>
+                    {!isAlreadyPublished(project) && (
+                      <DropdownMenuItem>
+                        <button
+                          onClick={() =>
+                            updateMutation.mutate({
+                              project_id: project.project_id,
+                              owner_project_status: "publie",
+                              category_id: project.category.category_id,
+                            })
+                          }
+                          className="cursor-pointer"
+                        >
+                          Publier
+                        </button>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem>
                       <button
                         onClick={() => {
