@@ -402,7 +402,7 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
                 user=user,
                 otp_type="create-new-password",
                 template_name="password_reset",
-                subject="Password Reset Request"
+                subject="Requête de reinitialisation de mot de passe"
             )
             print("Password Reset Link:", link)
         return user

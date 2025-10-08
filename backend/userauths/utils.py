@@ -28,7 +28,7 @@ def send_otp_email(user, otp_type, template_name, subject):
     # # Prépare le contexte de l'email
     context = {
         "link": link,
-        "username": user.username,
+        "full_name": user.full_name,
     }
 
     text_body = render_to_string(f"email/{template_name}.txt", context)
