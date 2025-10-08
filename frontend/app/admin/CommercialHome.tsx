@@ -59,7 +59,7 @@ export default function CommercialHome() {
 
   return (
     <section className="w-full overflow-x-hidden">
-      <div className="flex justify-between ">
+      <div className="flex flex-col md:flex-row space-y-3 md: space-y- justify-between ">
         <h2 className="text-2xl font-semibold">
           Détails {userInfo?.full_name}{" "}
         </h2>

@@ -96,7 +96,7 @@ export default function StatisticPage() {
               />
               <SynthesisCard
                 title="1er actuel"
-                data={`${ownerStats?.top_project_votes}`}
+                data={`${ownerStats?.top_project_votes} votes`}
               />
             </div>
           </div>
@@ -120,9 +120,9 @@ export default function StatisticPage() {
               Un simple partage peut faire la différence !
             </h4>
             <p className="text-gray-700 my-4">
-              Vous êtes actuellement 4ᵉ dans la catégorie “Tech & Innovation”.
-              Encouragez votre communauté à voter pour améliorer votre position
-              et maximiser vos chances de financement.
+              Vous êtes actuellement {ownerStats?.owner_ranking.rank}e dans
+              votre catégorie. Encouragez votre communauté à voter pour
+              améliorer votre position et maximiser vos chances de financement.
             </p>
             <div className="space-y-6 pt-3">
               <Link
