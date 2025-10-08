@@ -65,7 +65,7 @@ class ContactMessage(models.Model):
     
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.FileField(upload_to="user_folder", default="default-user.jpg", null=True, blank=True)
+    image = models.FileField(upload_to="user_folder", default="default-user.png", null=True, blank=True)
     full_name = models.CharField(max_length=100, verbose_name=_("Nom et Prénom"))
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))
     profession = models.TextField(null=True, blank=True, verbose_name=_("Profession"))
@@ -75,14 +75,18 @@ class Profile(models.Model):
         return self.full_name or self.user.full_name
         
     def save(self, *args, **kwargs):
+        # Synchroniser depuis User si les champs sont vides
         if not self.full_name:
             self.full_name = self.user.full_name
+        if not self.phone:
+            self.phone = self.user.phone
+            
         super(Profile, self).save(*args, **kwargs)
         
+        # Synchroniser vers Owner si il existe
         try:
             from projectowner.models import Owner
             owner = Owner.objects.get(user=self.user)
-            # Mettre à jour les champs de Owner
             owner.image = self.image
             owner.full_name = self.full_name
             owner.phone = self.phone
@@ -91,29 +95,6 @@ class Profile(models.Model):
                 owner.profile = self
             owner.save()
         except Owner.DoesNotExist:
-            # Ne pas créer de Owner ici
             pass
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    """Crée automatiquement un Profile quand un User est créé"""
-    if created:
-        Profile.objects.create(
-            user=instance,
-            full_name=instance.full_name or instance.username,
-            phone=instance.phone
-        )
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    """Sauvegarde le Profile quand le User est modifié"""
-    if hasattr(instance, 'profile'):
-        # Mettre à jour les informations du Profile depuis le User
-        if instance.profile.full_name != instance.full_name:
-            instance.profile.full_name = instance.full_name
-        if instance.profile.phone != instance.phone:
-            instance.profile.phone = instance.phone
-        instance.profile.save()
-
-post_save.connect(create_user_profile, sender=User)
-post_save.connect(save_user_profile, sender=User)

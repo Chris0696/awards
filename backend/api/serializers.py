@@ -409,6 +409,20 @@ class RegisterOwnerWithPaymentSerializer(serializers.ModelSerializer):
             accept_project_reformulation=accept_project_reformulation,
             accept_terms_of_use=accept_terms_of_use
         )
+        
+        # ✅ AJOUTER: Synchroniser explicitement le Profile avec l'Owner
+        try:
+            profile = Profile.objects.get(user=user)
+            profile.phone = phone or profile.phone
+            profile.profession = profession or profile.profession
+            profile.save()
+            
+            # Associer le Profile à l'Owner
+            owner.profile = profile
+            owner.save()
+        except Profile.DoesNotExist:
+            # Le Profile sera créé par le signal
+            pass
 
         # Créer le projet si fourni
         project = None

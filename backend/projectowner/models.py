@@ -9,7 +9,7 @@ import re
 
 class Owner(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.FileField(upload_to="owner-files", blank=True, null=True, default="default.jpg")
+    image = models.FileField(upload_to="owner-files", blank=True, null=True, default="default-user.png")
     profile = models.OneToOneField(Profile, related_name='owner_profile', on_delete=models.CASCADE, null=True, blank=True)
     full_name = models.CharField(max_length=100, verbose_name=_("Nom complet"))
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_("Téléphone"))

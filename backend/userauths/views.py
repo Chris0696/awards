@@ -540,6 +540,16 @@ class ContactMessageDetailView(generics.RetrieveDestroyAPIView):
     permission_classes = [IsAdminUser]
     
           
+# class ProfileAPIView(generics.RetrieveUpdateAPIView):
+#     serializer_class = ProfileSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_object(self):
+#         user_id = self.kwargs['user_id']
+#         user = User.objects.get(id=user_id)
+#         return Profile.objects.get(user=user)
+
+
 class ProfileAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -547,6 +557,20 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         user_id = self.kwargs['user_id']
         user = User.objects.get(id=user_id)
-        return Profile.objects.get(user=user)
+        
+        # S'assurer que le Profile existe
+        profile, created = Profile.objects.get_or_create(
+            user=user,
+            defaults={
+                'full_name': user.full_name or user.username,
+                'phone': user.phone or ''
+            }
+        )
+        return profile
     
+    def get_serializer_class(self):
+        # Utiliser un serializer différent pour les mises à jour
+        if self.request.method in ['PUT', 'PATCH']:
+            return ProfileUpdateSerializer
+        return ProfileSerializer
 

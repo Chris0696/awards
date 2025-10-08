@@ -230,6 +230,31 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = "__all__"
+        read_only_fields = ['user', 'date']
+
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    """Serializer spécifique pour la mise à jour du profil"""
+    class Meta:
+        model = Profile
+        fields = ['image', 'full_name', 'phone', 'profession']
+    
+    def update(self, instance, validated_data):
+        # Mettre à jour le Profile
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Optionnel: Synchroniser vers User
+        if 'full_name' in validated_data:
+            instance.user.full_name = validated_data['full_name']
+        if 'phone' in validated_data:
+            instance.user.phone = validated_data['phone']
+        
+        # Sauvegarder sans déclencher les signaux
+        instance.user.save(update_fields=['full_name', 'phone'])
+        
+        return instance
 
 
 class AdminUserUpdateSerializer(serializers.ModelSerializer):
