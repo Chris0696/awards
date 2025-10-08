@@ -17,6 +17,7 @@ import { deleteAdminRelatedUser } from "@/services/userService";
 import useCopyToClipboard from "@/hooks/useCopyToClipboard";
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 import { toast } from "sonner";
+import Link from "next/link";
 interface Props {
   affiliates: Team[];
 }
@@ -49,7 +50,7 @@ export default function AffiliateTable({ affiliates }: Props) {
         <thead>
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Nom & prénoms
+              Nom du commercial
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Email
@@ -107,6 +108,11 @@ export default function AffiliateTable({ affiliates }: Props) {
                       onClick={() => handleCopy(affiliate.affiliate_link)}
                     >
                       Copier le lien
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/admin/membership/details/${affiliate.id}`}>
+                        Voir détails
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {

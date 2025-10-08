@@ -59,7 +59,7 @@ export default function LoginForm() {
         className="w-full max-w-3xl mx-auto bg-white space-y-4 "
       >
         <div className="flex justify-center flex-col items-center">
-          <h2 className="text-4xl font-bold">Bienvenu!</h2>
+          <h2 className="text-4xl font-bold">Bienvenue!</h2>
           <p>Connectez vous à votre espace</p>
         </div>
         <div className="space-y-4">
