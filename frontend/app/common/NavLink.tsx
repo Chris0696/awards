@@ -4,14 +4,17 @@ import { usePathname } from "next/navigation";
 export default function NavLink({
   text,
   href,
+  onClose,
 }: {
   text: string;
   href: string;
+  onClose: (() => void) | undefined;
 }) {
   const pathname = usePathname();
   const isActive = pathname === href;
   return (
     <Link
+      onClick={onClose}
       href={href}
       className={`${
         isActive ? "bg-white/10" : ""

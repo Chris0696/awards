@@ -10,11 +10,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getAdminRelatedUsers } from "@/services/userService";
 
 import { Team } from "../team/page";
+import Loader from "@/components/Loader";
 
 export default function page() {
   const [showModal, setShowModal] = useState(false);
 
-  const { data: affiliates } = useQuery({
+  const { data: affiliates, isLoading } = useQuery({
     queryKey: ["team"],
     queryFn: () => getAdminRelatedUsers(),
   });
@@ -22,6 +23,10 @@ export default function page() {
   const filteredList = affiliates?.data?.filter(
     (affiliate: Team) => affiliate.user_type !== "admin"
   );
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <section>
@@ -38,7 +43,7 @@ export default function page() {
       {filteredList?.length > 0 ? (
         <div>
           <AffiliateTable affiliates={filteredList} />
-          <SwitchPageBtn />
+          {/*           <SwitchPageBtn /> */}
         </div>
       ) : (
         <p className="text-center text-primary text-3xl font-medium">

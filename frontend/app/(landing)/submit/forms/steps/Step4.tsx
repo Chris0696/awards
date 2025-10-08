@@ -8,10 +8,14 @@ export default function Step4({
   setStep,
   project,
   adminProject,
+  showFifthStep,
+  isOnEditMode,
 }: {
   setStep: (step: number) => void;
   project?: any;
   adminProject?: any;
+  showFifthStep: boolean;
+  isOnEditMode?: boolean;
 }) {
   const {
     register,
@@ -21,14 +25,18 @@ export default function Step4({
   } = useFormContext();
   const user = useUserSessionStore((state) => state.user);
   const showStepUpBtns = !Boolean(user);
-  const isOnEditMode = Boolean(project) || Boolean(adminProject);
+
   return (
-    <FormCard isOnEditMode={isOnEditMode} step={4}>
+    <FormCard
+      isOnEditMode={isOnEditMode}
+      showFifthStep={showFifthStep}
+      step={4}
+    >
       <div>
         <div className="flex flex-col space-y-10">
           <label
             htmlFor="acceptReformulation"
-            className="flex items-center space-x-4 cursor-pointer"
+            className="flex items-center space-x-4 cursor-pointer relative"
           >
             <Controller
               name="acceptReformulation"
@@ -41,7 +49,7 @@ export default function Step4({
                     disabled={project || adminProject}
                     checked={project || adminProject}
                     id="acceptReformulation"
-                    className="w-8 h-8 rounded-md border border-secondary appearance-none checked:bg-secondary checked:border-secondary checked:ring-2 checked:ring-secondary focus:outline-none transition cursor-pointer"
+                    className="w-20 h-7 md:w-8 md:h-7 rounded-sm border border-secondary appearance-none checked:bg-secondary checked:border-secondary checked:ring-2 checked:ring-secondary focus:outline-none transition cursor-pointer"
                   />
                   <span className="text-gray-900 text-xl font-medium">
                     J'accepte que mon projet soit reformulé par l'équipe Project
@@ -49,7 +57,7 @@ export default function Step4({
                     <span className="text-red-500">*</span>
                   </span>
                   {errors.acceptReformulation && (
-                    <span className="text-red-500 text-sm block">
+                    <span className="text-red-500 text-sm block absolute -top-5">
                       {error?.message}
                     </span>
                   )}
@@ -59,7 +67,7 @@ export default function Step4({
           </label>
           <label
             htmlFor="acceptTerms"
-            className="flex items-center space-x-4 cursor-pointer"
+            className="flex items-center space-x-4 cursor-pointer relative"
           >
             <Controller
               name="acceptTerms"
@@ -72,7 +80,7 @@ export default function Step4({
                     disabled={project || adminProject}
                     checked={project || adminProject}
                     id="acceptTerms"
-                    className="w-7 h-7 rounded-md border border-secondary appearance-none checked:bg-secondary checked:border-secondary checked:ring-2 checked:ring-secondary focus:outline-none transition"
+                    className="w-10 h-7 md:w-7 md:h-7 rounded-sm border border-secondary appearance-none checked:bg-secondary checked:border-secondary checked:ring-2 checked:ring-secondary focus:outline-none transition"
                   />
                   <span className="text-gray-900 text-xl font-medium">
                     J'ai lu et j'accepte{" "}
@@ -80,9 +88,9 @@ export default function Step4({
                       les conditions d'utilisation
                     </Link>
                   </span>
-                  <span className="text-red-500">*</span>
+                  {/* <span className="text-red-500">*</span> */}
                   {errors.acceptTerms && (
-                    <span className="text-red-500 text-sm block">
+                    <span className="text-red-500 text-sm block absolute -top-7">
                       {error?.message}
                     </span>
                   )}

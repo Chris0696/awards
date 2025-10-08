@@ -35,7 +35,13 @@ export default function MyProjectCard({ project }: Props) {
               : "text-orange-500 bg-orange-100"
           } py-1 text-xs px-5 rounded-full`}
         >
-          {project.platform_status}
+          {project.owner_project_status === "publie" &&
+          project.platform_status === "brouillon"
+            ? "en cours..."
+            : project.owner_project_status === "publie" &&
+              project.platform_status === "publie"
+            ? "publie"
+            : "brouillon"}
         </span>
       </p>
     </div>

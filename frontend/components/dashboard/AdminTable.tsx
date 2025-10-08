@@ -126,7 +126,9 @@ export default function AdminTable({ projects }: Props) {
                 <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                   {project.active_votes_count}
                 </td>
-                <td className="px-6 py-4 text-gray-600 whitespace-nowrap">1</td>
+                <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                  {project.rank ? project.rank : 0}{" "}
+                </td>
                 {user?.user_type === "user" && (
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                     <DropdownMenu>

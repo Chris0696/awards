@@ -47,13 +47,13 @@ export default function WelcomeModal() {
       visible={showModal}
       onClose={handleCloseModal}
     >
-      <div className="w-4/5 mx-auto mt-10 mb-5 ">
+      <div className="w-4/5 mx-auto mt-4 md:mt-10 mb-5 ">
         <Image
           src={LightBulbIcon}
           alt="Material Icon"
           className="mx-auto w-12 h-12"
         />
-        <div className="text-xl my-8 font-medium space-y-4 w-[85%] mx-auto ">
+        <div className="text-xl my-2 md:my-8 font-medium space-y-2 md:space-y-4 w-[85%] mx-auto ">
           <p className="flex space-x-2">
             <Image src={OrangeCircle} alt="bullet-point" className="w-4 h-4" />
             <span>
@@ -79,7 +79,7 @@ export default function WelcomeModal() {
           <Link
             href={"/submit"}
             onClick={handleCloseModal}
-            className="border border-secondary mt-10 bg-secondary text-white px-6 py-3 rounded-md transition-colors"
+            className="border border-secondary mt-2 md:mt-10 bg-secondary text-white px-6 py-3 rounded-md transition-colors"
           >
             Soumettre mon projet
           </Link>

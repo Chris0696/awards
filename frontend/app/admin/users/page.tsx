@@ -27,7 +27,7 @@ export default function page() {
       {users?.results.length > 0 ? (
         <div>
           <UserTable users={users.results} />
-          <SwitchPageBtn />
+          {/* <SwitchPageBtn /> */}
         </div>
       ) : (
         <p className="text-center text-primary text-3xl font-medium">

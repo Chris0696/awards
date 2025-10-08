@@ -73,6 +73,7 @@ export default function AddGdChildModal({
     mutationFn: addAdminRelatedUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team"] });
+      toast.success("Utilisateur ajouté avec succès");
       setShowModal(false);
       reset();
     },
@@ -131,7 +132,10 @@ export default function AddGdChildModal({
       isLogin
     >
       <FormProvider {...methods}>
-        <form className="px-16 pb-16 pt-8" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="px-4 md:px-16 pb-16 pt-8"
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <div className="flex justify-center text-center mb-8">
             <div>
               <h2 className="text-4xl font-bold">{title} </h2>

@@ -25,12 +25,13 @@ import { AdminProjectInfo, ProjectInfo } from "@/app/common/types/project";
 import Loader from "@/components/Loader";
 
 export default function AdminProjectList() {
+  const [isSecondProject, setIsSecondProject] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const user = useUserSessionStore((state) => state.user);
   const [selectedSatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const { data: adminProjects } = useQuery({
+  const { data: adminProjects, isLoading: isLoadingAdminPr } = useQuery({
     queryKey: ["adminProjects"],
     queryFn: () => getProjectsAsAdmin(),
     enabled: user?.user_type === "user" || user?.user_type === "admin",
@@ -67,6 +68,9 @@ export default function AdminProjectList() {
   if (isLoading) {
     return <Loader message="Chargement de vos projets..." />;
   }
+  if (isLoadingAdminPr) {
+    return <Loader message="Chargement des projets" />;
+  }
   return (
     <>
       {" "}
@@ -75,11 +79,17 @@ export default function AdminProjectList() {
           <DashboardHeader pageTitle="Mes projets" />
           {ownerProjects ? (
             <div>
-              <Table projects={ownerProjects} />
+              <Table
+                isSecondProject={isSecondProject}
+                projects={ownerProjects}
+              />
               {ownerProjects.length < 2 && (
                 <div className="mt-2">
                   <button
-                    onClick={() => setShowModal(true)}
+                    onClick={() => {
+                      setShowModal(true);
+                      setIsSecondProject(true);
+                    }}
                     className="bg-primary px-4 py-5 rounded-lg text-gray-50 flex items-center space-x-2 mt-6 text-lg cursor-pointer hover:border hover:border-primary hover:bg-white hover:text-primary transition-colors ml-auto"
                   >
                     <span>Soumettre un nouveau projet</span> <ChevronRight />
@@ -139,7 +149,7 @@ export default function AdminProjectList() {
 
             <div className="overflow-x-auto">
               <AdminTable projects={filteredProjects ?? []} />
-              <SwitchPageBtn />
+              {/*  <SwitchPageBtn /> */}
             </div>
           </div>
         </section>

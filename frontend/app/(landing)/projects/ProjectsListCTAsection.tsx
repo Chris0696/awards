@@ -4,9 +4,9 @@ import Link from "next/link";
 
 export default function ProjectsListCTAsection() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-primary w-[68%] mx-auto rounded-xl my-24">
-      <div className="text-white flex flex-col justify-center items-start pl-4  md:pl-28 space-y-4">
-        <div className="font-bold text-2xl">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-primary w-[68%] mx-auto rounded-xl my-12 md:my-24">
+      <div className="text-white flex flex-col justify-center items-start p-4  md:pl-28 space-y-4">
+        <div className="font-bold text-lg md:text-2xl">
           <p>Vous avez aimé ces idées ?</p>
           <p>Rejoignez-nous pour rester à l'affût des prochains événements</p>
         </div>

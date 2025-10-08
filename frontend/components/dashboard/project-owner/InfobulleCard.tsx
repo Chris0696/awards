@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function InfobulleCard() {
   return (
-    <div className="px-4 pt-10 pb-5 bg-gray-200 rounded-md relative w-full max-w-80">
+    <div className="px-4 pt-10 pb-5 bg-gray-200 rounded-md relative w-full lg:max-w-80">
       <h2 className="text-xl text-gray-700 font-medium">
         Donnez un coup de boost à votre projet
       </h2>

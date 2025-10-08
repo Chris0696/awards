@@ -22,7 +22,7 @@ export default function page() {
   return (
     <section>
       <DashboardHeader pageTitle="Liste des catégories" />
-      <div>
+      <div className="mb-12 ">
         <button
           onClick={() => setShowModal(true)}
           className="bg-primary px-4 py-3 rounded-lg text-gray-50 flex items-center space-x-2 mt-6 text-lg cursor-pointer hover:border hover:border-primary hover:bg-white hover:text-primary transition-colors ml-auto"

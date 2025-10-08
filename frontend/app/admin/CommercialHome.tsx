@@ -161,9 +161,7 @@ export default function CommercialHome() {
       <div>
         <CommercialTable projects={filteredProjects} />
       </div>
-      <div>
-        <SwitchPageBtn />
-      </div>
+      <div>{/*  <SwitchPageBtn /> */}</div>
     </section>
   );
 }

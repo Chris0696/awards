@@ -31,6 +31,7 @@ type Props = {
   setShowModal: (show: boolean) => void;
   project?: ProjectInfo;
   adminProject?: AdminProjectInfo;
+  isSecondProject?: boolean;
 };
 
 type AuthProjectInput = z.infer<typeof authProjectSchema>;
@@ -40,6 +41,7 @@ export default function CreateNewAuthProjectModal({
   setShowModal,
   project,
   adminProject,
+  isSecondProject,
 }: Props) {
   const methods = useForm<AuthProjectInput>({
     resolver: zodResolver(authProjectSchema),
@@ -105,6 +107,7 @@ export default function CreateNewAuthProjectModal({
       setStep(2);
       reset();
       queryClient.invalidateQueries({ queryKey: ["ownerProjects"] });
+      toast.success("Projet ajouté avec succès");
     },
     onError: (err) => {
       const msg = extractBackendErrors(err);
@@ -159,10 +162,10 @@ export default function CreateNewAuthProjectModal({
       reset({
         category_id: project.category.category_id ?? "",
         project_title: project.project_title ?? "",
-        local_area_impact: project.local_area_impact ?? "",
+        local_area_impact: project.local_area_impact ?? "aucun",
         estimated_budget: Number(project.estimated_budget ?? undefined),
         description: project.description ?? "",
-        main_objective: project.main_objective ?? "",
+        main_objective: project.main_objective ?? "main objective",
         solution: project.solution ?? "Solution edited",
         target_audience: project.target_audience ?? "Jeune edited",
         progress_report: project.progress_report ?? "Début edited",
@@ -194,9 +197,17 @@ export default function CreateNewAuthProjectModal({
     }
   }, [adminProject, reset]);
 
+  const showFifthStep =
+    Boolean(project) || Boolean(adminProject) || !isSecondProject;
+  const isOnEditMode = Boolean(project) || Boolean(adminProject);
+
   return (
     <Popover
-      title={project ? "Réformuler le projet" : "Créer un nouveau projet"}
+      title={
+        project || adminProject
+          ? "Réformuler le projet"
+          : "Créer un nouveau projet"
+      }
       visible={showModal}
       onClose={() => setShowModal(false)}
     >
@@ -205,16 +216,16 @@ export default function CreateNewAuthProjectModal({
           <form onSubmit={handleSubmit(onSubmit)}>
             {step === 2 && (
               <Step2
-                adminProject={adminProject}
-                project={project}
+                showFifthStep={showFifthStep}
+                isOnEditMode={isOnEditMode}
                 preview={preview}
                 setStep={setStep}
               />
             )}
             {step === 3 && (
               <Step3
-                adminProject={adminProject}
-                project={project}
+                showFifthStep={showFifthStep}
+                isOnEditMode={isOnEditMode}
                 setStep={setStep}
               />
             )}
@@ -223,6 +234,8 @@ export default function CreateNewAuthProjectModal({
                 adminProject={adminProject}
                 project={project}
                 setStep={setStep}
+                showFifthStep={showFifthStep}
+                isOnEditMode={isOnEditMode}
               />
             )}
 

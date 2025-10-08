@@ -24,7 +24,7 @@ export default function AdminLayout({
           >
             <MenuIcon />
           </button>
-          <div className="pl-5 py-5">
+          <div className="md:pl-5 py-5">
             <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           </div>
           {sidebarOpen && (

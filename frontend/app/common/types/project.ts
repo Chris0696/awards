@@ -92,6 +92,7 @@ export type ProjectInfo = {
   average_rating: number;
   vote_count: number;
   total_revenue: number;
+  rank: null | number;
 };
 
 export type AdminProjectInfo = {
@@ -126,4 +127,5 @@ export type AdminProjectInfo = {
   average_rating: number;
   total_revenue: number;
   active_votes_count: number;
+  rank: number | null;
 };

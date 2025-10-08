@@ -13,6 +13,8 @@ import { AdminCategory } from "@/app/common/types/category";
 import Popover from "@/components/ui/Popover";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteCategory } from "@/services/categoryService";
+import { toast } from "sonner";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 
 export default function CategoryCard({
   color,
@@ -91,10 +93,14 @@ const DeleteCategoryModal = ({
   const deleteMutation = useMutation({
     mutationFn: deleteCategory,
     onSuccess: () => {
+      toast.success("Catégorie supprimée avec succès");
       setShowDeleteModal(false);
       queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
-    onError: () => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
 
   const handleDelete = () => {

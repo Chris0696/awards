@@ -32,15 +32,15 @@ export default function ThanksNoteModal({
             Merci pour votre soumission !
           </h2>
           <p className="text-lg leading-6">
-            {/*  Notre équipe vous contactera sous 48h. Votre projet sera reformulé,
+            Notre équipe vous contactera sous 48h. Votre projet sera reformulé,
             validé, puis publié pour le vote. Vous serez notifié dès sa mise en
-            ligne. */}
-            Connectez-vous à votre compte pour publier votre projet afin de
-            finaliser la soumission
+            ligne.
+            {/*  Connectez-vous à votre compte pour publier votre projet afin de
+            finaliser la soumission */}
           </p>
-          <p className="mt-8">
+          {/*  <p className="mt-8">
             <ColoredLink url="/login" text="Connectez-vous" />
-          </p>
+          </p> */}
           {showBtn && (
             <div className="flex justify-center space-x-3 mt-8">
               <button className="flex items-center space-x-2 border border-secondary px-4 cursor-pointer py-1 rounded-md text-secondary font-medium ">

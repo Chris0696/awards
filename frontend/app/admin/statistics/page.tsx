@@ -23,12 +23,13 @@ import {
 import { fetchAdminCategories } from "@/services/categoryService";
 import { Category } from "@/app/common/types/category";
 import { AdminProjectInfo } from "@/app/common/types/project";
+import Loader from "@/components/Loader";
 
 export default function StatisticPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const user = useUserSessionStore((state) => state.user);
   const userInfo = useUserSessionStore((state) => state.additionalInfo);
-  const { data: ownerStats } = useQuery({
+  const { data: ownerStats, isLoading: isLoadinOwnerStats } = useQuery({
     queryKey: ["ownerStats"],
     queryFn: () => getOwnerStats(),
     enabled: user?.user_type === "owner",
@@ -71,6 +72,9 @@ export default function StatisticPage() {
     label: project.project_title,
     votes: project.votes_count ?? 0,
   }));
+  if (isLoadinOwnerStats) {
+    return <Loader />;
+  }
 
   return user?.user_type === "owner" ? (
     <section className="">
@@ -88,11 +92,11 @@ export default function StatisticPage() {
               />
               <SynthesisCard
                 title="Classement actuel"
-                data={`${ownerStats?.owner_ranking.rank}/${ownerStats?.owner_ranking.total_owners} projets`}
+                data={`${ownerStats?.owner_ranking.rank}/${ownerStats?.recent_projects.length} projets`}
               />
               <SynthesisCard
                 title="1er actuel"
-                data={`${ownerStats?.vote_stats.average_rating}`}
+                data={`${ownerStats?.top_project_votes}`}
               />
             </div>
           </div>
@@ -177,7 +181,7 @@ export default function StatisticPage() {
           </div>
           <div>
             <StatsTable projects={filteredProjects} />
-            <SwitchPageBtn />
+            {/*             <SwitchPageBtn /> */}
           </div>
         </div>
       }

@@ -1,4 +1,5 @@
 import { AdminProjectInfo } from "@/app/common/types/project";
+import { fetchAdminCategories } from "@/services/categoryService";
 import { getProjectsToRank } from "@/services/statsService";
 
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +9,11 @@ export default function StatsTable({
 }: {
   projects: AdminProjectInfo[];
 }) {
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => fetchAdminCategories(),
+  });
+
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">
       <table className=" w-full">
@@ -38,14 +44,18 @@ export default function StatsTable({
               className="hover:bg-white hover:rounded-full transition-colors"
             >
               <td className="px-6 py-4 text-gray-600 whitespace-normal max-w-[100px] ">
-                <p>{idx + 1} </p>
+                <p>{project.rank ? project.rank : 0} </p>
               </td>
 
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {project.owner_name}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {project.category}
+                {
+                  categories?.data?.find(
+                    (cat) => cat.category_id === project.category_id
+                  ).category_name
+                }
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {project.project_title}

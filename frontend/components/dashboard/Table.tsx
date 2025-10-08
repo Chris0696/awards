@@ -18,12 +18,15 @@ import {
 } from "@/services/projectService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
+import { toast } from "sonner";
 
 type Props = {
   projects: ProjectInfo[];
+  isSecondProject?: boolean;
 };
 
-export default function Table({ projects }: Props) {
+export default function Table({ projects, isSecondProject }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string>("");
@@ -37,15 +40,24 @@ export default function Table({ projects }: Props) {
   const updateMutation = useMutation({
     mutationFn: markProjectPublicAsOwner,
     onSuccess: () => {
+      toast.success("Projet publié avec succès");
       queryClient.invalidateQueries({ queryKey: ["ownerProjects"] });
     },
-    onError: () => {},
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
+    },
   });
   const deleteMutation = useMutation({
     mutationFn: deleteProjectAsOwner,
     onSuccess: () => {
+      toast.success("Projet supprimé avec succès");
       queryClient.invalidateQueries({ queryKey: ["ownerProjects"] });
       setShowConfirmationModal(false);
+    },
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
     },
   });
 
@@ -116,13 +128,21 @@ export default function Table({ projects }: Props) {
                       : "text-orange-500 bg-orange-100"
                   }   px-10 py-0.5 rounded-full`}
                 >
-                  {project.platform_status}
+                  {project.owner_project_status === "publie" &&
+                  project.platform_status === "brouillon"
+                    ? "en cours de traitement"
+                    : project.owner_project_status === "publie" &&
+                      project.platform_status === "publie"
+                    ? "publie"
+                    : "brouillon"}
                 </span>
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {project.owner?.total_votes_received}
+                {project.vote_count}
               </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">1</td>
+              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                {project.rank ? project.rank : 0}{" "}
+              </td>
 
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 <DropdownMenu>
@@ -175,6 +195,7 @@ export default function Table({ projects }: Props) {
         </tbody>
       </table>
       <CreateNewAuthProjectModal
+        isSecondProject={isSecondProject}
         showModal={showModal}
         setShowModal={setShowModal}
         project={project}

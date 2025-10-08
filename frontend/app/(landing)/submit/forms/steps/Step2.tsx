@@ -12,26 +12,29 @@ import { useEffect, useState } from "react";
 
 export default function Step2({
   setStep,
-  preview,
-  project,
-  adminProject,
+  isOnEditMode,
+  showFifthStep,
 }: {
   setStep: (step: number) => void;
   preview: string | null;
-  project?: any;
-  adminProject?: any;
+  isOnEditMode?: boolean;
+
+  showFifthStep: boolean;
 }) {
   const { trigger, watch, setValue } = useFormContext();
   const user = useUserSessionStore((state) => state.user);
   const [showCustomCategory, setShowCustomCategory] = useState(false);
-  const isOnEditMode = Boolean(project) || Boolean(adminProject);
   const cat = watch("category_id");
   useEffect(() => {
     if (cat === "other") setShowCustomCategory(true);
   }, [cat]);
 
   return (
-    <FormCard isOnEditMode={isOnEditMode} step={2}>
+    <FormCard
+      isOnEditMode={isOnEditMode}
+      showFifthStep={showFifthStep}
+      step={2}
+    >
       <div className="space-y-6">
         <TextField
           name="project_title"

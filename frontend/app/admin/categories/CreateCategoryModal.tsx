@@ -42,6 +42,7 @@ export default function CreateCategoryModal({
   const createMutation = useMutation({
     mutationFn: createCategory,
     onSuccess: () => {
+      toast.success("Catégorie ajoutée avec succès");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: (err) => {
@@ -52,27 +53,23 @@ export default function CreateCategoryModal({
   const updateMutation = useMutation({
     mutationFn: updateCategory,
     onSuccess: () => {
+      toast.success("Catégorie modifiée avec succès");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: () => {},
   });
   const onSubmit = (data: CategoryForm) => {
-    try {
-      if (category) {
-        updateMutation.mutate({
-          category_id: category.id,
-          category_name: data.category_name,
-        });
-      } else {
-        createMutation.mutate(data.category_name);
-      }
-
-      setShowModal(false);
-      reset();
-    } catch (error) {
-      const message = mapServerErrors(error, setError);
-      toast.error(message);
+    if (category) {
+      updateMutation.mutate({
+        category_id: category.id,
+        category_name: data.category_name,
+      });
+    } else {
+      createMutation.mutate(data.category_name);
     }
+
+    setShowModal(false);
+    reset();
   };
   useEffect(() => {
     if (category) {

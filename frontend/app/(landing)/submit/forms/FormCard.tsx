@@ -37,24 +37,34 @@ const steps: StepProps[] = [
 type Props = {
   step: 1 | 2 | 3 | 4 | 5;
   children: React.ReactNode;
+  showFifthStep?: boolean;
   isOnEditMode?: boolean;
 };
 
-export default function FormCard({ step = 1, children, isOnEditMode }: Props) {
+export default function FormCard({
+  step = 1,
+  children,
+  showFifthStep,
+  isOnEditMode,
+}: Props) {
   const currentStep = steps.find((s) => s.id === step);
   return (
     <div className="w-full px-5 max-w-3xl mx-auto ">
       <div>
-        <h2 className="flex  items-center text-xl md:text-4xl font-bold mb-3 space-x-20">
-          <span className="flex items-center space-x-1">
-            <span className="text-[#0026B0] font-medium">
-              {step}/{isOnEditMode ? 4 : 5}
+        {
+          <h2 className="flex  items-center text-xl md:text-4xl font-bold mb-3 space-x-20">
+            <span className="flex items-center space-x-1">
+              <span className="text-[#0026B0] font-medium">
+                {step}/{showFifthStep ? 4 : 5}
+              </span>
+              <ArrowRight size={20} />
             </span>
-            <ArrowRight size={20} />
-          </span>
-          <span>{currentStep?.title} </span>
-        </h2>
-        <p className="text-lg text-gray-600 ml-8">{currentStep?.desc}</p>
+            {!isOnEditMode && <span>{currentStep?.title} </span>}
+          </h2>
+        }
+        {!isOnEditMode && (
+          <p className="text-lg text-gray-600 ml-8">{currentStep?.desc}</p>
+        )}
       </div>
       <div className="mt-8">{children}</div>
     </div>

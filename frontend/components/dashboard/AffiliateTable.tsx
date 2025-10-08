@@ -15,6 +15,8 @@ import { Team } from "@/app/admin/team/page";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteAdminRelatedUser } from "@/services/userService";
 import useCopyToClipboard from "@/hooks/useCopyToClipboard";
+import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
+import { toast } from "sonner";
 interface Props {
   affiliates: Team[];
 }
@@ -30,6 +32,11 @@ export default function AffiliateTable({ affiliates }: Props) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team"] });
       setShowConfirmModal(false);
+      toast.success("Utilisateur supprimé avec succès");
+    },
+    onError: (err) => {
+      const msg = extractBackendErrors(err);
+      toast.error(msg);
     },
   });
 

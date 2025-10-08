@@ -14,7 +14,7 @@ export default function CategoryTag({
         isActive
           ? "bg-primary text-white"
           : "border border-primary text-primary hover:bg-primary hover:text-white"
-      }  px-5 py-2.5 rounded-full  cursor-pointer transition-colors mt-6 md:mt-0`}
+      } px-5 py-2.5 rounded-full  text-nowrap  cursor-pointer transition-colors mt-6 md:mt-0`}
     >
       {title}
     </button>

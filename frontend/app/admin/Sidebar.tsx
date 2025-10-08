@@ -80,7 +80,12 @@ export default function Sidebar({
         </Link>
         <div className=" flex flex-col space-y-8 max-h-[calc(100vh-6rem)] overflow-y-auto">
           {filteredLinks.map((link, idx) => (
-            <NavLink key={idx} text={link.page} href={link.url} />
+            <NavLink
+              onClose={onClose}
+              key={idx}
+              text={link.page}
+              href={link.url}
+            />
           ))}
         </div>
         <div className="flex justify-between mt-auto">
