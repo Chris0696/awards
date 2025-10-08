@@ -9,6 +9,7 @@ from django.utils.text import slugify
 from django.core.validators import EmailValidator
 from django.utils import timezone
 import uuid
+from django.db.models import Sum, Avg, Q
 import re
 from django.core.validators import RegexValidator
 from django.db import transaction
@@ -114,7 +115,7 @@ class ProjectAdminSerializer(serializers.ModelSerializer):
         return None
     
     def get_total_votes(self, obj):
-        return obj.vote_set.filter(active=True).count()
+        return obj.vote_set.filter(active=True).aggregate(total=Sum('vote_count'))['total'] or 0
 
     def get_average_rating(self, obj):
         return obj.average_rating()
