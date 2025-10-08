@@ -105,7 +105,7 @@ def general_stats_api(request):
     
     total_projects = Project.objects.filter(owner_project_status='publie').count()
     total_published = Project.objects.filter(platform_status='publie').count()
-    total_votes = Vote.objects.filter(active=True).count()
+    total_votes = Vote.objects.filter(active=True).aggregate(total=Sum('vote_count'))['total'] or 0
     total_users = User.objects.filter(is_active=True).count()
     
     return Response({
