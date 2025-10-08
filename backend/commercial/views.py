@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from userauths.mixin import CustomErrorResponseMixin
 from userauths.serializers import AdminUserUpdateSerializer, ProfileSerializer
 from userauths.models import Profile, User
 from project.models import Commercial
@@ -111,148 +112,259 @@ class CommercialDetailView(generics.RetrieveUpdateAPIView):
 #         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AdminCommercialView(generics.GenericAPIView):
+# class AdminCommercialView(CustomErrorResponseMixin, generics.GenericAPIView):
+#     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+#     serializer_class = AdminCommercialRegisterSerializer
+
+#     def get_queryset(self):
+#         return User.objects.filter(user_type__in=['admin', 'commercial'])
+    
+#     def format_validation_errors(self, detail):
+#         errors = []
+#         if isinstance(detail, dict):
+#             for _, messages in detail.items():
+#                 if isinstance(messages, list):
+#                     errors.extend(messages)
+#                 else:
+#                     errors.append(str(messages))
+#         elif isinstance(detail, list):
+#             errors = detail
+#         else:
+#             errors = [str(detail)]
+#         return errors
+
+#     # GET: Lister tous les admins et commerciaux
+#     def get(self, request, *args, **kwargs):
+#         try:
+#             queryset = self.get_queryset()
+#             users_data = []
+            
+#             for user in queryset:
+#                 data = {
+#                     'id': user.id,
+#                     'email': user.email,
+#                     'full_name': user.full_name,
+#                     'phone': user.phone,
+#                     'user_type': user.user_type,
+#                     'is_active': user.is_active
+#                 }
+#                 if user.user_type == 'commercial':
+#                     try:
+#                         commercial = user.commercial
+#                         commercial_data = CommercialSerializer(commercial).data
+#                         data.update({
+#                             'commission_rate': commercial_data['commission_rate'],
+#                             'affiliate_link': commercial_data['affiliate_link'],
+#                             'total_projects': commercial_data['total_projects'],
+#                             'total_published_projects': commercial_data['total_published_projects'],
+#                             'total_rejected_projects': commercial_data['total_rejected_projects'],
+#                             'total_votes': commercial_data['total_votes'],
+#                             'total_revenue': commercial_data['total_revenue'],
+#                             'commission_earned': commercial_data['commission_earned']
+#                         })
+#                     except Commercial.DoesNotExist:
+#                         pass
+#                 users_data.append(data)
+
+#             return Response({
+#                 'success': True,
+#                 'message': _("Liste récupérée avec succès"),
+#                 'data': users_data,
+#                 'count': len(users_data)
+#             })
+#         except Exception as e:
+#             return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#     # POST: Créer un nouvel admin ou commercial
+#     def post(self, request, *args, **kwargs):
+#         try:
+#             serializer = self.get_serializer(data=request.data)
+#             serializer.is_valid(raise_exception=True)
+#             user = serializer.save()
+            
+#             return Response({
+#                 'success': True,
+#                 'message': _("Utilisateur créé avec succès"),
+#                 'data': {
+#                     'id': user.id,
+#                     'email': user.email,
+#                     'username': user.username,
+#                     'phone': user.phone,
+#                     'user_type': user.user_type
+#                 }
+#             }, status=status.HTTP_201_CREATED)
+#         except serializers.ValidationError as e:
+#             return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_400_BAD_REQUEST)
+#         except Exception as e:
+#             return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#     # PUT: Mettre à jour complètement un utilisateur
+#     def put(self, request, pk, *args, **kwargs):
+#         try:
+#             user = get_object_or_404(User, pk=pk, user_type__in=['admin', 'commercial'])
+#             serializer = self.get_serializer(user, data=request.data, partial=False)
+#             serializer.is_valid(raise_exception=True)
+#             updated_user = serializer.save()
+            
+#             return Response({
+#                 'success': True,
+#                 'message': _("Utilisateur mis à jour avec succès"),
+#                 'data': serializer.data
+#             })
+#         except User.DoesNotExist:
+#             return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_404_NOT_FOUND)
+#         except serializers.ValidationError as e:
+#             return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_400_BAD_REQUEST)
+#         except Exception as e:
+#             return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#     # PATCH: Mettre à jour partiellement un utilisateur
+#     def patch(self, request, pk, *args, **kwargs):
+#         try:
+#             user = get_object_or_404(User, pk=pk, user_type__in=['admin', 'commercial'])
+#             serializer = self.get_serializer(user, data=request.data, partial=True)
+#             serializer.is_valid(raise_exception=True)
+#             updated_user = serializer.save()
+            
+#             return Response({
+#                 'success': True,
+#                 'message': _("Utilisateur modifié avec succès"),
+#                 'data': serializer.data
+#             })
+#         except User.DoesNotExist:
+#             return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_404_NOT_FOUND)
+#         except serializers.ValidationError as e:
+#             return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_400_BAD_REQUEST)
+#         except Exception as e:
+#             return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#     # DELETE: Supprimer un utilisateur
+#     def delete(self, request, pk, *args, **kwargs):
+#         try:
+#             user = get_object_or_404(User, pk=pk, user_type__in=['admin', 'commercial'])
+#             user_email = user.email  # Garder l'email pour le message
+#             user.delete()
+            
+#             return Response({
+#                 'success': True,
+#                 'message': _("Utilisateur '{}' supprimé avec succès").format(user_email)
+#             }, status=status.HTTP_200_OK)
+#         except User.DoesNotExist:
+#             return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class AdminCommercialView(CustomErrorResponseMixin, generics.GenericAPIView):
+    """
+    Vue pour gérer les Admins et Commerciaux :
+    - GET : Liste complète
+    - POST : Création
+    - PUT/PATCH : Mise à jour
+    - DELETE : Suppression
+    """
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
     serializer_class = AdminCommercialRegisterSerializer
 
     def get_queryset(self):
         return User.objects.filter(user_type__in=['admin', 'commercial'])
-    
-    def format_validation_errors(self, detail):
-        errors = []
-        if isinstance(detail, dict):
-            for _, messages in detail.items():
-                if isinstance(messages, list):
-                    errors.extend(messages)
-                else:
-                    errors.append(str(messages))
-        elif isinstance(detail, list):
-            errors = detail
-        else:
-            errors = [str(detail)]
-        return errors
 
-    # GET: Lister tous les admins et commerciaux
+    # ✅ GET : Liste des utilisateurs
     def get(self, request, *args, **kwargs):
-        try:
-            queryset = self.get_queryset()
-            users_data = []
-            
-            for user in queryset:
-                data = {
-                    'id': user.id,
-                    'email': user.email,
-                    'full_name': user.full_name,
-                    'phone': user.phone,
-                    'user_type': user.user_type,
-                    'is_active': user.is_active
-                }
-                if user.user_type == 'commercial':
-                    try:
-                        commercial = user.commercial
-                        commercial_data = CommercialSerializer(commercial).data
-                        data.update({
-                            'commission_rate': commercial_data['commission_rate'],
-                            'affiliate_link': commercial_data['affiliate_link'],
-                            'total_projects': commercial_data['total_projects'],
-                            'total_published_projects': commercial_data['total_published_projects'],
-                            'total_rejected_projects': commercial_data['total_rejected_projects'],
-                            'total_votes': commercial_data['total_votes'],
-                            'total_revenue': commercial_data['total_revenue'],
-                            'commission_earned': commercial_data['commission_earned']
-                        })
-                    except Commercial.DoesNotExist:
-                        pass
-                users_data.append(data)
+        queryset = self.get_queryset()
+        users_data = []
 
-            return Response({
-                'success': True,
-                'message': _("Liste récupérée avec succès"),
-                'data': users_data,
-                'count': len(users_data)
-            })
-        except Exception as e:
-            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        for user in queryset:
+            data = {
+                'id': user.id,
+                'email': user.email,
+                'full_name': user.full_name,
+                'phone': user.phone,
+                'user_type': user.user_type,
+                'is_active': user.is_active
+            }
 
-    # POST: Créer un nouvel admin ou commercial
+            if user.user_type == 'commercial':
+                commercial = getattr(user, 'commercial', None)
+                if commercial:
+                    commercial_data = CommercialSerializer(commercial).data
+                    data.update({
+                        'commission_rate': commercial_data['commission_rate'],
+                        'affiliate_link': commercial_data['affiliate_link'],
+                        'total_projects': commercial_data['total_projects'],
+                        'total_published_projects': commercial_data['total_published_projects'],
+                        'total_rejected_projects': commercial_data['total_rejected_projects'],
+                        'total_votes': commercial_data['total_votes'],
+                        'total_revenue': commercial_data['total_revenue'],
+                        'commission_earned': commercial_data['commission_earned']
+                    })
+
+            users_data.append(data)
+
+        return Response({
+            "success": True,
+            "message": _("Liste récupérée avec succès"),
+            "count": len(users_data),
+            "data": users_data
+        }, status=status.HTTP_200_OK)
+
+    # ✅ POST : Créer un nouvel admin ou commercial
+    def perform_create_with_response(self, serializer):
+        user = serializer.save()
+        return Response({
+            "success": True,
+            "message": _("Utilisateur créé avec succès"),
+            "data": {
+                "id": user.id,
+                "email": user.email,
+                "username": user.username,
+                "phone": user.phone,
+                "user_type": user.user_type
+            }
+        }, status=status.HTTP_201_CREATED)
+
     def post(self, request, *args, **kwargs):
-        try:
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            user = serializer.save()
-            
-            return Response({
-                'success': True,
-                'message': _("Utilisateur créé avec succès"),
-                'data': {
-                    'id': user.id,
-                    'email': user.email,
-                    'username': user.username,
-                    'phone': user.phone,
-                    'user_type': user.user_type
-                }
-            }, status=status.HTTP_201_CREATED)
-        except serializers.ValidationError as e:
-            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        """
+        On délègue la gestion d’erreurs au mixin.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return self.perform_create_with_response(serializer)
 
-    # PUT: Mettre à jour complètement un utilisateur
-    def put(self, request, pk, *args, **kwargs):
-        try:
-            user = get_object_or_404(User, pk=pk, user_type__in=['admin', 'commercial'])
-            serializer = self.get_serializer(user, data=request.data, partial=False)
-            serializer.is_valid(raise_exception=True)
-            updated_user = serializer.save()
-            
-            return Response({
-                'success': True,
-                'message': _("Utilisateur mis à jour avec succès"),
-                'data': serializer.data
-            })
-        except User.DoesNotExist:
-            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_404_NOT_FOUND)
-        except serializers.ValidationError as e:
-            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    # PATCH: Mettre à jour partiellement un utilisateur
+    # ✅ PUT / PATCH : Mise à jour
     def patch(self, request, pk, *args, **kwargs):
-        try:
-            user = get_object_or_404(User, pk=pk, user_type__in=['admin', 'commercial'])
-            serializer = self.get_serializer(user, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            updated_user = serializer.save()
-            
-            return Response({
-                'success': True,
-                'message': _("Utilisateur modifié avec succès"),
-                'data': serializer.data
-            })
-        except User.DoesNotExist:
-            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_404_NOT_FOUND)
-        except serializers.ValidationError as e:
-            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        user = get_object_or_404(self.get_queryset(), pk=pk)
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-    # DELETE: Supprimer un utilisateur
+        return Response({
+            "success": True,
+            "message": _("Utilisateur modifié avec succès"),
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
+
+    def put(self, request, pk, *args, **kwargs):
+        user = get_object_or_404(self.get_queryset(), pk=pk)
+        serializer = self.get_serializer(user, data=request.data, partial=False)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({
+            "success": True,
+            "message": _("Utilisateur mis à jour avec succès"),
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
+
+    # ✅ DELETE : Suppression
     def delete(self, request, pk, *args, **kwargs):
-        try:
-            user = get_object_or_404(User, pk=pk, user_type__in=['admin', 'commercial'])
-            user_email = user.email  # Garder l'email pour le message
-            user.delete()
-            
-            return Response({
-                'success': True,
-                'message': _("Utilisateur '{}' supprimé avec succès").format(user_email)
-            }, status=status.HTTP_200_OK)
-        except User.DoesNotExist:
-            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": self.format_validation_errors(e.detail)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        user = get_object_or_404(self.get_queryset(), pk=pk)
+        email = user.email
+        user.delete()
 
+        return Response({
+            "success": True,
+            "message": _("Utilisateur '{}' supprimé avec succès").format(email)
+        }, status=status.HTTP_200_OK)    
     
 # Ajoutez ces imports au début de votre fichier
 

@@ -146,6 +146,15 @@ class AdminCommercialRegisterSerializer(serializers.ModelSerializer):
             
         return value
     
+    def validate_password(self, value):
+        if User.objects.filter(password=value).exists():
+            raise serializers.ValidationError(
+                [_("Votre mot de passe doit contenir plus de 8 caractères (des chriffres et lettres compris).")]
+                
+                )
+            
+        return value
+    
     def validate(self, attrs):
         # Autoriser les superusers ou les utilisateurs avec user_type='admin'
         request = self.context.get('request')

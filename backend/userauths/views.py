@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+from userauths.mixin import CustomErrorResponseMixin
 from userauths.utils import send_otp_email
 from .models import ContactMessage, Profile, User
 from userauths import serializers as api_serializer
@@ -9,7 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework import generics, status, permissions
 from django.contrib.auth.hashers import check_password
 from rest_framework.response import Response
-from .serializers import AdminRegisterSerializer, ContactMessageSerializer, ProfileSerializer
+from .serializers import AdminRegisterSerializer, ContactMessageSerializer, ProfileSerializer, ProfileUpdateSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework.views import APIView
@@ -94,7 +95,7 @@ class LogoutView(APIView):
             )
             
 
-class CustomTokenRefreshView(TokenRefreshView):
+class CustomTokenRefreshView(CustomErrorResponseMixin, TokenRefreshView):
     """
     Vue personnalisée pour le rafraîchissement de token avec gestion d'erreurs améliorée
     """
@@ -278,7 +279,7 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 
 
-class RegisterWithPaymentViewAPIView(generics.CreateAPIView):
+class RegisterWithPaymentViewAPIView(CustomErrorResponseMixin, generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
@@ -383,13 +384,13 @@ class RegisterWithPaymentViewAPIView(generics.CreateAPIView):
         return processed_data
             
             
-class AdminRegisterViewAPIView(generics.CreateAPIView):
+class AdminRegisterViewAPIView(CustomErrorResponseMixin, generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     serializer_class = AdminRegisterSerializer
     
 
-class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
+class PasswordResetEmailVerifyAPIView(CustomErrorResponseMixin, generics.RetrieveAPIView):
     permission_classes = (AllowAny,)
     serializer_class = api_serializer.UserSerializer
 
@@ -408,7 +409,7 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
         return user
 
 
-class PasswordChangeAPIView(generics.CreateAPIView):
+class PasswordChangeAPIView(CustomErrorResponseMixin, generics.CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = api_serializer.UserSerializer
 
@@ -515,7 +516,7 @@ class ChangePasswordAPIView(generics.UpdateAPIView):
 #         }, status=status.HTTP_400_BAD_REQUEST)
         
 
-class ContactMessageListCreateView(generics.ListCreateAPIView):
+class ContactMessageListCreateView(CustomErrorResponseMixin, generics.ListCreateAPIView):
     """
     - GET: Liste tous les messages de contact (admin uniquement)
     - POST: Crée un nouveau message (ouvert à tous les utilisateurs)
@@ -530,7 +531,7 @@ class ContactMessageListCreateView(generics.ListCreateAPIView):
         return [permissions.AllowAny()]
 
 
-class ContactMessageDetailView(generics.RetrieveDestroyAPIView):
+class ContactMessageDetailView(CustomErrorResponseMixin, generics.RetrieveDestroyAPIView):
     """
     - GET: Récupère un message précis (admin uniquement)
     - DELETE: Supprime un message (admin uniquement)
