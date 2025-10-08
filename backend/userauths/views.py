@@ -285,42 +285,58 @@ class RegisterWithPaymentViewAPIView(CustomErrorResponseMixin, generics.CreateAP
     parser_classes = [JSONParser, MultiPartParser, FormParser]
     serializer_class = register_serializer.RegisterOwnerWithPaymentSerializer
     
+    # def create(self, request, *args, **kwargs):
+    #     print(f"🔍 DEBUG - Content-Type: {request.content_type}")
+    #     print(f"🔍 DEBUG - Request data keys: {list(request.data.keys())}")
+        
+    #     try:
+    #         # 🔧 SOLUTION ALTERNATIVE: Préprocesser sans modifier request.data
+    #         processed_data = self.preprocess_form_data(request)
+            
+    #         # Créer un nouveau serializer avec les données préprocessées
+    #         serializer = self.get_serializer(data=processed_data)
+            
+    #         if not serializer.is_valid():
+    #             print(f"❌ DEBUG - Erreurs de validation: {serializer.errors}")
+    #             return Response({
+    #                 "error": serializer.errors
+    #             }, status=status.HTTP_400_BAD_REQUEST)
+            
+    #         print("✅ DEBUG - Validation réussie, création en cours...")
+    #         response_data = serializer.save()
+    #         print("✅ DEBUG - Création terminée avec succès")
+            
+    #         return Response({
+    #             'success': True,
+    #             'message': _('Inscription et soumission réussies'),
+    #             'data': response_data
+    #         }, status=status.HTTP_201_CREATED)
+            
+    #     except Exception as e:
+    #         print(f"❌ DEBUG - Erreur inattendue: {str(e)}")
+    #         logger.exception("Erreur lors de la création du compte avec paiement")
+    #         return Response({
+    #             "error": {
+    #                 "non_field_errors": [f"Erreur interne: {str(e)}"]
+    #             }
+    #         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
     def create(self, request, *args, **kwargs):
         print(f"🔍 DEBUG - Content-Type: {request.content_type}")
         print(f"🔍 DEBUG - Request data keys: {list(request.data.keys())}")
-        
+
         try:
-            # 🔧 SOLUTION ALTERNATIVE: Préprocesser sans modifier request.data
+            # Prétraitement des données du formulaire
             processed_data = self.preprocess_form_data(request)
-            
-            # Créer un nouveau serializer avec les données préprocessées
-            serializer = self.get_serializer(data=processed_data)
-            
-            if not serializer.is_valid():
-                print(f"❌ DEBUG - Erreurs de validation: {serializer.errors}")
-                return Response({
-                    "error": serializer.errors
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            print("✅ DEBUG - Validation réussie, création en cours...")
-            response_data = serializer.save()
-            print("✅ DEBUG - Création terminée avec succès")
-            
-            return Response({
-                'success': True,
-                'message': _('Inscription et soumission réussies'),
-                'data': response_data
-            }, status=status.HTTP_201_CREATED)
-            
+
+            # 🔧 Utilise la méthode utilitaire du mixin pour créer et renvoyer la réponse
+            return self.perform_create_with_response(processed_data)
+
         except Exception as e:
             print(f"❌ DEBUG - Erreur inattendue: {str(e)}")
             logger.exception("Erreur lors de la création du compte avec paiement")
-            return Response({
-                "error": {
-                    "non_field_errors": [f"Erreur interne: {str(e)}"]
-                }
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+            return self.handle_exception(e)
+        
     def preprocess_form_data(self, request):
         """
         Préprocesse les données avec gestion du paiement

@@ -1,9 +1,10 @@
 from django.shortcuts import render
+from projectowner.models import Owner
 from userauths.mixin import CustomErrorResponseMixin
 from userauths.serializers import AdminUserUpdateSerializer, ProfileSerializer
 from userauths.models import Profile, User
 from project.models import Commercial
-from .serializers import CommercialSerializer, AdminCommercialRegisterSerializer
+from .serializers import CommercialDetailSerializer, CommercialSerializer, AdminCommercialRegisterSerializer
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -288,6 +289,7 @@ class AdminCommercialView(CustomErrorResponseMixin, generics.GenericAPIView):
                 if commercial:
                     commercial_data = CommercialSerializer(commercial).data
                     data.update({
+                        'commercial_id': commercial.id,
                         'commission_rate': commercial_data['commission_rate'],
                         'affiliate_link': commercial_data['affiliate_link'],
                         'total_projects': commercial_data['total_projects'],
@@ -295,7 +297,8 @@ class AdminCommercialView(CustomErrorResponseMixin, generics.GenericAPIView):
                         'total_rejected_projects': commercial_data['total_rejected_projects'],
                         'total_votes': commercial_data['total_votes'],
                         'total_revenue': commercial_data['total_revenue'],
-                        'commission_earned': commercial_data['commission_earned']
+                        'commission_earned': commercial_data['commission_earned'],
+                        'affiliates_count': Owner.objects.filter(commercial=commercial).count()
                     })
 
             users_data.append(data)
@@ -365,7 +368,47 @@ class AdminCommercialView(CustomErrorResponseMixin, generics.GenericAPIView):
             "success": True,
             "message": _("Utilisateur '{}' supprimé avec succès").format(email)
         }, status=status.HTTP_200_OK)    
+
+
+class AdminCommercialDetailView(generics.RetrieveAPIView):
+    """
+    Vue pour récupérer les détails d'un commercial avec ses filleuls
+    Accepte soit commercial_id soit user_id
+    """
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    serializer_class = CommercialDetailSerializer
+    queryset = Commercial.objects.all()
+    lookup_field = 'pk'  # Par défaut cherche par commercial.id
     
+    def get_object(self):
+        """
+        Récupère le commercial soit par son ID, soit par l'ID de son User
+        """
+        pk = self.kwargs.get('pk')
+        
+        # D'abord essayer de trouver par commercial.id
+        try:
+            return Commercial.objects.get(id=pk)
+        except Commercial.DoesNotExist:
+            pass
+        
+        # Si pas trouvé, essayer par user.id
+        try:
+            return Commercial.objects.get(user_id=pk)
+        except Commercial.DoesNotExist:
+            raise Http404(_("Commercial non trouvé"))
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        
+        return Response({
+            "success": True,
+            "message": _("Détails du commercial récupérés avec succès"),
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
+        
+        
 # Ajoutez ces imports au début de votre fichier
 
 # from rest_framework import viewsets, status, serializers

@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
 from django.utils import timezone
+
 from userauths.models import Profile, User
 import uuid
 from django.db import models
@@ -190,7 +191,7 @@ class ProjectSubmissionPayment(models.Model):
         ("pending", _("En attente")),
         ("approved", _("Payé")),
         ("declined", _("Déclinée")),
-        ("cancel", _("Échec")),
+        ("canceled", _("Échec")),
     )
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -331,6 +332,60 @@ class Commercial(models.Model):
             return (total_revenue * self.commission_rate) / 100
         except Exception:
             return 0
+        
+    def get_affiliates(self):
+        """Retourne tous les Owners affiliés à ce commercial"""
+        from projectowner.models import Owner
+        return Owner.objects.filter(commercial=self).select_related('user', 'profile')
+    
+    def get_affiliates_count(self):
+        """Nombre de filleuls"""
+        from projectowner.models import Owner
+        return Owner.objects.filter(commercial=self).count()
+    
+    def get_affiliates_with_projects(self):
+        """Filleuls qui ont au moins un projet"""
+        from projectowner.models import Owner
+        return Owner.objects.filter(
+            commercial=self,
+            project__isnull=False
+        ).distinct().count()
+    
+    def get_active_affiliates(self):
+        """Filleuls actifs (avec au moins un projet publié)"""
+        from projectowner.models import Owner
+        return Owner.objects.filter(
+            commercial=self,
+            project__platform_status='publie'
+        ).distinct().count()
+    
+    def get_affiliate_projects_stats(self):
+        """Statistiques détaillées des projets des filleuls"""
+        owners = self.get_affiliates()
+        
+        stats = {
+            'total_owners': owners.count(),
+            'owners_with_projects': 0,
+            'total_projects': 0,
+            'published_projects': 0,
+            'pending_projects': 0,
+            'rejected_projects': 0,
+            'total_votes': 0,
+            'total_revenue': 0
+        }
+        
+        for owner in owners:
+            projects = owner.project_set.all()
+            if projects.exists():
+                stats['owners_with_projects'] += 1
+            
+            stats['total_projects'] += projects.count()
+            stats['published_projects'] += projects.filter(platform_status='publie').count()
+            stats['pending_projects'] += projects.filter(platform_status='brouillon').count()
+            stats['rejected_projects'] += projects.filter(platform_status='rejete').count()
+            stats['total_votes'] += owner.total_votes_received()
+        
+        return stats
 
     class Meta:
         verbose_name = _("Commercial")

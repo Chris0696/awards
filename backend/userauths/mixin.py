@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-
+from django.utils.translation import gettext_lazy as _
 
 # class CustomErrorResponseMixin:
 #     """
@@ -164,11 +164,17 @@ class CustomErrorResponseMixin:
         except Exception as e:
             return Response({"error": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
 
-    def perform_create_with_response(self, serializer):
+    def perform_create_with_response(self, data):
         """
-        Méthode à surcharger dans les vues qui héritent du mixin
+        Crée un objet via le serializer et renvoie une réponse standardisée.
+        Compatible avec RegisterWithPaymentViewAPIView (data prétraitées).
         """
-        raise NotImplementedError(
-            "Vous devez implémenter la méthode 'perform_create_with_response' "
-            "dans votre vue."
-        )
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        response_data = serializer.save()
+
+        return Response({
+            "success": True,
+            "message": _("Inscription et soumission réussies"),
+            'data': response_data
+        }, status=status.HTTP_201_CREATED)

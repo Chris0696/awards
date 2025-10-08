@@ -51,12 +51,12 @@ class OwnerListSerializer(serializers.ModelSerializer):
     published_projects = serializers.SerializerMethodField()
     rejected_projects = serializers.SerializerMethodField()
     total_votes_received = serializers.SerializerMethodField()
-    # display_image = serializers.SerializerMethodField()
-    # Utiliser les propriétés au lieu des champs directs
     image = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     phone = serializers.SerializerMethodField()
     profession = serializers.SerializerMethodField()
+    joined_date = serializers.DateTimeField(source='created_at', read_only=True)
+
 
     class Meta:
         model = Owner
@@ -64,24 +64,10 @@ class OwnerListSerializer(serializers.ModelSerializer):
             'id', 'user', 'image', 'full_name', 'phone', 'country_code',
             'profession', 'age', 'commercial', 'created_at',
             'accept_project_reformulation', 'accept_terms_of_use',
-            'total_projects', 'published_projects', 'rejected_projects', 'total_votes_received'
+            'total_projects', 'published_projects', 'rejected_projects', 'total_votes_received', 'joined_date'
         ]
         read_only_fields = ['id', 'created_at']
-
-    # def get_display_image(self, obj):
-    #     """Retourne l'image du Profile si disponible, sinon celle d'Owner"""
-    #     if obj.profile and obj.profile.image:
-    #         request = self.context.get('request')
-    #         if request:
-    #             return request.build_absolute_uri(obj.profile.image.url)
-    #         return obj.profile.image.url
-    #     elif obj.image:
-    #         request = self.context.get('request')
-    #         if request:
-    #             return request.build_absolute_uri(obj.image.url)
-    #         return obj.image.url
-    #     return None
-    
+        
     def get_image(self, obj):
         """Retourne l'URL de l'image du Profile en priorité"""
         image = obj.get_image
