@@ -292,7 +292,9 @@ class ContactMessageSerializer(serializers.ModelSerializer):
     def validate_phone(self, value):
         """Valider le numéro de téléphone avec code pays inclus"""
         if not value.startswith('+'):
-            raise serializers.ValidationError(_("Le numéro de téléphone doit commencer par + (ex: +2290155662555)."))
+            raise serializers.ValidationError(
+                _("Le numéro de téléphone doit commencer par + (ex: +2290155662555).")
+                )
         if len(value) < 8 or len(value) > 20:
             raise serializers.ValidationError(_("Le numéro de téléphone doit contenir entre 8 et 20 caractères."))
         return value

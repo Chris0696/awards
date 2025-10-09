@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from userauths.mixin import CustomErrorResponseMixin
+from userauths.mixin import CustomErrorResponseMixin, CustomFormatErrorResponseMixin
 from rest_framework.decorators import action, api_view, permission_classes
 from datetime import datetime, timedelta
 # from django_filters.rest_framework import DjangoFilterBackend

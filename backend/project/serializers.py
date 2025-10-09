@@ -716,7 +716,7 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
                 print(f"❌ DEBUG - Type utilisateur incorrect: {user.user_type}")
                 raise serializers.ValidationError({
                     "error": {
-                        "non_field_errors": ["Seul un utilisateur de type 'owner' peut créer ou modifier un projet."]
+                        ["Seul un utilisateur de type 'owner' peut créer ou modifier un projet."]
                     }
                 })
             
@@ -730,7 +730,7 @@ class ProjectCreateUpdateSerializer(serializers.ModelSerializer):
                 print("❌ DEBUG - Profil Owner non trouvé")
                 raise serializers.ValidationError({
                     "error": {
-                        "non_field_errors": [_("Aucun profil Owner associé à cet utilisateur.")]
+                        [_("Aucun profil Owner associé à cet utilisateur.")]
                     }
                 })
                 

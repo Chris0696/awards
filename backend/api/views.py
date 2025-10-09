@@ -377,7 +377,7 @@ class AdminDashboardAPIView(generics.RetrieveAPIView):
         
         # Statistiques générales
         project_stats = Project.objects.aggregate(
-            total=Count('id'),
+            total=Count('id', filter=Q(owner_project_status='publie')),
             validated=Count('id', filter=Q(platform_status='publie')),
             rejected=Count('id', filter=Q(platform_status='rejete')),
             pending=Count('id', filter=Q(platform_status='vote')),
@@ -404,7 +404,7 @@ class AdminDashboardAPIView(generics.RetrieveAPIView):
         
         # Activité récente
         recent_activity = {
-            'recent_projects': Project.objects.filter(created_at__gte=timezone.now() - timedelta(days=30)).count(),
+            'recent_projects': Project.objects.filter(owner_project_status='publie', created_at__gte=timezone.now() - timedelta(days=30)).count(),
             'recent_votes': vote_stats['recent_votes'],
             'recent_users': user_stats['recent_users']
         }

@@ -46,11 +46,13 @@ class OwnerSerializer(serializers.ModelSerializer):
 class OwnerListSerializer(serializers.ModelSerializer):
     """Serializer pour la liste des Owner (vue d'ensemble)"""
     user = UserSerializer(read_only=True)
-    commercial = CommercialSerializer(read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    # commercial = CommercialSerializer(read_only=True)
     total_projects = serializers.SerializerMethodField()
     published_projects = serializers.SerializerMethodField()
     rejected_projects = serializers.SerializerMethodField()
     total_votes_received = serializers.SerializerMethodField()
+    projects = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     phone = serializers.SerializerMethodField()
@@ -61,8 +63,8 @@ class OwnerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Owner
         fields = [
-            'id', 'user', 'image', 'full_name', 'phone', 'country_code',
-            'profession', 'age', 'commercial', 'created_at',
+            'id', 'user', 'user_email', 'image', 'full_name', 'phone', 'country_code',
+            'profession', 'age', 'projects', 'created_at',
             'accept_project_reformulation', 'accept_terms_of_use',
             'total_projects', 'published_projects', 'rejected_projects', 'total_votes_received', 'joined_date'
         ]
@@ -98,6 +100,12 @@ class OwnerListSerializer(serializers.ModelSerializer):
     
     def get_rejected_projects(self, obj):
         return obj.rejected_projects()
+    
+    def get_projects(self, obj):
+        """Retourner la liste des projets de cet owner"""
+        from project.serializers import ProjectListSerializer  # Import local pour éviter les cycles
+        projects = obj.project_set.filter(owner_project_status="publie") #[:10]  # Limiter à 10 projets récents
+        return ProjectListSerializer(projects, many=True).data
     
     def to_representation(self, instance):
         data = super().to_representation(instance)

@@ -2,6 +2,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from rest_framework import serializers
+
 
 # class CustomErrorResponseMixin:
 #     """
@@ -178,3 +180,40 @@ class CustomErrorResponseMixin:
             "message": _("Inscription et soumission réussies"),
             'data': response_data
         }, status=status.HTTP_201_CREATED)
+
+
+class CustomFormatErrorResponseMixin:
+    def format_validation_errors(self, detail):
+        errors = []
+        if isinstance(detail, dict):
+            for _, messages in detail.items():
+                if isinstance(messages, list):
+                    errors.extend(messages)
+                else:
+                    errors.append(str(messages))
+        elif isinstance(detail, list):
+            errors = detail
+        else:
+            errors = [str(detail)]
+        return errors
+
+    def handle_exception(self, exc):
+        """Intercept toutes les erreurs DRF"""
+        if isinstance(exc, serializers.ValidationError):
+            formatted_errors = self.format_validation_errors(exc.detail)
+            # 🧠 Ici tu peux aussi traduire ou remplacer les messages par défaut
+            custom_errors = []
+            for err in formatted_errors:
+                if "This password is too short" in err:
+                    err = "Votre mot de passe est trop court. Il doit contenir au moins 8 caractères."
+                elif "Ensure this field has at least" in err:
+                    err = "Ce champ doit contenir au moins 8 caractères."
+                elif "This field is required." in err:
+                    err = "Ce champ est obligatoire."
+                custom_errors.append(err)
+            
+            return Response(
+                {"error": custom_errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return super().handle_exception(exc)

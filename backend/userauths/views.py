@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from userauths.mixin import CustomErrorResponseMixin
+from userauths.mixin import CustomErrorResponseMixin, CustomFormatErrorResponseMixin
 from userauths.utils import send_otp_email
 from .models import ContactMessage, Profile, User
 from userauths import serializers as api_serializer
@@ -532,7 +532,7 @@ class ChangePasswordAPIView(generics.UpdateAPIView):
 #         }, status=status.HTTP_400_BAD_REQUEST)
         
 
-class ContactMessageListCreateView(CustomErrorResponseMixin, generics.ListCreateAPIView):
+class ContactMessageListCreateView(CustomFormatErrorResponseMixin, generics.ListCreateAPIView):
     """
     - GET: Liste tous les messages de contact (admin uniquement)
     - POST: Crée un nouveau message (ouvert à tous les utilisateurs)
@@ -547,7 +547,7 @@ class ContactMessageListCreateView(CustomErrorResponseMixin, generics.ListCreate
         return [permissions.AllowAny()]
 
 
-class ContactMessageDetailView(CustomErrorResponseMixin, generics.RetrieveDestroyAPIView):
+class ContactMessageDetailView(CustomFormatErrorResponseMixin, generics.RetrieveDestroyAPIView):
     """
     - GET: Récupère un message précis (admin uniquement)
     - DELETE: Supprime un message (admin uniquement)
