@@ -2,29 +2,41 @@ import CameraIcon from "@/assets/camera.svg";
 import Image from "next/image";
 import { Controller, useFormContext } from "react-hook-form";
 import { useWatch } from "react-hook-form";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";
 
 export default function FileInputField() {
   const { control } = useFormContext();
   const imageFiles = useWatch({ control, name: "image" });
   const previewRef = useRef<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  // Create preview URL and cleanup
   useEffect(() => {
     if (imageFiles && imageFiles.length > 0) {
-      const url = URL.createObjectURL(imageFiles[0]);
-      previewRef.current = url;
-      return () => {
-        if (previewRef.current) {
-          URL.revokeObjectURL(previewRef.current);
-          previewRef.current = null;
-        }
-      };
+      const fileOrUrl = imageFiles[0];
+      if (typeof fileOrUrl === "string") {
+        // It's a URL from edit mode
+        setIsEditMode(true);
+        setPreview(fileOrUrl);
+        previewRef.current = null;
+        return;
+      }
+      if (fileOrUrl instanceof File) {
+        const url = URL.createObjectURL(fileOrUrl);
+        setPreview(url);
+        previewRef.current = url;
+        return () => {
+          if (previewRef.current) {
+            URL.revokeObjectURL(previewRef.current);
+            previewRef.current = null;
+          }
+        };
+      }
+    } else {
+      setPreview(null);
     }
   }, [imageFiles]);
-
-  const preview =
-    imageFiles && imageFiles.length > 0 ? previewRef.current : null;
 
   return (
     <div>
@@ -35,7 +47,7 @@ export default function FileInputField() {
       >
         {preview ? (
           <Image
-            src={preview}
+            src={`${isEditMode ? fixBackendUrl(imageFiles) : preview} `}
             alt="preview image"
             fill
             className="object-cover w-full h-full"

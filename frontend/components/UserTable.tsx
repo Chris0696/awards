@@ -13,6 +13,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteOwner, toggleOwnerAccountAsAdmin } from "@/services/userService";
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 import { toast } from "sonner";
+import { formatDate } from "@/app/common/types/common";
 
 export default function UserTable({ users }: { users: User[] }) {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -46,31 +47,20 @@ export default function UserTable({ users }: { users: User[] }) {
         <thead>
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Nom et prénoms
+              Nom complet
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Email
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Projets soumis
             </th>
 
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Age
-            </th>
-
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Téléphone
+              Date d'inscription
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Profession
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Projets validés
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Projets rejetés
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Total projets soumis
-            </th>
-
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Total votes reçus
+              Nom de l'affilié
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
@@ -86,28 +76,17 @@ export default function UserTable({ users }: { users: User[] }) {
               <td className="px-6 py-4 text-gray-600 whitespace-normal max-w-[100px] ">
                 <p>{user.full_name} </p>
               </td>
-
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.age}
-              </td>
-
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.phone}
-              </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.profession}
-              </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.published_projects}
-              </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.rejected_projects}
+                {user.total_projects}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {user.total_projects}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.total_votes_received}{" "}
+                {formatDate(user.joined_date)}{" "}
+              </td>
+              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                {user.commercial ? user.commercial : "-"}
               </td>
 
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
@@ -123,6 +102,11 @@ export default function UserTable({ users }: { users: User[] }) {
                     >
                       Désactiver
                     </DropdownMenuItem> */}
+                    <DropdownMenuItem
+                      onClick={() => updateMutation.mutate(user.id)}
+                    >
+                      Bloquer
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
                         setSelectedUser(user.id);

@@ -13,7 +13,7 @@ import CreateNewAuthProjectModal from "@/app/admin/projects/CreateNewAuthProject
 import { useState } from "react";
 
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   rejectProjectAsAdmin,
   validateProjectAsAdmin,
@@ -23,15 +23,17 @@ import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 
 type Props = {
   projects: AdminProjectInfo[];
+  categories: any;
 };
 
-export default function AdminTable({ projects }: Props) {
+export default function AdminTable({ projects, categories }: Props) {
   const [showModal, setShowModal] = useState(false);
   const user = useUserSessionStore((state) => state.user);
   const [project, setProject] = useState<AdminProjectInfo | undefined>(
     undefined
   );
   const queryClient = useQueryClient();
+
   const validateMutation = useMutation({
     mutationFn: validateProjectAsAdmin,
     onSuccess: () => {
@@ -58,6 +60,10 @@ export default function AdminTable({ projects }: Props) {
     setProject(project);
     setShowModal(true);
   };
+  const findCategory = (project: AdminProjectInfo) => {
+    return categories?.find((cat) => cat.category_id === project.category_id)
+      .category_name;
+  };
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">
       <table className=" w-full">
@@ -71,6 +77,9 @@ export default function AdminTable({ projects }: Props) {
                 Auteur
               </th>
             )}
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Catégorie
+            </th>
 
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Date de soumission
@@ -78,12 +87,7 @@ export default function AdminTable({ projects }: Props) {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Statut
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Votes reçus
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Position actuelle
-            </th>
+
             {user?.user_type === "user" && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -106,7 +110,9 @@ export default function AdminTable({ projects }: Props) {
                     {project.owner_name}
                   </td>
                 )}
-
+                <td className="px-6 py-4 text-gray-600 whitespace-normal max-w-[100px] ">
+                  <p>{findCategory(project)} </p>
+                </td>
                 <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                   {formatDate(project.created_at)}
                 </td>
@@ -123,12 +129,7 @@ export default function AdminTable({ projects }: Props) {
                     {project.platform_status}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                  {project.active_votes_count}
-                </td>
-                <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                  {project.rank ? project.rank : 0}{" "}
-                </td>
+
                 {user?.user_type === "user" && (
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                     <DropdownMenu>

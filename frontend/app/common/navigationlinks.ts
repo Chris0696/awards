@@ -46,12 +46,12 @@ export const dashboardlinks = [
     isRequireAdmin: true,
     canCommercialAccess: false,
   },
-  {
+  /*  {
     page: "Équipe",
     url: "/admin/team",
     isRequireAdmin: true,
     canCommercialAccess: false,
-  },
+  }, */
   {
     page: "Votes & statistiques",
     url: "/admin/statistics",

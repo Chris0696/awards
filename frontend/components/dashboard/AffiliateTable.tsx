@@ -65,7 +65,7 @@ export default function AffiliateTable({ affiliates }: Props) {
               Candidats inscrit via le lien
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Montant gagné
+              Projet soumis
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
@@ -93,10 +93,10 @@ export default function AffiliateTable({ affiliates }: Props) {
                 {affiliate?.affiliate_link?.slice(-5)}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {affiliate?.total_projects}
+                {affiliate?.affiliates_count}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {affiliate?.total_revenue}
+                {affiliate?.total_projects}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 <DropdownMenu>

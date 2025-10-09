@@ -13,25 +13,25 @@ export const getOwnersList = async () => {
 };
 
 export const getAdminRelatedUsers = async () => {
-  const res = await apiClient.get("admin/users/commercial/");
+  const res = await apiClient.get("admin/users/");
   return res.data;
 };
 
 export const addAdminRelatedUser = async (data: User) => {
   try {
-    const res = await apiClient.post("admin/users/commercial/", data);
+    const res = await apiClient.post("admin/users/", data);
     return res.data;
   } catch (error) {
     throw error;
   }
 };
 export const updateAdminRelatedUser = async (data: User) => {
-  const res = await apiClient.patch(`admin/users/commercial/${data.id}/`, data);
+  const res = await apiClient.patch(`admin/users/${data.id}/`, data);
   return res.data;
 };
 
 export const deleteAdminRelatedUser = async (userId: number) => {
-  const res = await apiClient.delete(`admin/users/commercial/${userId}/`);
+  const res = await apiClient.delete(`admin/users/${userId}/`);
   return res.data;
 };
 

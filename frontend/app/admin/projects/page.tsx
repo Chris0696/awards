@@ -148,7 +148,10 @@ export default function AdminProjectList() {
             </div>
 
             <div className="overflow-x-auto">
-              <AdminTable projects={filteredProjects ?? []} />
+              <AdminTable
+                categories={categories?.data}
+                projects={filteredProjects ?? []}
+              />
               {/*  <SwitchPageBtn /> */}
             </div>
           </div>

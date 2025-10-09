@@ -141,6 +141,14 @@ export default function CommercialHome() {
       </div>
       <div className="flex flex-col md:flex-row justify-between mt-8 mb-3">
         <h3 className="text-2xl font-bold">Liste des fileuls</h3>
+        <div className="flex items-center space-x-2">
+          <p className="text-[#4f69c8] bg-[#e6eaf8] px-4 py-1 rounded-md font-bold text-lg">
+            {stats?.financial_stats?.total_votes_generated} Votes{" "}
+          </p>
+          <p className="text-[#f48a1a] bg-[#fef3e6] px-4 py-1 rounded-md font-bold text-lg">
+            {stats?.financial_stats?.total_revenue_generated} XOF
+          </p>
+        </div>
         <div className="flex items-center bg-gray-100 rounded-md relative h-10">
           <Image
             src={SearchIcon}
@@ -166,7 +174,7 @@ export default function CommercialHome() {
   );
 }
 
-const CommercialTable = ({ projects }: { projects: Projects[] }) => {
+export const CommercialTable = ({ projects }: { projects: Projects[] }) => {
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">
       <table className=" w-full">

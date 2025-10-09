@@ -160,6 +160,7 @@ export default function CreateNewAuthProjectModal({
   useEffect(() => {
     if (project) {
       reset({
+        image: project.image,
         category_id: project.category.category_id ?? "",
         project_title: project.project_title ?? "",
         local_area_impact: project.local_area_impact ?? "aucun",
@@ -180,6 +181,7 @@ export default function CreateNewAuthProjectModal({
   useEffect(() => {
     if (adminProject) {
       reset({
+        image: adminProject.image,
         category_id: adminProject.category_id ?? "",
         project_title: adminProject.project_title ?? "",
         local_area_impact: adminProject.local_area_impact ?? "Agla",

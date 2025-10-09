@@ -48,7 +48,14 @@ export default function Page() {
   });
 
   const onSubmit = (data: MessageForm) => {
-    sendMessageMutation.mutate(data);
+    const payload = {
+      full_name: data.full_name,
+      email: data.email,
+      phone: data.phone.startsWith("+229") ? data.phone : `+229 ${data.phone}`,
+      subject: data.subject,
+      message: data.message,
+    };
+    sendMessageMutation.mutate(payload);
   };
   return (
     <section>
