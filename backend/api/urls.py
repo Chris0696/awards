@@ -25,7 +25,7 @@ urlpatterns = [
     # path('auth/admin/register/commercial', UserViews.AdminRegisterViewAPIView.as_view(), name='admin_register'),
     
     # Enregistrement avec paiement
-    path('register-with-payment/', UserViews.RegisterWithPaymentViewAPIView.as_view(), name='register-with-payment'),
+    # path('register-with-payment/', UserViews.RegisterWithPaymentViewAPIView.as_view(), name='register-with-payment'),
 
     
     path("auth/password-reset/<email>/", UserViews.PasswordResetEmailVerifyAPIView.as_view(), name='password_reset_email'),
