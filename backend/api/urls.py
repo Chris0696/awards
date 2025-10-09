@@ -21,7 +21,7 @@ urlpatterns = [
     path('auth/refresh/', UserViews.CustomTokenRefreshView.as_view(), name='token_refresh'),
     
     # Register Endpoints
-    # path("auth/register/authorproject", UserViews.RegisterViewAPIView.as_view(), name='register'),
+    path("auth/register/authorproject", UserViews.RegisterViewAPIView.as_view(), name='register'),
     # path('auth/admin/register/commercial', UserViews.AdminRegisterViewAPIView.as_view(), name='admin_register'),
     
     # Enregistrement avec paiement

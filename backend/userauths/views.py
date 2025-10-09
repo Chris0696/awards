@@ -190,92 +190,108 @@ class CustomTokenRefreshView(CustomErrorResponseMixin, TokenRefreshView):
 #         return Response(response_data, status=status.HTTP_201_CREATED)
     
 
-# class RegisterViewAPIView(generics.CreateAPIView):
-#     queryset = User.objects.all()
-#     permission_classes = [AllowAny]
-#     parser_classes = [JSONParser, MultiPartParser, FormParser]
-#     serializer_class = register_serializer.RegisterSerializer
+class RegisterViewAPIView(CustomErrorResponseMixin, generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = [AllowAny]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
+    serializer_class = register_serializer.RegisterSerializer
     
-#     def create(self, request, *args, **kwargs):
-#         print(f"🔍 DEBUG - Content-Type: {request.content_type}")
-#         print(f"🔍 DEBUG - Request data keys: {list(request.data.keys())}")
+    # def create(self, request, *args, **kwargs):
+    #     print(f"🔍 DEBUG - Content-Type: {request.content_type}")
+    #     print(f"🔍 DEBUG - Request data keys: {list(request.data.keys())}")
         
-#         try:
-#             # 🔧 SOLUTION ALTERNATIVE: Préprocesser sans modifier request.data
-#             processed_data = self.preprocess_form_data(request)
+    #     try:
+    #         # 🔧 SOLUTION ALTERNATIVE: Préprocesser sans modifier request.data
+    #         processed_data = self.preprocess_form_data(request)
             
-#             # Créer un nouveau serializer avec les données préprocessées
-#             serializer = self.get_serializer(data=processed_data)
+    #         # Créer un nouveau serializer avec les données préprocessées
+    #         serializer = self.get_serializer(data=processed_data)
             
-#             if not serializer.is_valid():
-#                 print(f"❌ DEBUG - Erreurs de validation: {serializer.errors}")
-#                 return Response({
-#                     "error": serializer.errors
-#                 }, status=status.HTTP_400_BAD_REQUEST)
+    #         if not serializer.is_valid():
+    #             print(f"❌ DEBUG - Erreurs de validation: {serializer.errors}")
+    #             return Response({
+    #                 "error": serializer.errors
+    #             }, status=status.HTTP_400_BAD_REQUEST)
             
-#             print("✅ DEBUG - Validation réussie, création en cours...")
-#             response_data = serializer.save()
-#             print("✅ DEBUG - Création terminée avec succès")
+    #         print("✅ DEBUG - Validation réussie, création en cours...")
+    #         response_data = serializer.save()
+    #         print("✅ DEBUG - Création terminée avec succès")
             
-#             return Response(response_data, status=status.HTTP_201_CREATED)
+    #         return Response(response_data, status=status.HTTP_201_CREATED)
             
-#         except Exception as e:
-#             print(f"❌ DEBUG - Erreur inattendue: {str(e)}")
-#             logger.exception("Erreur lors de la création du compte")
-#             return Response({
-#                 "error": {
-#                     "non_field_errors": [f"Erreur interne: {str(e)}"]
-#                 }
-#             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    #     except Exception as e:
+    #         print(f"❌ DEBUG - Erreur inattendue: {str(e)}")
+    #         logger.exception("Erreur lors de la création du compte")
+    #         return Response({
+    #             "error": {
+    #                 "non_field_errors": [f"Erreur interne: {str(e)}"]
+    #             }
+    #         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-#     def preprocess_form_data(self, request):
-#         """
-#         Préprocesse les données FormData sans modifier l'objet request original
-#         """
-#         print("🔍 DEBUG - Préprocessing des données...")
+    def create(self, request, *args, **kwargs):
+        print(f"🔍 DEBUG - Content-Type: {request.content_type}")
+        print(f"🔍 DEBUG - Request data keys: {list(request.data.keys())}")
+
+        try:
+            # Prétraitement des données du formulaire
+            processed_data = self.preprocess_form_data(request)
+
+            # 🔧 Utilise la méthode utilitaire du mixin pour créer et renvoyer la réponse
+            return self.perform_create_with_response(processed_data)
+
+        except Exception as e:
+            print(f"❌ DEBUG - Erreur inattendue: {str(e)}")
+            logger.exception("Erreur lors de la création du compte avec paiement")
+            return self.handle_exception(e)
+    
+    def preprocess_form_data(self, request):
+        """
+        Préprocesse les données FormData sans modifier l'objet request original
+        """
+        print("🔍 DEBUG - Préprocessing des données...")
         
-#         # Créer un dictionnaire simple pour les données
-#         processed_data = {}
+        # Créer un dictionnaire simple pour les données
+        processed_data = {}
         
-#         # Copier les données textuelles
-#         for key, value in request.data.items():
-#             if key == 'project':
-#                 # Traitement spécial pour le projet
-#                 if isinstance(value, str):
-#                     print(f"🔍 DEBUG - Project data (string): {value[:200]}...")
-#                     try:
-#                         project_data = json.loads(value)
-#                         processed_data[key] = project_data
-#                         print("✅ DEBUG - Project JSON désérialisé avec succès")
-#                         print(f"🔍 DEBUG - Project data: {project_data}")
-#                     except json.JSONDecodeError as e:
-#                         print(f"❌ DEBUG - Erreur JSON: {str(e)}")
-#                         raise ValueError(f"Format JSON invalide pour le projet: {str(e)}")
-#                 else:
-#                     processed_data[key] = value
-#             elif key in ['accept_project_reformulation', 'accept_terms_of_use']:
-#                 # Normaliser les booléens
-#                 str_value = str(value).lower()
-#                 if str_value in ['true', '1', 'on', 'yes']:
-#                     processed_data[key] = True
-#                 elif str_value in ['false', '0', 'off', 'no']:
-#                     processed_data[key] = False
-#                 else:
-#                     processed_data[key] = value
-#                 print(f"🔍 DEBUG - Booléen {key}: {processed_data[key]} (original: {value})")
-#             else:
-#                 processed_data[key] = value
+        # Copier les données textuelles
+        for key, value in request.data.items():
+            if key == 'project':
+                # Traitement spécial pour le projet
+                if isinstance(value, str):
+                    print(f"🔍 DEBUG - Project data (string): {value[:200]}...")
+                    try:
+                        project_data = json.loads(value)
+                        processed_data[key] = project_data
+                        print("✅ DEBUG - Project JSON désérialisé avec succès")
+                        print(f"🔍 DEBUG - Project data: {project_data}")
+                    except json.JSONDecodeError as e:
+                        print(f"❌ DEBUG - Erreur JSON: {str(e)}")
+                        raise ValueError(f"Format JSON invalide pour le projet: {str(e)}")
+                else:
+                    processed_data[key] = value
+            elif key in ['accept_project_reformulation', 'accept_terms_of_use']:
+                # Normaliser les booléens
+                str_value = str(value).lower()
+                if str_value in ['true', '1', 'on', 'yes']:
+                    processed_data[key] = True
+                elif str_value in ['false', '0', 'off', 'no']:
+                    processed_data[key] = False
+                else:
+                    processed_data[key] = value
+                print(f"🔍 DEBUG - Booléen {key}: {processed_data[key]} (original: {value})")
+            else:
+                processed_data[key] = value
         
-#         if 'project.image' in request.FILES:
-#             processed_data['project']['image'] = request.FILES['project.image']
-#             print(f"🔍 DEBUG - Fichier project.image: {request.FILES['project.image'].name}")
-#         if 'project.file' in request.FILES:
-#             processed_data['project']['file'] = request.FILES['project.file']
-#             print(f"🔍 DEBUG - Fichier project.file: {request.FILES['project.file'].name}")
+        if 'project.image' in request.FILES:
+            processed_data['project']['image'] = request.FILES['project.image']
+            print(f"🔍 DEBUG - Fichier project.image: {request.FILES['project.image'].name}")
+        if 'project.file' in request.FILES:
+            processed_data['project']['file'] = request.FILES['project.file']
+            print(f"🔍 DEBUG - Fichier project.file: {request.FILES['project.file'].name}")
     
         
-#         print("✅ DEBUG - Préprocessing terminé")
-#         return processed_data
+        print("✅ DEBUG - Préprocessing terminé")
+        return processed_data
 
 
 
