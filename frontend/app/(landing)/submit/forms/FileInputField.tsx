@@ -23,6 +23,7 @@ export default function FileInputField() {
         return;
       }
       if (fileOrUrl instanceof File) {
+        setIsEditMode(false);
         const url = URL.createObjectURL(fileOrUrl);
         setPreview(url);
         previewRef.current = url;
@@ -47,7 +48,11 @@ export default function FileInputField() {
       >
         {preview ? (
           <Image
-            src={`${isEditMode ? fixBackendUrl(imageFiles) : preview} `}
+            src={`${
+              isEditMode && typeof imageFiles?.[0] === "string"
+                ? fixBackendUrl(imageFiles)
+                : preview
+            } `}
             alt="preview image"
             fill
             className="object-cover w-full h-full"
