@@ -40,7 +40,7 @@ class CommercialSerializer(serializers.ModelSerializer):
         read_only_fields = ['affiliate_link', 'created_at']
         
     def get_click_rate(self, obj):
-        return obj.get_click_rate()
+        return obj.click_rate()
     
     def get_clicks_last_30_days(self, obj):
         thirty_days_ago = timezone.now() - timedelta(days=30)
@@ -196,7 +196,7 @@ class CommercialDetailSerializer(serializers.ModelSerializer):
         ]
     
     def get_click_rate(self, obj):
-        return obj.get_click_rate()
+        return obj.click_rate()
     
     def get_clicks_last_30_days(self, obj):
         thirty_days_ago = timezone.now() - timedelta(days=30)
@@ -253,6 +253,8 @@ class CommercialDetailSerializer(serializers.ModelSerializer):
 
 class CommercialStatsSerializer(serializers.ModelSerializer):
     """Serializer avec statistiques de clics"""
+    projects_brought = serializers.IntegerField()
+    total_votes = serializers.IntegerField()
     user_email = serializers.CharField(source='user.email', read_only=True)
     total_clicks = serializers.IntegerField(read_only=True)
     click_rate = serializers.SerializerMethodField()
@@ -262,16 +264,15 @@ class CommercialStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Commercial
         fields = [
-            'id', 'user_email', 'full_name', 'affiliate_link',
+            'id', 'user_email', 'full_name', 'projects_brought', 'total_votes', 'affiliate_link',
             'total_clicks', 'click_rate', 'clicks_last_30_days', 'clicks_today'
         ]
     
     def get_click_rate(self, obj):
-        return obj.get_click_rate()
+        return obj.click_rate()
     
     def get_clicks_last_30_days(self, obj):
         """Clics des 30 derniers jours"""
-        
         thirty_days_ago = timezone.now() - timedelta(days=30)
         return AffiliateClick.objects.filter(
             commercial=obj,
@@ -280,8 +281,6 @@ class CommercialStatsSerializer(serializers.ModelSerializer):
     
     def get_clicks_today(self, obj):
         """Clics d'aujourd'hui"""
-        
-        
         today = timezone.now().date()
         return AffiliateClick.objects.filter(
             commercial=obj,

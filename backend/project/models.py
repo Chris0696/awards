@@ -289,7 +289,7 @@ class Commercial(models.Model):
         # Recharger l'objet pour avoir la valeur réelle
         self.refresh_from_db()
     
-    def get_click_rate(self):
+    def click_rate(self):
         """Taux de conversion: affiliés / clics"""
         if self.total_clicks == 0:
             return 0

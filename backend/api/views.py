@@ -366,7 +366,7 @@ def bulk_project_action(request):
 # === DASHBOARD ADMINISTRATEUR ===
 
 class AdminDashboardAPIView(generics.RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     
     def get(self, request):
         if not request.user.is_staff and request.user.user_type != 'admin':
@@ -420,12 +420,17 @@ class AdminDashboardAPIView(generics.RetrieveAPIView):
 
         
         # Top commerciaux — somme des vote_count de leurs projets
-        top_commercials_qs = Commercial.objects.annotate(
+        # top_commercials_qs = Commercial.objects.annotate(
+        #     projects_brought=Count('project'),
+        #     total_votes=Sum('project__vote__vote_count', filter=Q(project__vote__active=True))
+        # ).order_by('-projects_brought')[:5]
+        # top_commercials = list(top_commercials_qs.values('full_name', 'projects_brought', 'total_votes', 'affiliate_link'))
+
+        top_commercials = Commercial.objects.annotate(
             projects_brought=Count('project'),
             total_votes=Sum('project__vote__vote_count', filter=Q(project__vote__active=True))
-        ).order_by('-projects_brought')[:5]
-        top_commercials = list(top_commercials_qs.values('full_name', 'projects_brought', 'total_votes', 'affiliate_link'))
-
+        ).select_related('user').order_by('-projects_brought')[:5]
+        
         data = {
             'general_stats': project_stats,
             'user_stats': user_stats,
