@@ -209,20 +209,20 @@ export default function page() {
                   </td>
 
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {aff.projects[0].project_title}
+                    {aff.projects[0]?.project_title}
                   </td>
 
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {aff.projects[0].category.category_name}
+                    {aff.projects[0]?.category.category_name}
                   </td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {formatDate(aff.projects[0].created_at)}
+                    {formatDate(aff.projects[0]?.created_at)}
                   </td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {aff.projects[0].vote_count}
+                    {aff.projects[0]?.vote_count}
                   </td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {aff.projects[0].total_revenue}
+                    {aff.projects[0]?.total_revenue}
                   </td>
                   {/*  <td className="px-6 py-4 text-gray-600 whitespace-nowrap">1</td> */}
                 </tr>

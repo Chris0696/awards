@@ -74,20 +74,20 @@ export default function UserTable({ users }: { users: User[] }) {
               className="hover:bg-white hover:rounded-full transition-colors"
             >
               <td className="px-6 py-4 text-gray-600 whitespace-normal max-w-[100px] ">
-                <p>{user.full_name} </p>
+                <p>{user?.full_name} </p>
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.user_email}{" "}
+                {user?.user_email}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.projects[0].project_title}{" "}
+                {user?.projects[0]?.project_title}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {formatDate(user.joined_date)}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {user.projects[0].commercial
-                  ? user.projects[0].commercial?.full_name
+                  ? user?.projects[0].commercial?.full_name
                   : "-"}
               </td>
 
