@@ -286,7 +286,7 @@ class Commercial(models.Model):
         try:
             # Importation dynamique pour éviter les imports circulaires
             
-            return Project.objects.filter(commercial=self).count()
+            return Project.objects.filter(commercial=self, owner_project_status='publie').count()
         except Exception:
             return 0
     
