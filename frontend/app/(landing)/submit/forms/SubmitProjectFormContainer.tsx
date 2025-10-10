@@ -23,6 +23,7 @@ import Popover from "@/components/Popover";
 import { useMutation } from "@tanstack/react-query";
 import { submitFirstProject } from "@/services/projectService";
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
+import { trackLinkClick } from "@/services/userService";
 
 type ProjectForm = z.infer<typeof projectSchema>;
 export default function SubmitProjectFormContainer() {
@@ -83,6 +84,12 @@ export default function SubmitProjectFormContainer() {
   const progress_report = watch("progress_report");
   const custom_category_name = watch("custom_category_name"); */
   const image: FileList | null = watch("image");
+
+  const tackClickMutation = useMutation({
+    mutationFn: trackLinkClick,
+    onSuccess: () => {},
+    onError: () => {},
+  });
 
   const submissionMutation = useMutation({
     mutationFn: submitFirstProject,
@@ -248,6 +255,15 @@ export default function SubmitProjectFormContainer() {
     setCurrentUrl(currentUrl);
     SetUrlOptionnalPart(search);
   }, []);
+  useEffect(() => {
+    if (urlOptionnalPart) {
+      const code = urlOptionnalPart?.split("=")[1];
+      tackClickMutation.mutate(code);
+    }
+  }, [urlOptionnalPart]);
+
+  console.log(currentUrl, "current");
+  console.log(urlOptionnalPart?.split("="), "urlOptionnalPart");
 
   const onSubmit = async (data: ProjectForm) => {
     const formData = new FormData();

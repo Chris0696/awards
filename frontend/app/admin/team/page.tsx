@@ -22,6 +22,7 @@ export type Team = {
   total_revenue: string;
   commission_earned: string;
   affiliates_count: number;
+  total_clicks: number;
 };
 export default function page() {
   const [showModal, setShowModal] = useState(false);

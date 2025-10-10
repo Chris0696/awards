@@ -86,7 +86,7 @@ export default function UserTable({ users }: { users: User[] }) {
                 {formatDate(user.joined_date)}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.projects[0].commercial
+                {user.projects[0]?.commercial
                   ? user?.projects[0]?.commercial?.full_name
                   : "-"}
               </td>

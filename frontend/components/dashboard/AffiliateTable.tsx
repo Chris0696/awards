@@ -62,6 +62,9 @@ export default function AffiliateTable({ affiliates }: Props) {
               Liens d'affiliation
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Nombre de cliques
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Candidats inscrit via le lien
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -94,6 +97,9 @@ export default function AffiliateTable({ affiliates }: Props) {
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {affiliate?.affiliates_count}
+              </td>
+              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                {affiliate?.total_clicks}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {affiliate?.total_projects}

@@ -61,3 +61,10 @@ export const getAffiliateDetails = async (id: number) => {
   const res = await apiClient.get(`admin/users/commercial/${id}/`);
   return res.data;
 };
+
+export const trackLinkClick = async (affiliate_code: string) => {
+  const res = await apiClient.post("affiliate/track-click/", {
+    affiliate_code,
+  });
+  return res.data;
+};
