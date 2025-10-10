@@ -96,11 +96,12 @@ export default function AffiliateTable({ affiliates }: Props) {
                 {affiliate?.affiliate_link?.slice(-5)}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {affiliate?.affiliates_count}
-              </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {affiliate?.total_clicks}
               </td>
+              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                {affiliate?.affiliates_count}
+              </td>
+
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {affiliate?.total_projects}
               </td>
