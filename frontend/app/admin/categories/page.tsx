@@ -8,20 +8,41 @@ import CategoryCard from "./CategoryCard";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAdminCategories } from "@/services/categoryService";
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
+import Loader from "@/components/Loader";
 
 export default function page() {
   const [showModal, setShowModal] = useState(false);
   const user = useUserSessionStore((state) => state.user);
+  const [search, setSearch] = useState("");
 
-  const { data: categories } = useQuery({
+  const { data: categories, isLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: () => fetchAdminCategories(),
     enabled: user?.user_type === "user",
   });
 
+  const filteredCategories = categories?.data?.filter((cat) => {
+    if (
+      search &&
+      !cat.category_name.toLowerCase().includes(search.toLowerCase())
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
   return (
     <section>
-      <DashboardHeader pageTitle="Liste des catégories" />
+      <DashboardHeader
+        search={search}
+        setSearch={setSearch}
+        pageTitle="Liste des catégories"
+      />
       <div className="mb-12 ">
         <button
           onClick={() => setShowModal(true)}
@@ -32,7 +53,7 @@ export default function page() {
       </div>
       {categories?.data?.length > 0 ? (
         <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 mb-10 gap-4">
-          {categories?.data?.map((category) => (
+          {filteredCategories?.map((category) => (
             <CategoryCard
               key={category.category_id}
               color="text-[#CECE2C]"

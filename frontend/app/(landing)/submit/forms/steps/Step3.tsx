@@ -6,21 +6,17 @@ import { useFormContext } from "react-hook-form";
 
 export default function Step3({
   setStep,
-  showFifthStep,
+
   isOnEditMode,
 }: {
   setStep: (step: number) => void;
-  showFifthStep: boolean;
+
   isOnEditMode?: boolean;
 }) {
   const { trigger } = useFormContext();
 
   return (
-    <FormCard
-      isOnEditMode={isOnEditMode}
-      showFifthStep={showFifthStep}
-      step={3}
-    >
+    <FormCard isOnEditMode={isOnEditMode} step={3}>
       <div className="space-y-6">
         <TextareaField name="description" />
         <TextField
@@ -47,6 +43,7 @@ export default function Step3({
         </div>
         <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row justify-between items-center mt-6">
           <button
+            type="button"
             onClick={() => setStep(2)}
             className="border w-full md:w-auto border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
           >

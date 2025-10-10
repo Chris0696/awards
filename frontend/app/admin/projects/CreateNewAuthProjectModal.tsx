@@ -4,7 +4,7 @@ import Step4 from "@/app/(landing)/submit/forms/steps/Step4";
 import Step5 from "@/app/(landing)/submit/forms/steps/Step5";
 
 import { AdminProjectInfo, ProjectInfo } from "@/app/common/types/project";
-import Popover from "@/components/ui/Popover";
+import Popover from "@/components/Popover";
 import { authProjectSchema } from "@/frontendlib/schemas";
 
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
@@ -140,7 +140,7 @@ export default function CreateNewAuthProjectModal({
     formData.append("owner_project_status", String(data.owner_project_status));
 
     if (data.image && data.image.length > 0) {
-      formData.append("project.image", data.image[0]);
+      formData.append("image", data.image[0]);
     }
 
     if (project) {
@@ -199,8 +199,6 @@ export default function CreateNewAuthProjectModal({
     }
   }, [adminProject, reset]);
 
-  const showFifthStep =
-    Boolean(project) || Boolean(adminProject) || !isSecondProject;
   const isOnEditMode = Boolean(project) || Boolean(adminProject);
 
   return (
@@ -218,25 +216,19 @@ export default function CreateNewAuthProjectModal({
           <form onSubmit={handleSubmit(onSubmit)}>
             {step === 2 && (
               <Step2
-                showFifthStep={showFifthStep}
                 isOnEditMode={isOnEditMode}
                 preview={preview}
                 setStep={setStep}
               />
             )}
             {step === 3 && (
-              <Step3
-                showFifthStep={showFifthStep}
-                isOnEditMode={isOnEditMode}
-                setStep={setStep}
-              />
+              <Step3 isOnEditMode={isOnEditMode} setStep={setStep} />
             )}
             {step === 4 && (
               <Step4
                 adminProject={adminProject}
                 project={project}
                 setStep={setStep}
-                showFifthStep={showFifthStep}
                 isOnEditMode={isOnEditMode}
               />
             )}

@@ -8,13 +8,13 @@ export default function Step4({
   setStep,
   project,
   adminProject,
-  showFifthStep,
+
   isOnEditMode,
 }: {
   setStep: (step: number) => void;
   project?: any;
   adminProject?: any;
-  showFifthStep: boolean;
+
   isOnEditMode?: boolean;
 }) {
   const {
@@ -27,11 +27,7 @@ export default function Step4({
   const showStepUpBtns = !Boolean(user);
 
   return (
-    <FormCard
-      isOnEditMode={isOnEditMode}
-      showFifthStep={showFifthStep}
-      step={4}
-    >
+    <FormCard isOnEditMode={isOnEditMode} step={4}>
       <div>
         <div className="flex flex-col space-y-10">
           <label
@@ -100,7 +96,7 @@ export default function Step4({
           </label>
         </div>
 
-        {showStepUpBtns && (
+        {/* {showStepUpBtns && (
           <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row justify-between items-center mt-6">
             <button
               onClick={() => setStep(3)}
@@ -122,7 +118,7 @@ export default function Step4({
               Continuer
             </button>
           </div>
-        )}
+        )} */}
       </div>
     </FormCard>
   );

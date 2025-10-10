@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import Popover from "../ui/Popover";
+import Popover from "../Popover";
 import TextField from "../../app/(landing)/submit/forms/TextField";
 import EmailField from "../../app/(landing)/submit/forms/EmailField";
 import PhoneNumberField from "../../app/(landing)/submit/forms/PhoneNumberField";

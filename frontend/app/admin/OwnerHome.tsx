@@ -1,3 +1,4 @@
+"use client";
 import OverviewCard from "@/components/dashboard/project-owner/OverviewCard";
 import DashboardHeader from "./DasboardHeader";
 import InfobulleCard from "@/components/dashboard/project-owner/InfobulleCard";
@@ -40,6 +41,7 @@ export default function OwnerHome() {
   if (isLoading) {
     return <Loader message="Chargement de votre tableau de bord..." />;
   }
+
   return (
     <section className="space-y-24">
       <DashboardHeader

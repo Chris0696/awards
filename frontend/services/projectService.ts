@@ -7,7 +7,7 @@ export const getPublicProjects = async (): Promise<PublicProject[]> => {
 };
 
 export const submitFirstProject = async (data: FormData) => {
-  const res = await apiClient.post("register-with-payment/", data, {
+  const res = await apiClient.post("auth/register/authorproject", data, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

@@ -26,7 +26,13 @@ export const projectSchema = z
         "Format invalide (JPEG/PNG uniquement)"
       )
       .optional(),
-    password: z.string().nonempty("Entrez un mot de passe"),
+    password: z
+      .string()
+      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+      .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule")
+      .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
+      .regex(/\d/, "Le mot de passe doit contenir au moins un chiffre")
+      .nonempty("Entrez un mot de passe"),
     age: z.coerce
       .number<number>("Entrer votre age")
       .min(18, "Vous devez avoir au moins 18 ans pour postuler"),
@@ -182,8 +188,18 @@ export const changePasswordSchema = z
     old_password: z.string().min(1, "Entrez votre ancien mot de passe"),
     new_password: z
       .string()
-      .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-    confirm_password: z.string().min(6, "Confirmez votre nouveau mot de passe"),
+      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+      .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule")
+      .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
+      .regex(/\d/, "Le mot de passe doit contenir au moins un chiffre")
+      .nonempty("Entrez un mot de passe"),
+    confirm_password: z
+      .string()
+      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+      .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule")
+      .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
+      .regex(/\d/, "Le mot de passe doit contenir au moins un chiffre")
+      .nonempty("Confirmez le mot de passe"),
   })
   .refine((data) => data.new_password === data.confirm_password, {
     message: "Les mots de passe ne correspondent pas",

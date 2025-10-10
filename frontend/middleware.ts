@@ -9,8 +9,9 @@ export async function middleware(req: NextRequest) {
   const role = session?.user_type;
 
   const access = tokens.access;
+  const refresh = tokens.refresh;
 
-  if (!access) {
+  if (!access && !refresh) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 

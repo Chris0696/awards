@@ -1,4 +1,4 @@
-import Popover from "../ui/Popover";
+import Popover from "../Popover";
 
 export default function ConfirmDeleteModal({
   showDeleteModal,

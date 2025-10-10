@@ -77,16 +77,18 @@ export default function UserTable({ users }: { users: User[] }) {
                 <p>{user.full_name} </p>
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.total_projects}{" "}
+                {user.user_email}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.total_projects}{" "}
+                {user.projects[0].project_title}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {formatDate(user.joined_date)}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.commercial ? user.commercial : "-"}
+                {user.projects[0].commercial
+                  ? user.projects[0].commercial?.full_name
+                  : "-"}
               </td>
 
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">

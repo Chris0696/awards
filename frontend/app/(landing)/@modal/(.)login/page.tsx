@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import LoginForm from "../../login/LoginForm";
-import Popover from "@/components/ui/Popover";
+import Popover from "@/components/Popover";
 import { useRouter } from "next/navigation";
 
 export default function LoginInterceptorPage() {

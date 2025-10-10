@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { dashboardlinks } from "../common/navigationlinks";
 import NavLink from "../common/NavLink";
-import ProfilImg from "@/assets/defaultProfil.png";
 import { MoreVerticalIcon } from "lucide-react";
 import {
   DropdownMenu,

@@ -3,7 +3,17 @@ import SearchIcon from "@/assets/searchicon.svg";
 
 import Image from "next/image";
 
-export default function DashboardHeader({ pageTitle }: { pageTitle: string }) {
+export default function DashboardHeader({
+  pageTitle,
+  path,
+  search,
+  setSearch,
+}: {
+  pageTitle: string;
+  path?: string;
+  search?: string;
+  setSearch?: (value: string) => void;
+}) {
   return (
     <div className="mb-20">
       <div className="flex justify-between items-center">
@@ -23,6 +33,8 @@ export default function DashboardHeader({ pageTitle }: { pageTitle: string }) {
               name="search"
               placeholder="Rechercher"
               id="search"
+              value={search}
+              onChange={(e) => setSearch?.(e.target.value)}
               className="pl-10 pr-2 py-1 placeholder:text-black rounded-md h-full w-full outline-none border-none"
             />
           </div>

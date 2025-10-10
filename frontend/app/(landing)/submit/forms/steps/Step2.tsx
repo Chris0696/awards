@@ -13,13 +13,10 @@ import { useEffect, useState } from "react";
 export default function Step2({
   setStep,
   isOnEditMode,
-  showFifthStep,
 }: {
   setStep: (step: number) => void;
   preview: string | null;
   isOnEditMode?: boolean;
-
-  showFifthStep: boolean;
 }) {
   const { trigger, watch, setValue } = useFormContext();
   const user = useUserSessionStore((state) => state.user);
@@ -30,11 +27,7 @@ export default function Step2({
   }, [cat]);
 
   return (
-    <FormCard
-      isOnEditMode={isOnEditMode}
-      showFifthStep={showFifthStep}
-      step={2}
-    >
+    <FormCard isOnEditMode={isOnEditMode} step={2}>
       <div className="space-y-6">
         <TextField
           name="project_title"
@@ -78,6 +71,7 @@ export default function Step2({
       <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row justify-between items-center mt-6">
         {!user && (
           <button
+            type="button"
             onClick={() => setStep(1)}
             className="border w-full md:w-auto border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
           >

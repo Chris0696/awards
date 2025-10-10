@@ -19,7 +19,7 @@ import { projectSchema } from "@/frontendlib/schemas";
 import { useImagePreview } from "@/hooks/useImagePreview";
 import Step5 from "./steps/Step5";
 import { FedaCheckoutContainer } from "fedapay-reactjs";
-import Popover from "@/components/ui/Popover";
+import Popover from "@/components/Popover";
 import { useMutation } from "@tanstack/react-query";
 import { submitFirstProject } from "@/services/projectService";
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
@@ -64,7 +64,7 @@ export default function SubmitProjectFormContainer() {
     watch,
     formState: { isSubmitting },
   } = methods;
-  const email = watch("email");
+  /* const email = watch("email");
   const fullName = watch("full_name");
   const phone = watch("phone");
   const profession = watch("profession");
@@ -81,14 +81,14 @@ export default function SubmitProjectFormContainer() {
   const solution = watch("solution");
   const target_audience = watch("target_audience");
   const progress_report = watch("progress_report");
-  const custom_category_name = watch("custom_category_name");
+  const custom_category_name = watch("custom_category_name"); */
   const image: FileList | null = watch("image");
 
   const submissionMutation = useMutation({
     mutationFn: submitFirstProject,
     onSuccess: () => {
-      setIsWidgetOpen(false);
-
+      // setIsWidgetOpen(false);
+      setShowModal(true);
       reset();
       setStep(1);
     },
@@ -98,7 +98,7 @@ export default function SubmitProjectFormContainer() {
     },
   });
 
-  const checkoutEmbedOptions = {
+  /* const checkoutEmbedOptions = {
     public_key: process.env.NEXT_PUBLIC_FEDAPAY_PUBLIC_KEY,
     transaction: {
       amount: 2000,
@@ -239,7 +239,7 @@ export default function SubmitProjectFormContainer() {
         setStep(1);
       }
     },
-  };
+  }; */
 
   const preview = useImagePreview(image);
   useEffect(() => {
@@ -249,7 +249,45 @@ export default function SubmitProjectFormContainer() {
     SetUrlOptionnalPart(search);
   }, []);
 
-  const onSubmit = async (data: ProjectForm) => {};
+  const onSubmit = async (data: ProjectForm) => {
+    const formData = new FormData();
+    formData.append("full_name", data.full_name);
+    formData.append("email", data.email);
+    formData.append(
+      "country_code",
+      `+${parsePhoneNumber(data.phone)?.countryCallingCode}`
+    );
+    formData.append("phone", formatPhoneNumber(data.phone).replaceAll(" ", ""));
+    formData.append("profession", data.profession);
+    formData.append("password", data.password);
+    formData.append("age", String(data.age));
+    formData.append("affiliate", urlOptionnalPart ? String(currentUrl) : "");
+    formData.append(
+      "accept_project_reformulation",
+      data.acceptReformulation ? "1" : "0"
+    );
+    formData.append("accept_terms_of_use", data.acceptTerms ? "1" : "0");
+    formData.append(
+      "project",
+      JSON.stringify({
+        category_id: data.custom_category_name ? "" : data.category_id,
+        custom_category_name: data.custom_category_name,
+        project_title: data.project_title,
+        local_area_impact: data.local_area_impact,
+        main_objective: data.main_objective,
+        solution: data.solution,
+        description: data.description,
+        estimated_budget: data.estimated_budget,
+        target_audience: data.target_audience,
+        progress_report: data.progress_report,
+        owner_project_status: "brouillon",
+      })
+    );
+    if (image && image.length > 0) {
+      formData.append("project.image", image[0]);
+    }
+    submissionMutation.mutate(formData);
+  };
   return (
     <section className="pb-40 pt-28" id="submit-form">
       <FormProvider {...methods}>
@@ -258,25 +296,27 @@ export default function SubmitProjectFormContainer() {
 
           {step === 2 && <Step2 preview={preview} setStep={setStep} />}
           {step === 3 && <Step3 setStep={setStep} />}
-          {step === 4 && <Step4 setStep={setStep} />}
+          {/*  {step === 4 && <Step4 setStep={setStep} />} */}
 
-          {step === 5 && (
+          {step === 4 && (
             <div>
-              <Step5 />
+              <Step4 setStep={setStep} />
+
               <div className="w-full px-5 max-w-3xl mx-auto">
                 <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 justify-between items-center mt-20">
                   <button
-                    onClick={() => setStep(4)}
+                    type="button"
+                    onClick={() => setStep(3)}
                     className="border w-full md:w-auto border-gray-800 px-8 py-2 cursor-pointer text-lg rounded-md text-gray-800 flex items-center space-x-2 "
                   >
                     <ChevronLeft /> <span>Retourner</span>
                   </button>
                   <button
-                    type="button"
-                    onClick={() => setIsWidgetOpen(true)}
+                    type="submit"
+                    /* onClick={() => setIsWidgetOpen(true)} */
                     className="bg-secondary w-full md:w-auto px-10  py-2.5 cursor-pointer text-lg rounded-md text-white disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? "En cours..." : "Payer pour valider"}
+                    {isSubmitting ? "En cours..." : "Enregistrer"}
                   </button>
                 </div>
               </div>
@@ -284,11 +324,11 @@ export default function SubmitProjectFormContainer() {
           )}
         </form>
       </FormProvider>
-      <CheckoutModal
+      {/* <CheckoutModal
         setShowModal={setIsWidgetOpen}
         showModal={isWidgetOpen}
         checkoutEmbedOptions={checkoutEmbedOptions}
-      />
+      /> */}
       {showModal && (
         <ThanksNoteModal
           title="Soumission réussie"
@@ -300,7 +340,7 @@ export default function SubmitProjectFormContainer() {
   );
 }
 
-export const CheckoutModal = ({
+/* export const CheckoutModal = ({
   showModal,
   setShowModal,
   checkoutEmbedOptions,
@@ -316,14 +356,14 @@ export const CheckoutModal = ({
       onClose={() => setShowModal(false)}
     >
       <div className="relative min-h-[500px] flex items-center justify-center">
-        {/* {isLoading && (
+      {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
             <span className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-secondary"></span>
             <span className="ml-4 text-secondary">
               Chargement du paiement...
             </span>
           </div>
-        )} */}
+        )}
         <FedaCheckoutContainer
           options={checkoutEmbedOptions}
           style={{ height: 500, width: "100%" }}
@@ -331,4 +371,4 @@ export const CheckoutModal = ({
       </div>
     </Popover>
   );
-};
+}; */

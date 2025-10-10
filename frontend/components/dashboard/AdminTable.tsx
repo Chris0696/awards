@@ -143,7 +143,14 @@ export default function AdminTable({ projects, categories }: Props) {
                           <DropdownMenuItem>
                             <button
                               className="cursor-pointer"
-                              onClick={() => openEditModal(project)}
+                              onClick={() => {
+                                if (project.platform_status === "publie") {
+                                  return toast.error(
+                                    "Ce projet a déjà été publié"
+                                  );
+                                }
+                                openEditModal(project);
+                              }}
                             >
                               Reformuler
                             </button>
@@ -151,9 +158,14 @@ export default function AdminTable({ projects, categories }: Props) {
                         )}
                         <DropdownMenuItem>
                           <button
-                            onClick={() =>
-                              validateMutation.mutate(project.project_id)
-                            }
+                            onClick={() => {
+                              if (project.platform_status === "publie") {
+                                return toast.error(
+                                  "Ce projet a déjà été publié"
+                                );
+                              }
+                              validateMutation.mutate(project.project_id);
+                            }}
                             className="cursor-pointer"
                           >
                             Valider
@@ -161,12 +173,17 @@ export default function AdminTable({ projects, categories }: Props) {
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <button
-                            onClick={() =>
+                            onClick={() => {
+                              if (project.platform_status === "publie") {
+                                return toast.error(
+                                  "Ce projet a déjà été publié"
+                                );
+                              }
                               rejectMutation.mutate({
                                 id: project.project_id,
                                 admin_comment: "Inapproprié",
-                              })
-                            }
+                              });
+                            }}
                             className="cursor-pointer"
                           >
                             Rejeter

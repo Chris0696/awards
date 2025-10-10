@@ -137,7 +137,7 @@ export default function ProjectsList() {
         {canScroll && (
           <button
             type="button"
-            className="p-2 rounded-full bg-white shadow mt-6 md:mt-0 ml-2"
+            className="p-2 rounded-full bg-white  shadow mt-6 md:mt-0 ml-2"
             onClick={() => scroll("right")}
             aria-label="Scroll right"
           >

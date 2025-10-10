@@ -92,7 +92,7 @@ export default function StatisticPage() {
               />
               <SynthesisCard
                 title="Classement actuel"
-                data={`${ownerStats?.owner_ranking.rank}/${ownerStats?.recent_projects.length} projets`}
+                data={`${ownerStats?.owner_ranking.rank}e/${ownerStats?.owner_ranking.total_owners} personnes`}
               />
               <SynthesisCard
                 title="1er actuel"
@@ -109,7 +109,13 @@ export default function StatisticPage() {
             </div>
             <div className="bg-white rounded-xl">
               <div className=" mt-10 max-w-xl ">
-                <VotesChart chartData={chartData} />
+                {chartData.length > 0 ? (
+                  <VotesChart chartData={chartData} />
+                ) : (
+                  <p className="pb-8 text-xl font-semibold text-center">
+                    Vous n'avez reçu aucun vote pour le moment
+                  </p>
+                )}
               </div>
             </div>
           </div>

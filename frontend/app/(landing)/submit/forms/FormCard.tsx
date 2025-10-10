@@ -54,9 +54,7 @@ export default function FormCard({
         {
           <h2 className="flex  items-center text-xl md:text-4xl font-bold mb-3 space-x-20">
             <span className="flex items-center space-x-1">
-              <span className="text-[#0026B0] font-medium">
-                {step}/{showFifthStep ? 4 : 5}
-              </span>
+              <span className="text-[#0026B0] font-medium">{step}/4</span>
               <ArrowRight size={20} />
             </span>
             {!isOnEditMode && <span>{currentStep?.title} </span>}

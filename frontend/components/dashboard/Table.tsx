@@ -71,6 +71,10 @@ export default function Table({ projects, isSecondProject }: Props) {
     );
   };
 
+  const isAlreadyPublishedByOwner = (project: ProjectInfo) => {
+    return project.owner_project_status === "publie";
+  };
+
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">
       <table className=" w-full">
@@ -154,49 +158,67 @@ export default function Table({ projects, isSecondProject }: Props) {
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button>
+                    <button
+                      onClick={() => {
+                        if (isAlreadyPublished(project)) {
+                          return toast.error("Ce projet est déjà publié");
+                        }
+                      }}
+                    >
                       <MoreVerticalIcon />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {project.platform_status !== "publie" && (
+                  {!isAlreadyPublished(project) && (
+                    <DropdownMenuContent>
                       <DropdownMenuItem>
                         <button
                           className="cursor-pointer"
-                          onClick={() => openEditModal(project)}
+                          onClick={() => {
+                            if (isAlreadyPublishedByOwner(project)) {
+                              return toast.error(
+                                "Votre projet est déjà en cours de validation"
+                              );
+                            }
+                            openEditModal(project);
+                          }}
                         >
                           Reformuler
                         </button>
                       </DropdownMenuItem>
-                    )}
-                    {!isAlreadyPublished(project) && (
+
                       <DropdownMenuItem>
                         <button
-                          onClick={() =>
+                          onClick={() => {
+                            if (isAlreadyPublishedByOwner(project)) {
+                              return toast.error(
+                                "Votre projet est déjà en cours de validation"
+                              );
+                            }
                             updateMutation.mutate({
                               project_id: project.project_id,
                               owner_project_status: "publie",
                               category_id: project.category.category_id,
-                            })
-                          }
+                            });
+                          }}
                           className="cursor-pointer"
                         >
                           Publier
                         </button>
                       </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem>
-                      <button
-                        onClick={() => {
-                          setShowConfirmationModal(true);
-                          setProjectToDelete(project.project_id);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        Supprimer
-                      </button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
+
+                      <DropdownMenuItem>
+                        <button
+                          onClick={() => {
+                            setShowConfirmationModal(true);
+                            setProjectToDelete(project.project_id);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          Supprimer
+                        </button>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  )}
                 </DropdownMenu>
               </td>
             </tr>

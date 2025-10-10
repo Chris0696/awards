@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import SearchIcon from "@/assets/searchicon.svg";
 import { useEffect, useState } from "react";
 import Loader from "@/components/Loader";
+import { formatDate } from "@/app/common/types/common";
 
 type PersonnalInfo = {
   fullname: string;
@@ -47,6 +48,11 @@ export default function page() {
   const { handleCopy } = useCopyToClipboard();
 
   const affiliate = affiliates?.data;
+
+  const filteredlist =
+    affiliate?.affiliates?.filter((user) =>
+      user.full_name.toLowerCase().includes(searcTerm.toLowerCase())
+    ) ?? [];
 
   if (isLoading) {
     return <Loader />;
@@ -193,30 +199,30 @@ export default function page() {
           </thead>
           <tbody>
             {affiliate?.affiliates.length > 0 ? (
-              affiliate?.affiliates?.map((aff, idx) => (
+              filteredlist.map((aff, idx) => (
                 <tr
                   key={idx}
                   className="hover:bg-white hover:rounded-full transition-colors"
                 >
                   <td className="px-6 py-4 text-gray-600 whitespace-normal max-w-[100px] ">
-                    <p>{affiliate?.user.full_name} </p>
+                    <p>{aff?.user?.full_name} </p>
                   </td>
 
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    -
+                    {aff.projects[0].project_title}
                   </td>
 
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    -
+                    {aff.projects[0].category.category_name}
                   </td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    -
+                    {formatDate(aff.projects[0].created_at)}
                   </td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    -
+                    {aff.projects[0].vote_count}
                   </td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    -
+                    {aff.projects[0].total_revenue}
                   </td>
                   {/*  <td className="px-6 py-4 text-gray-600 whitespace-nowrap">1</td> */}
                 </tr>

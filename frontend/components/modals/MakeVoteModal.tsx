@@ -4,7 +4,7 @@ import { FedaCheckoutContainer } from "fedapay-reactjs";
 
 import { ChevronRightIcon } from "lucide-react";
 import ArtworkImg from "@/assets/artworklight.jpg";
-import Popover from "../ui/Popover";
+import Popover from "../Popover";
 import PhoneNumberField from "@/app/(landing)/submit/forms/PhoneNumberField";
 import NumberField from "@/app/(landing)/submit/forms/NumberField";
 import { FormProvider, useForm } from "react-hook-form";

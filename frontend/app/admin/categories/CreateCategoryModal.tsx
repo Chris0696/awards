@@ -1,6 +1,6 @@
 import TextField from "@/app/(landing)/submit/forms/TextField";
 import { AdminCategory, Category } from "@/app/common/types/category";
-import Popover from "@/components/ui/Popover";
+import Popover from "@/components/Popover";
 import { categorySchema } from "@/frontendlib/schemas";
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 

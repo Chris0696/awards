@@ -10,7 +10,7 @@ import { MoreVerticalIcon } from "lucide-react";
 import { useState } from "react";
 import CreateCategoryModal from "./CreateCategoryModal";
 import { AdminCategory } from "@/app/common/types/category";
-import Popover from "@/components/ui/Popover";
+import Popover from "@/components/Popover";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteCategory } from "@/services/categoryService";
 import { toast } from "sonner";

@@ -14,6 +14,7 @@ import Loader from "@/components/Loader";
 
 export default function page() {
   const [showModal, setShowModal] = useState(false);
+  const [search, setSearch] = useState("");
 
   const { data: affiliates, isLoading } = useQuery({
     queryKey: ["team"],
@@ -28,9 +29,24 @@ export default function page() {
     return <Loader />;
   }
 
+  const filteredUsers = filteredList?.filter((user) => {
+    if (
+      search &&
+      !user.full_name.toLowerCase().includes(search.toLowerCase())
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
   return (
     <section>
-      <DashboardHeader pageTitle="Affiliation" />
+      <DashboardHeader
+        search={search}
+        setSearch={setSearch}
+        pageTitle="Affiliation"
+      />
       <div className="mb-8">
         <button
           onClick={() => setShowModal(true)}
@@ -42,7 +58,7 @@ export default function page() {
       </div>
       {filteredList?.length > 0 ? (
         <div>
-          <AffiliateTable affiliates={filteredList} />
+          <AffiliateTable affiliates={filteredUsers} />
           {/*           <SwitchPageBtn /> */}
         </div>
       ) : (

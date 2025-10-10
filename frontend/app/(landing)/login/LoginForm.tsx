@@ -1,7 +1,7 @@
 "use client";
 import EmailField from "@/app/(landing)/submit/forms/EmailField";
 import PasswordField from "@/app/(landing)/submit/forms/PasswordField";
-import Popover from "@/components/ui/Popover";
+import Popover from "@/components/Popover";
 import { resetPasswordSchema, userSchema } from "@/frontendlib/schemas";
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 

@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 import { toast } from "sonner";
-import Popover from "@/components/ui/Popover";
+import Popover from "@/components/Popover";
 import PasswordField from "@/app/(landing)/submit/forms/PasswordField";
 import { changePasswordSchema } from "@/frontendlib/schemas";
 import z from "zod";

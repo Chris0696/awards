@@ -4,12 +4,17 @@ import DashboardHeader from "../DasboardHeader";
 import { getMessages, Message } from "@/services/messageService";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
+import Loader from "@/components/Loader";
 
 export default function page() {
-  const { data: messages } = useQuery({
+  const { data: messages, isLoading } = useQuery({
     queryKey: ["messages"],
     queryFn: () => getMessages(),
   });
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <div>

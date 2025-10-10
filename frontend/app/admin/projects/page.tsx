@@ -23,13 +23,19 @@ import { fetchAdminCategories } from "@/services/categoryService";
 import { Category } from "@/app/common/types/category";
 import { AdminProjectInfo, ProjectInfo } from "@/app/common/types/project";
 import Loader from "@/components/Loader";
+import { usePathname } from "next/navigation";
+import { Calendar22 } from "@/components/Calendar";
 
 export default function AdminProjectList() {
+  const pathname = usePathname();
+  const [search, setSearch] = useState("");
+
   const [isSecondProject, setIsSecondProject] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const user = useUserSessionStore((state) => state.user);
   const [selectedSatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const { data: adminProjects, isLoading: isLoadingAdminPr } = useQuery({
     queryKey: ["adminProjects"],
@@ -61,6 +67,25 @@ export default function AdminProjectList() {
       }
       if (selectedCategory && project.category_id !== selectedCategory) {
         return false;
+      }
+      if (
+        search &&
+        !(
+          project.project_title.toLowerCase().includes(search.toLowerCase()) ||
+          (project.owner_name &&
+            project.owner_name.toLowerCase().includes(search.toLowerCase()))
+        )
+      ) {
+        return false;
+      }
+      if (selectedDate && project.created_at) {
+        const createdDate = new Date(project.created_at);
+        const sameDay =
+          createdDate.getFullYear() === selectedDate.getFullYear() &&
+          createdDate.getMonth() === selectedDate.getMonth() &&
+          createdDate.getDate() === selectedDate.getDate();
+
+        if (!sameDay) return false;
       }
       return true;
     }
@@ -124,9 +149,31 @@ export default function AdminProjectList() {
       )}
       {user?.user_type === "user" && (
         <section>
-          <DashboardHeader pageTitle="Projets" />
+          <DashboardHeader
+            path={pathname}
+            pageTitle="Projets"
+            search={search}
+            setSearch={setSearch}
+          />
           <div>
             <div className=" flex justify-end space-x-3  mb-5">
+              {/* <label
+                htmlFor="adminProjectDate"
+                className="px-6 py-2 text-lg font-medium rounded-lg border border-primary text-primary cursor-pointer"
+              >
+                {selectedDate ? selectedDate : "Date"}
+              </label>
+              <input
+                type="date"
+                id="adminProjectDate"
+                onChange={(e) => setSelectedDate(e.target.value)}
+                style={{ zIndex: 2 }}
+              /> */}
+              <Calendar22
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+              />
+
               {/* <FilterBtn
             defaultText="Date"
             options={["Date", "Statut", "Catégorie"]}

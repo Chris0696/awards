@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import LightBulbIcon from "@/assets/lightbulb.svg";
 import OrangeCircle from "@/assets/orangecircle.svg";
-import Popover from "../ui/Popover";
+import Popover from "../Popover";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
@@ -57,7 +57,7 @@ export default function WelcomeModal() {
           <p className="flex space-x-2">
             <Image src={OrangeCircle} alt="bullet-point" className="w-4 h-4" />
             <span>
-              Soumission des projets : du 6 Octombre au 20 Novembre 2025
+              Soumission des projets : du 6 Octobre au 20 Novembre 2025
             </span>
           </p>
           <p className="flex space-x-2">
