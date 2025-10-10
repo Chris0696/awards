@@ -61,6 +61,18 @@ urlpatterns = [
     # Statistiques des Owner
     path('admin/owners/statistics/', OwnerViews.OwnerStatisticsAPIView.as_view(), name='admin-owner-statistics'),
     
+    # Détails d'un commercial avec ses filleuls
+    
+    path('admin/users/', CommercialViews.AdminCommercialView.as_view(), name='admin-commercial-list-create'),
+    
+    path('admin/users/<int:pk>/', CommercialViews.AdminCommercialView.as_view(), name='admin-commercial-detail'),
+    
+    path('admin/users/commercial/<int:pk>/', CommercialViews.AdminCommercialDetailView.as_view(), name='commercial-detail'),
+    
+    path('admin/users/commercial/<int:pk>/click-stats/', CommercialViews.CommercialClickStatsView.as_view(), name='commercial-click-stats'),
+    
+    path('affiliate/track-click/', CommercialViews.TrackAffiliateClickView.as_view(), name='track-affiliate-click'),
+    
     # Project Endpoints
     # Soumission de projet avec paiement
     path('projects/submit-with-payment/', ProjectViews.ProjectSubmissionWithPaymentAPIView.as_view(), name='project-submit-with-payment'),
@@ -102,15 +114,6 @@ urlpatterns = [
     # path('user/commercials/', CommercialViews.CommercialListCreateView.as_view(), name='commercial_list_create'),
     # path('user/commercials/<int:pk>/', CommercialViews.CommercialDetailView.as_view(), name='commercial_detail'),
     
-    path('admin/users/', CommercialViews.AdminCommercialView.as_view(), name='admin-commercial-list-create'),
-    path('admin/users/<int:pk>/', CommercialViews.AdminCommercialView.as_view(), name='admin-commercial-detail'),
-    
-    # Détails d'un commercial avec ses filleuls
-    path('admin/users/commercial/<int:pk>/', CommercialViews.AdminCommercialDetailView.as_view(), name='commercial-detail'),
-    
-    path('admin/users/commercial/<int:pk>/click-stats/', CommercialViews.CommercialClickStatsView.as_view(), name='commercial-click-stats'),
-    
-    path('affiliate/track-click/', CommercialViews.TrackAffiliateClickView.as_view(), name='track-affiliate-click'),
      # === STATISTIQUES ===
     path('stats/general/', ApiViews.general_stats_api, name='general_stats'),
     

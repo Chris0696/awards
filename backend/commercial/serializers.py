@@ -22,14 +22,40 @@ class CommercialSerializer(serializers.ModelSerializer):
     total_revenue = serializers.DecimalField(max_digits=10, decimal_places=2, source='total_revenue_generated', read_only=True)
     commission_earned = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
 
+    # Nombres de cliques obtenus
+    total_clicks = serializers.IntegerField(read_only=True)
+    click_rate = serializers.SerializerMethodField()
+    clicks_last_30_days = serializers.SerializerMethodField()
+    clicks_today = serializers.SerializerMethodField()
+    
     class Meta:
         model = Commercial
         fields = [
             'id', 'user_email', 'full_name', 'phone', 'commission_rate', 'affiliate_link',
             'is_active', 'created_at', 'total_projects', 'total_published_projects',
-            'total_rejected_projects', 'total_votes', 'total_revenue', 'commission_earned'
+            'total_rejected_projects', 'total_votes', 'total_revenue', 'commission_earned',
+            'total_clicks',
+            'click_rate', 'clicks_last_30_days', 'clicks_today'
         ]
         read_only_fields = ['affiliate_link', 'created_at']
+        
+    def get_click_rate(self, obj):
+        return obj.get_click_rate()
+    
+    def get_clicks_last_30_days(self, obj):
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        return AffiliateClick.objects.filter(
+            commercial=obj,
+            clicked_at__gte=thirty_days_ago
+        ).count()
+    
+    def get_clicks_today(self, obj):
+        today = timezone.now().date()
+        return AffiliateClick.objects.filter(
+            commercial=obj,
+            clicked_at__date=today
+        ).count()
+        
 
     def validate_phone(self, value):
         if value and not re.match(r'^\d{7,15}$', value):

@@ -9,7 +9,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_filter = ('owner_project_status',)
 
 class CommercialAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'commission_rate', 'affiliate_link', 'phone', 'is_active', 'created_at')
+    list_display = ('full_name', 'commission_rate', 'affiliate_link', 'total_clicks', 'phone', 'is_active', 'created_at')
     search_fields = ('full_name',)
     list_filter = ('full_name',)
 

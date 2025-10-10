@@ -298,7 +298,8 @@ class AdminCommercialView(CustomErrorResponseMixin, generics.GenericAPIView):
                         'total_votes': commercial_data['total_votes'],
                         'total_revenue': commercial_data['total_revenue'],
                         'commission_earned': commercial_data['commission_earned'],
-                        'affiliates_count': Owner.objects.filter(commercial=commercial).count()
+                        'affiliates_count': Owner.objects.filter(commercial=commercial).count(),
+                        'total_clicks': commercial_data['total_clicks'],
                     })
 
             users_data.append(data)
