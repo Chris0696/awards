@@ -110,7 +110,7 @@ export default function Table({ projects, isSecondProject }: Props) {
           </tr>
         </thead>
         <tbody>
-          {projects.map((project) => (
+          {projects?.map((project) => (
             <tr
               key={project.project_id}
               className="hover:bg-white hover:rounded-full transition-colors"

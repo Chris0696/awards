@@ -58,7 +58,7 @@ export default function OwnerHome() {
             <OverviewCard
               color="text-[#CECE2C]"
               title="Projets soumis en cours de validation par Project Awards"
-              total={ownerStats?.project_stats.pending}
+              total={ownerStats?.project_stats.draft}
             />
             <OverviewCard
               color="text-[#FF7F00]"
