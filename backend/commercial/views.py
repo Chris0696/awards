@@ -3,8 +3,8 @@ from projectowner.models import Owner
 from userauths.mixin import CustomErrorResponseMixin
 from userauths.serializers import AdminUserUpdateSerializer, ProfileSerializer
 from userauths.models import Profile, User
-from project.models import Commercial
-from .serializers import CommercialDetailSerializer, CommercialSerializer, AdminCommercialRegisterSerializer
+from project.models import AffiliateClick, Commercial
+from .serializers import AffiliateClickSerializer, CommercialDetailSerializer, CommercialSerializer, AdminCommercialRegisterSerializer, CommercialStatsSerializer
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,7 +21,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import serializers
-
+from django.http import Http404
 
 
 class CommercialListCreateView(generics.ListCreateAPIView):
@@ -408,7 +408,88 @@ class AdminCommercialDetailView(generics.RetrieveAPIView):
             "data": serializer.data
         }, status=status.HTTP_200_OK)
         
+class TrackAffiliateClickView(generics.GenericAPIView):
+    """
+    Envoyer dans le body:
+    {
+        "affiliate_code": "COM_3179B372",
+        "ip_address": "192.168.1.1",  // optionnel
+        "user_agent": "Mozilla/5.0...",  // optionnel
+        "referrer": "https://example.com"  // optionnel
+    }
+    """
+    permission_classes = [AllowAny]  # Accessible sans authentification
+    serializer_class = AffiliateClickSerializer 
+    
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
         
+        if not serializer.is_valid():
+            return Response({
+                "success": False,
+                "message": _("Données invalides"),
+                "errors": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        affiliate_code = serializer.validated_data['affiliate_code']
+        
+        # Extraire le code si c'est une URL complète
+        if 'affiliate=' in affiliate_code:
+            affiliate_code = affiliate_code.split('affiliate=')[-1]
+        
+        # Trouver le commercial
+        try:
+            commercial = Commercial.objects.get(affiliate_link__contains=affiliate_code)
+        except Commercial.DoesNotExist:
+            return Response({
+                "success": False,
+                "message": _("Commercial non trouvé")
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Incrémenter le compteur
+        commercial.increment_click()
+        
+        # Enregistrer le clic détaillé (optionnel)
+        ip_address = serializer.validated_data.get('ip_address') or self.get_client_ip(request)
+        user_agent = serializer.validated_data.get('user_agent') or request.META.get('HTTP_USER_AGENT', '')
+        referrer = serializer.validated_data.get('referrer') or request.META.get('HTTP_REFERER', '')
+        
+        AffiliateClick.objects.create(
+            commercial=commercial,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            referrer=referrer
+        )
+        
+        return Response({
+            "success": True,
+            "message": _("Clic enregistré avec succès"),
+            "data": {
+                "commercial_id": commercial.id,
+                "commercial_name": commercial.full_name,
+                "total_clicks": commercial.total_clicks
+            }
+        }, status=status.HTTP_200_OK)
+    
+    def get_client_ip(self, request):
+        """Récupère l'adresse IP du client"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
+
+class CommercialClickStatsView(generics.RetrieveAPIView):
+    """
+    Vue pour récupérer les statistiques de clics d'un commercial
+    GET /api/commercial/<int:pk>/click-stats/
+    """
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    queryset = Commercial.objects.all()
+    serializer_class = CommercialStatsSerializer
+
 # Ajoutez ces imports au début de votre fichier
 
 # from rest_framework import viewsets, status, serializers

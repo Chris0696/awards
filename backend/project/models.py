@@ -281,6 +281,20 @@ class Commercial(models.Model):
                 frontend_site_affiliate = getattr(settings, 'FRONTEND_SITE_AFFILIATE_URL', 'https://projectawards.scarsoft.net/submit')
                 self.affiliate_link = f"{frontend_site_affiliate}/?affiliate={affiliate_id}"
         super().save(*args, **kwargs)
+        
+    def increment_click(self):
+        """Incrémente le compteur de clics de manière atomique"""
+        self.total_clicks = models.F('total_clicks') + 1
+        self.save(update_fields=['total_clicks'])
+        # Recharger l'objet pour avoir la valeur réelle
+        self.refresh_from_db()
+    
+    def get_click_rate(self):
+        """Taux de conversion: affiliés / clics"""
+        if self.total_clicks == 0:
+            return 0
+        affiliates_count = self.get_affiliates_count()
+        return round((affiliates_count / self.total_clicks) * 100, 2)
     
     def total_projects_brought(self):
         """Nombre total de projets amenés par ce commercial"""
@@ -392,6 +406,32 @@ class Commercial(models.Model):
         verbose_name = _("Commercial")
         verbose_name_plural = _("Commerciaux")
     
+class AffiliateClick(models.Model):
+    """
+    Modèle pour tracker chaque clic individuellement avec des détails
+    """
+    commercial = models.ForeignKey(Commercial, on_delete=models.CASCADE, related_name='clicks')
+    clicked_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date du clic"))
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name=_("Adresse IP"))
+    user_agent = models.TextField(blank=True, null=True, verbose_name=_("User Agent"))
+    referrer = models.URLField(blank=True, null=True, verbose_name=_("Provenance"))
+    country = models.CharField(max_length=100, blank=True, null=True, verbose_name=_("Pays"))
+    city = models.CharField(max_length=100, blank=True, null=True, verbose_name=_("Ville"))
+    converted = models.BooleanField(default=False, verbose_name=_("A créé un compte"))
+    converted_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Date de conversion"))
+    
+    class Meta:
+        verbose_name = _("Clic d'affiliation")
+        verbose_name_plural = _("Clics d'affiliation")
+        ordering = ['-clicked_at']
+        indexes = [
+            models.Index(fields=['commercial', '-clicked_at']),
+            models.Index(fields=['ip_address', '-clicked_at']),
+        ]
+    
+    def __str__(self):
+        return f"Clic sur {self.commercial.full_name} - {self.clicked_at}"
+
 
 class VotePriceSettings(models.Model):
     """Configuration globale des prix"""

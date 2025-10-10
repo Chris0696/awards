@@ -108,6 +108,9 @@ urlpatterns = [
     # Détails d'un commercial avec ses filleuls
     path('admin/users/commercial/<int:pk>/', CommercialViews.AdminCommercialDetailView.as_view(), name='commercial-detail'),
     
+    path('admin/users/commercial/<int:pk>/click-stats/', CommercialViews.CommercialClickStatsView.as_view(), name='commercial-click-stats'),
+    
+    path('affiliate/track-click/', CommercialViews.TrackAffiliateClickView.as_view(), name='track-affiliate-click'),
      # === STATISTIQUES ===
     path('stats/general/', ApiViews.general_stats_api, name='general_stats'),
     

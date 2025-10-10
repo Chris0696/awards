@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from project.models import Commercial
+from project.models import AffiliateClick, Commercial
 from django.utils.translation import gettext_lazy as _
 import re
 from userauths.models import User, USER_TYPES
@@ -8,7 +8,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from django.core.validators import RegexValidator
 
-
+from django.utils import timezone
+from datetime import timedelta
 
 
 
@@ -151,6 +152,12 @@ class CommercialDetailSerializer(serializers.ModelSerializer):
     affiliates = serializers.SerializerMethodField()
     affiliates_count = serializers.SerializerMethodField()
     
+    # Nombres de cliques obtenus
+    total_clicks = serializers.IntegerField(read_only=True)
+    click_rate = serializers.SerializerMethodField()
+    clicks_last_30_days = serializers.SerializerMethodField()
+    clicks_today = serializers.SerializerMethodField()
+    
     class Meta:
         model = Commercial
         fields = [
@@ -158,9 +165,27 @@ class CommercialDetailSerializer(serializers.ModelSerializer):
             'commission_rate', 'affiliate_link', 'is_active', 'created_at',
             'total_projects', 'total_published_projects', 'total_rejected_projects',
             'total_votes', 'total_revenue', 'commission_earned',
-            'affiliates', 'affiliates_count'
+            'affiliates', 'affiliates_count', 'total_clicks',
+            'click_rate', 'clicks_last_30_days', 'clicks_today'
         ]
     
+    def get_click_rate(self, obj):
+        return obj.get_click_rate()
+    
+    def get_clicks_last_30_days(self, obj):
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        return AffiliateClick.objects.filter(
+            commercial=obj,
+            clicked_at__gte=thirty_days_ago
+        ).count()
+    
+    def get_clicks_today(self, obj):
+        today = timezone.now().date()
+        return AffiliateClick.objects.filter(
+            commercial=obj,
+            clicked_at__date=today
+        ).count()
+        
     def get_total_projects(self, obj):
         return obj.total_projects_brought()
     
@@ -179,9 +204,6 @@ class CommercialDetailSerializer(serializers.ModelSerializer):
     def get_commission_earned(self, obj):
         return str(obj.commission_earned())
     
-    
-    
-    
     def get_affiliates_count(self, obj):
         """Nombre de filleuls (Owners) affiliés à ce commercial"""
         from projectowner.models import Owner
@@ -195,11 +217,67 @@ class CommercialDetailSerializer(serializers.ModelSerializer):
         return OwnerListSerializer(owners, many=True, context=self.context).data
 
 
+# class CommercialStatsSerializer(serializers.ModelSerializer):
+#     projects_brought = serializers.IntegerField()
+#     total_votes = serializers.IntegerField()
+    
+#     class Meta:
+#         model = Commercial
+#         fields = ['full_name', 'projects_brought', 'total_votes', 'affiliate_link']
+
 class CommercialStatsSerializer(serializers.ModelSerializer):
-    projects_brought = serializers.IntegerField()
-    total_votes = serializers.IntegerField()
+    """Serializer avec statistiques de clics"""
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    total_clicks = serializers.IntegerField(read_only=True)
+    click_rate = serializers.SerializerMethodField()
+    clicks_last_30_days = serializers.SerializerMethodField()
+    clicks_today = serializers.SerializerMethodField()
     
     class Meta:
         model = Commercial
-        fields = ['full_name', 'projects_brought', 'total_votes', 'affiliate_link']
+        fields = [
+            'id', 'user_email', 'full_name', 'affiliate_link',
+            'total_clicks', 'click_rate', 'clicks_last_30_days', 'clicks_today'
+        ]
     
+    def get_click_rate(self, obj):
+        return obj.get_click_rate()
+    
+    def get_clicks_last_30_days(self, obj):
+        """Clics des 30 derniers jours"""
+        
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        return AffiliateClick.objects.filter(
+            commercial=obj,
+            clicked_at__gte=thirty_days_ago
+        ).count()
+    
+    def get_clicks_today(self, obj):
+        """Clics d'aujourd'hui"""
+        
+        
+        today = timezone.now().date()
+        return AffiliateClick.objects.filter(
+            commercial=obj,
+            clicked_at__date=today
+        ).count()
+
+
+class AffiliateClickSerializer(serializers.Serializer):
+    """Serializer pour enregistrer un clic d'affiliation"""
+    affiliate_code = serializers.CharField(required=True)
+    ip_address = serializers.IPAddressField(required=False, allow_null=True)
+    user_agent = serializers.CharField(required=False, allow_blank=True)
+    referrer = serializers.URLField(required=False, allow_blank=True, allow_null=True)
+    
+    def validate_affiliate_code(self, value):
+        """Valider que le code d'affiliation existe"""
+        # Le code peut être "COM_3179B372" ou l'URL complète
+        if 'affiliate=' in value:
+            value = value.split('affiliate=')[-1]
+        
+        # Chercher le commercial par son code
+        if not Commercial.objects.filter(affiliate_link__contains=value).exists():
+            raise serializers.ValidationError(_("Code d'affiliation invalide"))
+        
+        return value
