@@ -313,10 +313,13 @@ export default function SubmitProjectFormContainer() {
                   </button>
                   <button
                     type="submit"
+                    disabled={submissionMutation.isPending}
                     /* onClick={() => setIsWidgetOpen(true)} */
                     className="bg-secondary w-full md:w-auto px-10  py-2.5 cursor-pointer text-lg rounded-md text-white disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? "En cours..." : "Enregistrer"}
+                    {submissionMutation.isPending
+                      ? "En cours..."
+                      : "Enregistrer"}
                   </button>
                 </div>
               </div>
