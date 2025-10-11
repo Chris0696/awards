@@ -1,7 +1,6 @@
 import { Controller, useFormContext } from "react-hook-form";
 import FormCard from "../FormCard";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
 
 export default function Step4({

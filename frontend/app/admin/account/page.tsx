@@ -1,5 +1,4 @@
 "use client";
-import ProfilImg from "@/assets/profil.png";
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
 
 import { fixBackendUrl } from "@/frontendlib/utils/fixBackendUrls";

@@ -30,7 +30,8 @@ export default function PhoneNumberField({ label, placeholder, name }: Props) {
               placeholder={placeholder}
               countryCallingCodeEditable={false}
               rules={{
-                validate: (val) => isValidPhoneNumber(val) || "Numéro invalide",
+                validate: (val: string) =>
+                  isValidPhoneNumber(val) || "Numéro invalide",
               }}
               className="border-none outline-none bg-gray-100 px-2 py-3 rounded-md w-full "
             />

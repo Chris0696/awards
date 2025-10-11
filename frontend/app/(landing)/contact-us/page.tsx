@@ -5,7 +5,7 @@ import MailboxIcon from "@/assets/mailbox.svg";
 
 import ContactUsHero from "./ContactUsHero";
 import Image from "next/image";
-import { Form, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import z from "zod";
 import { messageFormSchema } from "@/frontendlib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";

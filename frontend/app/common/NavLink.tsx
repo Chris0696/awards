@@ -8,7 +8,7 @@ export default function NavLink({
 }: {
   text: string;
   href: string;
-  onClose: (() => void) | undefined;
+  onClose?: (() => void) | undefined;
 }) {
   const pathname = usePathname();
   const isActive = pathname === href;

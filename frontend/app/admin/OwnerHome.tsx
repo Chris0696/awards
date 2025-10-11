@@ -8,6 +8,7 @@ import { getProjectsAsOwner } from "@/services/projectService";
 import { getOwnerStats } from "@/services/statsService";
 import MyProjectCard from "@/components/dashboard/project-owner/MyProjectCard";
 import Loader from "@/components/Loader";
+import { ProjectInfo } from "../common/types/project";
 
 export default function OwnerHome() {
   const user = useUserSessionStore((state) => state.user);
@@ -72,7 +73,7 @@ export default function OwnerHome() {
         <div className="pt-6 pb-20 bg-gray-100 rounded-lg space-y-6 px-3">
           <h2 className="text-2xl font-semibold text-gray-900">Mes projets</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {projects?.map((project) => (
+            {projects?.map((project: ProjectInfo) => (
               <MyProjectCard key={project.project_id} project={project} />
             ))}
           </div>

@@ -3,7 +3,7 @@ import Footer from "@/app/(landing)/components/Footer";
 import Header from "@/app/(landing)/components/Header";
 import { SessionProvider } from "../admin/SessionProvider";
 import WelcomeModal from "@/components/modals/WelcomeModal";
-import VoteAnnouncementModal from "@/components/modals/VoteAnnoucementModal";
+//import VoteAnnouncementModal from "@/components/modals/VoteAnnoucementModal";
 
 export default function LandingLayout({
   children,

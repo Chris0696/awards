@@ -104,11 +104,11 @@ export default function UserTable({ users }: { users: User[] }) {
                     >
                       Désactiver
                     </DropdownMenuItem> */}
-                    <DropdownMenuItem
+                    {/*  <DropdownMenuItem
                       onClick={() => updateMutation.mutate(user.id)}
                     >
                       Bloquer
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                     <DropdownMenuItem
                       onClick={() => {
                         setSelectedUser(user.id);

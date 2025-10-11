@@ -34,7 +34,6 @@ export default function CreateCategoryModal({
   const {
     handleSubmit,
     reset,
-    setError,
     formState: { isSubmitting },
   } = methods;
 

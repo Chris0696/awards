@@ -1,4 +1,3 @@
-import Link from "next/link";
 import HeroImg from "@/assets/heroImage.png";
 import Image from "next/image";
 import ColoredLink from "@/components/ui/ColoredLink";

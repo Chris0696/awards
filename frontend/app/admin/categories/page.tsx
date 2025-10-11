@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchAdminCategories } from "@/services/categoryService";
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
 import Loader from "@/components/Loader";
+import { AdminCategory } from "@/app/common/types/category";
 
 export default function page() {
   const [showModal, setShowModal] = useState(false);
@@ -21,7 +22,7 @@ export default function page() {
     enabled: user?.user_type === "user",
   });
 
-  const filteredCategories = categories?.data?.filter((cat) => {
+  const filteredCategories = categories?.data?.filter((cat: AdminCategory) => {
     if (
       search &&
       !cat.category_name.toLowerCase().includes(search.toLowerCase())
@@ -53,7 +54,7 @@ export default function page() {
       </div>
       {categories?.data?.length > 0 ? (
         <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 mb-10 gap-4">
-          {filteredCategories?.map((category) => (
+          {filteredCategories?.map((category: AdminCategory) => (
             <CategoryCard
               key={category.category_id}
               color="text-[#CECE2C]"

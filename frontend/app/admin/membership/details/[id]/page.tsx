@@ -13,6 +13,7 @@ import SearchIcon from "@/assets/searchicon.svg";
 import { useEffect, useState } from "react";
 import Loader from "@/components/Loader";
 import { formatDate } from "@/app/common/types/common";
+import { Affiliate } from "@/app/common/types/affiliate";
 
 type PersonnalInfo = {
   fullname: string;
@@ -28,6 +29,7 @@ export default function page() {
     queryFn: () => getAffiliateDetails(Number(id)),
     enabled: id !== undefined,
   });
+
   const [searcTerm, setSearchTerm] = useState("");
   const { register, reset } = useForm<PersonnalInfo>({
     defaultValues: {
@@ -50,7 +52,7 @@ export default function page() {
   const affiliate = affiliates?.data;
 
   const filteredlist =
-    affiliate?.affiliates?.filter((user) =>
+    affiliate?.affiliates?.filter((user: Affiliate) =>
       user.full_name.toLowerCase().includes(searcTerm.toLowerCase())
     ) ?? [];
 
@@ -199,7 +201,7 @@ export default function page() {
           </thead>
           <tbody>
             {affiliate?.affiliates.length > 0 ? (
-              filteredlist.map((aff, idx) => (
+              filteredlist.map((aff: Affiliate, idx: number) => (
                 <tr
                   key={idx}
                   className="hover:bg-white hover:rounded-full transition-colors"

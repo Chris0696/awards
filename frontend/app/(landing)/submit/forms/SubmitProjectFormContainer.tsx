@@ -262,9 +262,6 @@ export default function SubmitProjectFormContainer() {
     }
   }, [urlOptionnalPart]);
 
-  console.log(currentUrl, "current");
-  console.log(urlOptionnalPart?.split("="), "urlOptionnalPart");
-
   const onSubmit = async (data: ProjectForm) => {
     const formData = new FormData();
     formData.append("full_name", data.full_name);

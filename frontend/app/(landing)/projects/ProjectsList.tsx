@@ -11,10 +11,15 @@ import { useQuery } from "@tanstack/react-query";
 import { getPublicProjects } from "@/services/projectService";
 import { fetchPublicCategories } from "@/services/categoryService";
 
-type Category = {
-  tagname: string;
-  title: string;
+export type Categories = {
+  category_id: string;
+  category_name: string;
+  is_custom: boolean;
+  created_by: number;
+  image: string;
+  slug: string;
 };
+
 export type PublicProject = {
   project_id: string;
   slug: string;
@@ -32,24 +37,6 @@ export type PublicProject = {
   average_rating: number;
   total_votes: number;
 };
-/* const categories: Category[] = [
-  {
-    tagname: "education",
-    title: "Éducation & Formation",
-  },
-  {
-    tagname: "health",
-    title: "Santé & Bien-être",
-  },
-  {
-    tagname: "culture",
-    title: "Art & Culture",
-  },
-  {
-    tagname: "agro",
-    title: "Agriculture & Agroalimentaire",
-  },
-]; */
 
 export default function ProjectsList() {
   const [activeTab, setActiveTab] = useState<string>("all");
@@ -124,7 +111,7 @@ export default function ProjectsList() {
           >
             Tout
           </button>
-          {categories?.map((category, idx) => (
+          {categories?.map((category: Categories, idx: number) => (
             <CategoryTag
               isActive={activeTab === category.category_name}
               key={idx}

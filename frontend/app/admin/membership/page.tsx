@@ -29,7 +29,7 @@ export default function page() {
     return <Loader />;
   }
 
-  const filteredUsers = filteredList?.filter((user) => {
+  const filteredUsers = filteredList?.filter((user: Team) => {
     if (
       search &&
       !user.full_name.toLowerCase().includes(search.toLowerCase())

@@ -1,9 +1,9 @@
 "use client";
-import { Category } from "@/app/common/types/category";
 import { fetchPublicCategories } from "@/services/categoryService";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { Controller, useFormContext } from "react-hook-form";
+import { Categories } from "../../projects/ProjectsList";
 
 export default function SelectField({ name }: { name: string }) {
   const { control } = useFormContext();
@@ -29,7 +29,7 @@ export default function SelectField({ name }: { name: string }) {
                 className="appearance-none border-none outline-none bg-gray-100 px-2 py-2 rounded-md w-full text-gray-500 text-lg"
               >
                 <option value="">Sélectionnez une catégorie</option>
-                {categories?.map((category, idx) => (
+                {categories?.map((category: Categories, idx: number) => (
                   <option key={idx} value={category.category_id}>
                     {category.category_name}{" "}
                   </option>

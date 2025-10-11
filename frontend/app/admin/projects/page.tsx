@@ -3,12 +3,7 @@ import DashboardHeader from "@/app/admin/DasboardHeader";
 import FilterBtn from "@/components/dashboard/FilterBtn";
 import Table from "@/components/dashboard/Table";
 import SwitchPageBtn from "@/components/dashboard/SwitchPageBtn";
-import {
-  ArrowRight,
-  ChevronLeftIcon,
-  ChevronRight,
-  ChevronRightIcon,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import CreateNewAuthProjectModal from "./CreateNewAuthProjectModal";
 import { useState } from "react";
