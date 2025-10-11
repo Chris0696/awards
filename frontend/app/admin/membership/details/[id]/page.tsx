@@ -21,9 +21,9 @@ type PersonnalInfo = {
   phone: string | null;
 };
 
-export default function page() {
+export default function Page() {
   const { id } = useParams();
-  console.log(id, "id");
+
   const { data: affiliates, isLoading } = useQuery({
     queryKey: ["affiliateDetails", id],
     queryFn: () => getAffiliateDetails(Number(id)),
@@ -86,6 +86,7 @@ export default function page() {
                 <Image
                   src={`${fixBackendUrl(affiliate?.image)}`}
                   alt="User avatar"
+                  className="w-16 h-16 rounded-full object-cover"
                   width={180}
                   height={180}
                 />
@@ -211,20 +212,30 @@ export default function page() {
                   </td>
 
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {aff.projects[0]?.project_title}
+                    {aff.projects?.length > 0
+                      ? aff.projects[0]?.project_title
+                      : "soumis mais pas publié"}
                   </td>
 
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {aff.projects[0]?.category.category_name}
+                    {aff.projects?.length > 0
+                      ? aff.projects[0]?.category.category_name
+                      : "-"}
                   </td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {formatDate(aff.projects[0]?.created_at)}
+                    {aff.projects?.length > 0
+                      ? formatDate(aff.projects[0]?.created_at)
+                      : "-"}
                   </td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {aff.projects[0]?.vote_count}
+                    {aff.projects?.length > 0
+                      ? aff.projects[0]?.vote_count
+                      : "-"}
                   </td>
                   <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                    {aff.projects[0]?.total_revenue}
+                    {aff.projects?.length > 0
+                      ? aff.projects[0]?.total_revenue
+                      : "-"}
                   </td>
                   {/*  <td className="px-6 py-4 text-gray-600 whitespace-nowrap">1</td> */}
                 </tr>

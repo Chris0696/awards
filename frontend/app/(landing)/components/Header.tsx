@@ -12,6 +12,7 @@ import { useUserSessionStore } from "@/stores/useUserSessionStore";
 export default function Header() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const user = useUserSessionStore((state) => state.user);
+
   return (
     <header className="bg-primary py-5 px-10">
       <nav className="flex justify-between">
@@ -19,6 +20,7 @@ export default function Header() {
           <Image
             src={"/LOGO.svg"}
             alt="Project Awards Logo"
+            className="object-cover"
             width={100}
             height={100}
           />

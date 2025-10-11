@@ -20,6 +20,7 @@ export type Team = {
   total_rejected_projects: number;
   total_votes: number;
   total_revenue: string;
+  commercial_id: number;
   commission_earned: string;
   affiliates_count: number;
   total_clicks: number;

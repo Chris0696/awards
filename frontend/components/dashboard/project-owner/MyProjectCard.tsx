@@ -72,14 +72,14 @@ export default function MyProjectCard({ project }: Props) {
     return project.owner_project_status === "publie";
   };
   return (
-    <div className="bg-white p-4 rounded-2xl w-full max-w-xs space-y-4">
+    <div className="bg-white p-4 rounded-2xl relative w-full max-w-xs space-y-4">
       <div className="flex justify-between">
         <h2 className="w-3/4">
           <span className="font-medium">Titre du projet : </span>{" "}
           <span className="text-gray-600">{project?.project_title}</span>{" "}
         </h2>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger asChild className="absolute top-5 right-0">
             <button
               onClick={() => {
                 if (isAlreadyPublished(project)) {

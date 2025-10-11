@@ -95,6 +95,7 @@ export default function SubmitProjectFormContainer() {
     mutationFn: submitFirstProject,
     onSuccess: () => {
       // setIsWidgetOpen(false);
+      localStorage.removeItem("affiliateLink");
       setShowModal(true);
       reset();
       setStep(1);
@@ -257,12 +258,14 @@ export default function SubmitProjectFormContainer() {
   }, []);
   useEffect(() => {
     if (urlOptionnalPart) {
+      localStorage.setItem("affiliateLink", JSON.stringify(currentUrl));
       const code = urlOptionnalPart?.split("=")[1];
       tackClickMutation.mutate(code);
     }
   }, [urlOptionnalPart]);
 
   const onSubmit = async (data: ProjectForm) => {
+    const storedAffiliateLink = localStorage.getItem("affiliateLink");
     const formData = new FormData();
     formData.append("full_name", data.full_name);
     formData.append("email", data.email);
@@ -274,7 +277,14 @@ export default function SubmitProjectFormContainer() {
     formData.append("profession", data.profession);
     formData.append("password", data.password);
     formData.append("age", String(data.age));
-    formData.append("affiliate", urlOptionnalPart ? String(currentUrl) : "");
+    formData.append(
+      "affiliate",
+      urlOptionnalPart
+        ? String(currentUrl)
+        : storedAffiliateLink
+        ? JSON.parse(storedAffiliateLink)
+        : ""
+    );
     formData.append(
       "accept_project_reformulation",
       data.acceptReformulation ? "1" : "0"

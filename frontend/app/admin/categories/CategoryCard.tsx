@@ -27,15 +27,15 @@ export default function CategoryCard({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<number>();
   return (
-    <div className="bg-gray-200/50 p-4 rounded-xl space-y-8 w-full md:max-w-[220px]">
+    <div className="bg-gray-200/50 p-4 rounded-xl relative  flex flex-col space-y-8 w-full md:max-w-[220px]">
       <div className="flex justify-between">
-        <h4 className="text-lg text-gray-600  ">
+        <h4 className="text-lg text-gray-600 w-[90%] ">
           {category.category_name
             ? category.category_name
             : "Nombre total de projets validés"}
         </h4>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger className="absolute top-6 right-0" asChild>
             <button className="cursor-pointer">
               <MoreVerticalIcon size={18} />
             </button>
@@ -63,8 +63,8 @@ export default function CategoryCard({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <p className={`text-4xl font-semibold text-center ${color}  `}>
-        {category.project_count !== undefined ? category.project_count : 150}
+      <p className={`text-4xl mt-auto font-semibold text-center ${color}  `}>
+        {category.project_count}
       </p>
       <CreateCategoryModal
         showModal={showModal}

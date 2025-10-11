@@ -90,6 +90,7 @@ export default function CreateCategoryModal({
             placeholder="Entrer le nom"
             name="category_name"
           />
+
           <div className="mt-6">
             <button
               disabled={updateMutation.isPending || createMutation.isPending}

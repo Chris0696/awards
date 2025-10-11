@@ -29,7 +29,11 @@ export default function HomePageHero() {
         </div>
       </div>
       <div>
-        <Image src={HeroImg} alt="Hero section image" />
+        <Image
+          src={HeroImg}
+          alt="Hero section image"
+          className="object-cover"
+        />
       </div>
     </section>
   );

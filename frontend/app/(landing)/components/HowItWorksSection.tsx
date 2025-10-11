@@ -20,7 +20,7 @@ export default function HowItWorksSection() {
               <Image
                 src={CurveImg}
                 alt="selection process curve img"
-                className="mx-auto"
+                className="mx-auto object-cover"
               />
             </div>
             <div className="mb-12 md:mb-0 md:absolute -bottom-80   xl:left-16 w-md lg:-bottom-96 ">

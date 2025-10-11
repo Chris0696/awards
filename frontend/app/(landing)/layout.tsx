@@ -13,13 +13,15 @@ export default function LandingLayout({
   modal: React.ReactNode;
 }>) {
   return (
-    <main className="w-full overflow-x-hidden">
-      <WelcomeModal />
-      {/* <VoteAnnouncementModal showModal={true} setShowModal={() => {}} /> */}
-      <Header />
-      {children}
-      <Footer />
-      {modal}
-    </main>
+    <SessionProvider>
+      <main className="w-full overflow-x-hidden">
+        <WelcomeModal />
+        {/* <VoteAnnouncementModal showModal={true} setShowModal={() => {}} /> */}
+        <Header />
+        {children}
+        <Footer />
+        {modal}
+      </main>
+    </SessionProvider>
   );
 }

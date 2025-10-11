@@ -9,14 +9,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ access: accessToken });
   }
   if (refreshToken) {
-    const backendRes = await fetch(`${process.env.API_URL}/auth/refresh/`, {
+    const backendRes = await fetch(`${process.env.API_URL}auth/refresh/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh: refreshToken }),
     });
 
     if (!backendRes.ok) {
-      return NextResponse.json({ error: "Invalid refresh" }, { status: 401 });
+      let errorData;
+      try {
+        errorData = await backendRes.json();
+      } catch {
+        errorData = { error: "Unknown error from backend" };
+      }
+
+      return NextResponse.json(
+        { error: errorData.error || "Invalid refresh" },
+        { status: backendRes.status }
+      );
     }
 
     const data = await backendRes.json();

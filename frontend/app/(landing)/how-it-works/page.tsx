@@ -60,7 +60,7 @@ export default function page() {
         <div className="mt-20 md:mt-48 space-y-12 px-10 md:px-20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-items-center">
             <div>
-              <Image src={Hiw1Img} alt="Étape 1" />
+              <Image src={Hiw1Img} alt="Étape 1" className="object-cover" />
             </div>
             <div className="  ">
               <h3 className="text-[#134F9D] font-bold text-xl mb-5">
@@ -104,12 +104,12 @@ export default function page() {
               </p>
             </div>
             <div>
-              <Image src={Hiw2Img} alt="Étape 2" />
+              <Image src={Hiw2Img} alt="Étape 2" className="object-cover" />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-items-center">
             <div>
-              <Image src={Hiw3Img} alt="Étape 3" />
+              <Image src={Hiw3Img} alt="Étape 3" className="object-cover" />
             </div>
             <div className="">
               <h3 className="text-[#134F9D] font-bold text-xl mb-5">
@@ -162,7 +162,7 @@ export default function page() {
               </div>
             </div>
             <div>
-              <Image src={Hiw4Img} alt="Étape 4" />
+              <Image src={Hiw4Img} alt="Étape 4" className="object-cover" />
             </div>
           </div>
         </div>

@@ -117,7 +117,9 @@ export default function AffiliateTable({ affiliates }: Props) {
                       Copier le lien
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href={`/admin/membership/details/${affiliate.id}`}>
+                      <Link
+                        href={`/admin/membership/details/${affiliate.commercial_id}`}
+                      >
                         Voir détails
                       </Link>
                     </DropdownMenuItem>

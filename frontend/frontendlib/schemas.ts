@@ -82,6 +82,7 @@ export const authProjectSchema = z.object({
     .nonempty("Choisissez une catégorie"),
   custom_category_name: z
     .string("Entrer la catégorie qui correspond à votre projet")
+    .max(50, "Le nom de la catégorie ne peut pas dépasser 50 caractères")
     .optional(),
   project_title: z.string().nonempty("Entrez le nom du projet"),
   local_area_impact: z
@@ -133,7 +134,10 @@ export const userSchema = z.object({
 });
 
 export const categorySchema = z.object({
-  category_name: z.string().nonempty("Entrer le nom de la catégorie"),
+  category_name: z
+    .string()
+    .max(50, "Le nom de la catégorie ne peut pas dépasser 50 caractères")
+    .min(1, "Entrer le nom de la catégorie"),
 });
 
 export const createUserSchema = z.object({

@@ -66,7 +66,10 @@ export default function StatisticPage() {
       }
       return true;
     })
-    .sort((a, b) => b.total_votes - a.total_votes);
+    .sort(
+      (a: AdminProjectInfo, b: AdminProjectInfo) =>
+        b.total_votes - a.total_votes
+    );
 
   const chartData = ownerStats?.recent_projects?.map((project) => ({
     label: project.project_title,
@@ -85,10 +88,11 @@ export default function StatisticPage() {
             <h2 className="text-xl font-medium text-gray-800">
               Synthèse globale
             </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-3 md:pl-5 gap-2">
               <SynthesisCard
                 title="Total des votes reçus"
-                data={`${ownerStats?.vote_stats.total_vote_transactions}`}
+                data={`${ownerStats?.vote_stats.total_votes_purchased}`}
               />
               <SynthesisCard
                 title="Classement actuel"

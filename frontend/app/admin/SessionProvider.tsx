@@ -18,11 +18,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const setUserSession = useUserSessionStore((state) => state.setUserSession);
   const { data } = useQuery({
     queryKey: ["userSession"],
-    queryFn: () => createSession(),
-    //retry: false,
+    queryFn: () => fetchSession(),
+    retry: false,
   });
 
-  useEffect(() => {
+  /*  useEffect(() => {
     if (
       data &&
       "user_id" in data &&
@@ -33,8 +33,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     ) {
       setUserSession(data);
     }
-  }, [data, setUserSession]);
-  /* useEffect(() => {
+  }, [data, setUserSession]); */
+  useEffect(() => {
     if (data?.access) {
       try {
         const decoded = jwtDecode<any>(data.access);
@@ -50,7 +50,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         console.error("JWT decode failed", err);
       }
     }
-  }, [data, setUserSession]); */
+  }, [data, setUserSession]);
 
   return <>{children}</>;
 }

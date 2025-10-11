@@ -20,6 +20,7 @@ import {
 } from "@/services/projectService";
 import { toast } from "sonner";
 import { extractBackendErrors } from "@/frontendlib/utils/extractBackendErrors";
+import { AdminCategory } from "@/app/common/types/category";
 
 type Props = {
   projects: AdminProjectInfo[];
@@ -61,8 +62,9 @@ export default function AdminTable({ projects, categories }: Props) {
     setShowModal(true);
   };
   const findCategory = (project: AdminProjectInfo) => {
-    return categories?.find((cat) => cat.category_id === project.category_id)
-      .category_name;
+    return categories?.find(
+      (cat: AdminCategory) => cat.category_id === project.category_id
+    ).category_name;
   };
   return (
     <div className="bg-gray-50 px-4 py-8 rounded-xl overflow-x-auto w-screen md:w-full">

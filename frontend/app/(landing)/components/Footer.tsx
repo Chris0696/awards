@@ -70,7 +70,7 @@ export default function Footer() {
             <Link href={""}>Blog</Link>
             <Link href={""}>FAQ</Link>
             <Link href={""}>À propos</Link>
-            <Link href={""}>Contact</Link>
+            <Link href={"/contact-us"}>Contact</Link>
           </div>
         </div>
         <div className="flex justify-around md:hidden mt-10  w-full">
@@ -88,7 +88,7 @@ export default function Footer() {
               <Link href={""}>Blog</Link>
               <Link href={""}>FAQ</Link>
               <Link href={""}>À propos</Link>
-              <Link href={""}>Contact</Link>
+              <Link href={"/contact-us"}>Contact</Link>
             </div>
           </div>
         </div>

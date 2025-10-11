@@ -35,8 +35,9 @@ export default function Sidebar({
   const mutateLogout = useMutation({
     mutationFn: logoutUser,
     onSuccess: () => {
-      router.push("/");
       setUserSession(null);
+      router.push("/");
+
       if (setAdditionalInfo) setAdditionalInfo(null);
     },
     onError: (err) => {
@@ -73,6 +74,7 @@ export default function Sidebar({
           <Image
             src={"/LOGO.svg"}
             alt="Project Awards Logo"
+            className="object-cover"
             width={150}
             height={150}
           />
@@ -92,7 +94,7 @@ export default function Sidebar({
             <Image
               src={`${fixBackendUrl(userInfo?.image)}`}
               alt="Profil image"
-              className=" rounded-full w-10 h-10"
+              className=" rounded-full w-10 h-10 object-cover"
               width={80}
               height={80}
             />

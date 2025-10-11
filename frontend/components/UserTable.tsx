@@ -80,13 +80,17 @@ export default function UserTable({ users }: { users: User[] }) {
                 {user?.user_email}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user?.projects[0]?.project_title}{" "}
+                {user?.projects?.length > 0 ? (
+                  user?.projects[0]?.project_title
+                ) : (
+                  <span className="text-red-400">soumis mais pas publié</span>
+                )}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {formatDate(user.joined_date)}{" "}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                {user.projects[0]?.commercial
+                {user.projects.length > 0 && user?.projects[0]?.commercial
                   ? user?.projects[0]?.commercial?.full_name
                   : "-"}
               </td>

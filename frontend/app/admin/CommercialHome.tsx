@@ -83,14 +83,14 @@ export default function CommercialHome() {
         <h3 className="text-xl font-medium">Informations personnelles</h3>
         <div className="xl:flex space-x-4 xl:space-x-24 mt-8">
           <div className="flex items-center space-x-2">
-            <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
-              <Image
-                src={`${fixBackendUrl(userInfo?.image)}`}
-                alt="User avatar"
-                width={180}
-                height={180}
-              />
-            </div>
+            <Image
+              src={`${fixBackendUrl(userInfo?.image)}`}
+              alt="User avatar"
+              className="rounded-full w-16 h-16 object-cover"
+              width={180}
+              height={180}
+            />
+
             <h3 className="text-xl text-gray-800">{userInfo?.full_name}</h3>
           </div>
           <div className="flex flex-col space-y-4 xl:space-y-0 xl:flex-row xl:space-x-8">

@@ -88,7 +88,7 @@ export default function Table({ projects, isSecondProject }: Props) {
                 Auteur
               </th>
             )}
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500  uppercase tracking-wider">
               Catégorie
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -123,7 +123,7 @@ export default function Table({ projects, isSecondProject }: Props) {
                   {project.owner.full_name}
                 </td>
               )}
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+              <td className="px-6 py-4 text-gray-600 whitespace-normal max-w-[220px]">
                 {project.category.category_name}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">

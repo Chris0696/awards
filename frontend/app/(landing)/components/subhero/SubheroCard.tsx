@@ -9,7 +9,7 @@ export default function SubheroCard({ title, text, icon }: Infos) {
         alt="Light bulb filament icon"
         width={60}
         height={60}
-        className="mx-auto"
+        className="mx-auto object-cover"
       />
       <h3 className="text-xl font-medium text-gray-800 mt-8 mb-2">{title}</h3>
       <p className="text-gray-500 leading-5">{text}</p>

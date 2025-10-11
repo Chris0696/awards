@@ -1,3 +1,4 @@
+import { AdminCategory } from "@/app/common/types/category";
 import { AdminProjectInfo } from "@/app/common/types/project";
 import { fetchAdminCategories } from "@/services/categoryService";
 import { getProjectsToRank } from "@/services/statsService";
@@ -44,16 +45,17 @@ export default function StatsTable({
               className="hover:bg-white hover:rounded-full transition-colors"
             >
               <td className="px-6 py-4 text-gray-600 whitespace-normal max-w-[100px] ">
-                <p>{project.rank ? project.rank : 0} </p>
+                <p>{project.rank ? project.rank : idx + 1} </p>
               </td>
 
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {project.owner_name}
               </td>
-              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+              <td className="px-6 py-4 text-gray-600 whitespace-normal max-w-[200px] ">
                 {
                   categories?.data?.find(
-                    (cat) => cat.category_id === project.category_id
+                    (cat: AdminCategory) =>
+                      cat.category_id === project.category_id
                   ).category_name
                 }
               </td>
