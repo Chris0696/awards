@@ -103,7 +103,7 @@ export default function AdminProjectList() {
                 isSecondProject={isSecondProject}
                 projects={ownerProjects}
               />
-              {ownerProjects.length < 2 && (
+              {/*  {ownerProjects.length < 2 && (
                 <div className="mt-2">
                   <button
                     onClick={() => {
@@ -115,7 +115,7 @@ export default function AdminProjectList() {
                     <span>Soumettre un nouveau projet</span> <ChevronRight />
                   </button>
                 </div>
-              )}
+              )} */}
             </div>
           ) : (
             <div className="mt-28 text-center space-y-6">
