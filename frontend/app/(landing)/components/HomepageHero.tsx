@@ -7,11 +7,11 @@ export default function HomePageHero() {
   return (
     <section className="bg-primary grid grid-cols-1 md:grid-cols-2">
       <div className="flex items-center justify-center">
-        <div className=" px-24 h-auto py-8">
+        <div className="px-10 md:px-24 h-auto py-8">
           <h4 className="text-gray-200 mb-5 text-xl uppercase">
             Vous avez un projet qui mérite de voir le jour ?
           </h4>
-          <h2 className="text-gray-50 font-bold text-5xl">
+          <h2 className="text-gray-50 font-bold text-2xl md:text-5xl">
             Participez à{" "}
             <span className="text-secondary">Project Awards 2025</span> et
             faites découvrir votre idée au grand public !

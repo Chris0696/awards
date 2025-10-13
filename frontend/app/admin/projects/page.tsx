@@ -151,7 +151,7 @@ export default function AdminProjectList() {
             setSearch={setSearch}
           />
           <div>
-            <div className=" flex justify-end space-x-3  mb-5">
+            <div className=" flex flex-wrap justify-end space-y-3 sm:space-y-0 space-x-3  mb-5">
               {/* <label
                 htmlFor="adminProjectDate"
                 className="px-6 py-2 text-lg font-medium rounded-lg border border-primary text-primary cursor-pointer"
