@@ -103,6 +103,8 @@ class CustomErrorResponseMixin:
     # 💡 Règles de personnalisation dynamiques :
     CUSTOM_MESSAGES = {
         "This password is too short": "Votre mot de passe est trop court. Il doit contenir au moins 8 caractères.",
+        "Ensure this field has no more than 200 characters.": "Assurez-vous que ce champ ne comporte pas plus de 200 caractères.",
+        "Ensure this field has no more than 100 characters.": "Assurez-vous que ce champ ne comporte pas plus de 100 caractères.",
         "Ensure this field has at least": "Ce champ doit contenir au moins 8 caractères.",
         "This field may not be blank": "Ce champ ne peut pas être vide.",
         "This field is required": "Ce champ est obligatoire.",
