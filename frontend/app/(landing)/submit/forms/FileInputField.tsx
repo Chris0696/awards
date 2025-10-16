@@ -61,7 +61,9 @@ export default function FileInputField() {
         ) : (
           <div className="flex flex-col items-center justify-center w-full h-full">
             <Image src={CameraIcon} alt="Upload file" className="w-10 h-10" />
-            <span className="text-gray-500 mt-2">Ajouter une image</span>
+            <span className="text-gray-500 mt-2">
+              Ajouter une image ayant rapport avec votre projet{" "}
+            </span>
           </div>
         )}
       </label>
