@@ -715,7 +715,7 @@ class CommercialDashboardAPIView(generics.RetrieveAPIView):
         # Projets récents amenés
         recent_projects = Project.objects.filter(
             commercial=commercial
-        ).select_related('owner', 'category').order_by('-created_at')[:10]
+        ).select_related('owner', 'category').order_by('-created_at') # [:10]
         
         # Performance mensuelle (6 derniers mois)
         monthly_stats = []
@@ -770,7 +770,7 @@ class CommercialDashboardAPIView(generics.RetrieveAPIView):
                     'category': p.category.category_name,
                     'status': p.platform_status,
                     'votes': p.vote_count(),
-                    'created_at': p.created_at.strftime('%d/%m/%Y')
+                    'created_at': p.created_at #.strftime('%d/%m/%Y')
                 } for p in recent_projects
             ],
             'monthly_performance': monthly_stats[::-1]  # Inverser pour avoir chronologique
