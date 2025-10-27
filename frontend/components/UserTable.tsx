@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { User, useUserStore } from "@/stores/useUserStore";
+
 import ConfirmDeleteModal from "./modals/ConfirmDeleteModal";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -53,6 +53,9 @@ export default function UserTable({ users }: { users: User[] }) {
               Email
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Téléphone
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Projets soumis
             </th>
 
@@ -78,6 +81,10 @@ export default function UserTable({ users }: { users: User[] }) {
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {user?.user_email}{" "}
+              </td>
+              <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                {user?.country_code}
+                {user?.phone}
               </td>
               <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
                 {user?.projects?.length > 0 ? (
