@@ -29,7 +29,7 @@ export default function DiscoverProjects() {
 
       <div className="flex justify-center">
         <div className="flex flex-wrap gap-8 justify-center w-5/6">
-          {projects?.map((project, idx) => (
+          {projects?.slice(0, 6).map((project, idx) => (
             <ProjectCard key={idx} project={project} />
           ))}
         </div>
