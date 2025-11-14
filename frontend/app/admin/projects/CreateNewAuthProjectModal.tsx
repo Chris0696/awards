@@ -139,8 +139,10 @@ export default function CreateNewAuthProjectModal({
     formData.append("affiliate", "");
     formData.append("owner_project_status", String(data.owner_project_status));
 
-    if (data.image && data.image.length > 0) {
-      formData.append("image", data.image[0]);
+    if (data.image && !(typeof data.image === "string")) {
+      if (data.image.length > 0) {
+        formData.append("image", data.image[0]);
+      }
     }
 
     if (project) {
@@ -184,7 +186,7 @@ export default function CreateNewAuthProjectModal({
         image: adminProject.image,
         category_id: adminProject.category_id ?? "",
         project_title: adminProject.project_title ?? "",
-        local_area_impact: adminProject.local_area_impact ?? "Agla",
+        local_area_impact: adminProject.local_area_impact ?? "Aucun",
         estimated_budget: Number(adminProject.estimated_budget ?? undefined),
         description: adminProject.description ?? "",
         main_objective: adminProject.main_objective ?? "Main objective edited",

@@ -91,22 +91,23 @@ export const authProjectSchema = z.object({
   description: z.string().nonempty("Donnez une brève description du projet"),
   image: z
     .any()
+    .optional()
     .refine(
-      (files) => !files || files instanceof FileList,
+      (files) =>
+        !files || typeof files === "string" || files instanceof FileList,
       "L'image doit être un fichier valide"
     )
-    .refine(
-      (files) =>
-        !files || files.length === 0 || files[0].size < 5 * 1024 * 1024,
-      "Image trop lourde (max 5Mo)"
-    )
-    .refine(
-      (files) =>
-        !files ||
+    .refine((files) => {
+      if (!files || typeof files === "string") return true;
+      return files.length === 0 || files[0].size < 5 * 1024 * 1024;
+    }, "Image trop lourde (max 5Mo)")
+    .refine((files) => {
+      if (!files || typeof files === "string") return true;
+      return (
         files.length === 0 ||
-        ["image/jpeg", "image/png"].includes(files[0].type),
-      "Format invalide (JPEG/PNG uniquement)"
-    )
+        ["image/jpeg", "image/png"].includes(files[0].type)
+      );
+    }, "Format invalide (JPEG/PNG uniquement)")
     .optional(),
   solution: z.string().nonempty("Quel est le but du projet ?"),
   estimated_budget: z.coerce.number<number>(

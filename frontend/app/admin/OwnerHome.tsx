@@ -18,7 +18,7 @@ export default function OwnerHome() {
     isLoading: isLoadingProjects,
     isPending: isPendingProjects,
   } = useQuery({
-    queryKey: ["projects"],
+    queryKey: ["ownerProjects"],
     queryFn: () => getProjectsAsOwner(),
     enabled: user?.user_type === "owner",
   });
