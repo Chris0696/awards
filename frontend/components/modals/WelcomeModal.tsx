@@ -57,18 +57,18 @@ export default function WelcomeModal() {
           <p className="flex space-x-2">
             <Image src={OrangeCircle} alt="bullet-point" className="w-4 h-4" />
             <span>
-              Soumission des projets : du 6 Octobre au 20 Novembre 2025
+              Soumission des projets : du 1 Février au 30 Mars 2026
             </span>
           </p>
           <p className="flex space-x-2">
             <Image src={OrangeCircle} alt="bullet-point" className="w-4 h-4" />
             <span>
-              Votes en ligne : du 1er Décembre 2025 au 31 Janvier 2026
+              Votes en ligne : du 1er Avril 15 Mai 2026
             </span>
           </p>
           <p className="flex space-x-2">
             <Image src={OrangeCircle} alt="bullet-point" className="w-4 h-4" />
-            <span>Annonce des gagnants : Février 2026</span>
+            <span>Annonce des gagnants : Fin mai</span>
           </p>
         </div>
         <p>
