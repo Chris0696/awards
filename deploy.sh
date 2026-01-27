@@ -9,7 +9,7 @@ echo "🚀 Démarrage du déploiement..."
 
 # 1. Arrêter les conteneurs existants
 echo "📦 Arrêt des conteneurs existants..."
-docker-compose -f docker-compose.prod.yml down || true
+docker compose -f docker-compose.prod.yml down || true
 
 # 2. Créer les dossiers nécessaires
 echo "📁 Création des dossiers..."
