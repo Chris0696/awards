@@ -57,7 +57,7 @@ export default function WelcomeModal() {
           <p className="flex space-x-2">
             <Image src={OrangeCircle} alt="bullet-point" className="w-4 h-4" />
             <span>
-              Soumission des projets : du 1 Février au 30 Mars 2026
+              Soumission des projets : du 1er Février au 30 Mars 2026
             </span>
           </p>
           <p className="flex space-x-2">
