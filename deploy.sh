@@ -96,22 +96,22 @@ cp nginx/nginx.final.conf nginx/nginx.conf
 
 # 9. Construire et démarrer tous les services
 echo "🏗️  Construction des images..."
-docker-compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml build
 
 echo "🚀 Démarrage de tous les services..."
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 
 # 10. Vérifier le statut
 echo "📊 Vérification du statut..."
 sleep 15
-docker-compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml ps
 
 # 11. Tester la connectivité
 echo "🔍 Test de connectivité..."
 if curl -f -s -I https://$DOMAIN > /dev/null 2>&1; then
     echo "✅ Site accessible via HTTPS!"
 else
-    echo "⚠️  Vérifiez les logs avec : docker-compose -f docker-compose.prod.yml logs"
+    echo "⚠️  Vérifiez les logs avec : docker compose -f docker-compose.prod.yml logs"
 fi
 
 echo "✅ Déploiement terminé!"
@@ -136,7 +136,7 @@ docker run --rm \
 if [ $? -eq 0 ]; then
     echo "✅ Certificat vérifié/renouvelé avec succès"
     echo "🔄 Rechargement de nginx..."
-    docker-compose -f docker-compose.prod.yml exec nginx nginx -s reload
+    docker compose -f docker-compose.prod.yml exec nginx nginx -s reload
     echo "✅ Nginx rechargé"
 else
     echo "❌ Erreur lors du renouvellement"
@@ -155,6 +155,6 @@ rm -f nginx/nginx.temp.conf nginx/nginx.final.conf
 echo ""
 echo "🎉 Déploiement terminé avec succès!"
 echo "📋 Commandes utiles :"
-echo "  - Voir les logs: docker-compose -f docker-compose.prod.yml logs"
-echo "  - Redémarrer: docker-compose -f docker-compose.prod.yml restart"
-echo "  - Arrêter: docker-compose -f docker-compose.prod.yml down"
+echo "  - Voir les logs: docker compose -f docker-compose.prod.yml logs"
+echo "  - Redémarrer: docker compose -f docker-compose.prod.yml restart"
+echo "  - Arrêter: docker compose -f docker-compose.prod.yml down"
