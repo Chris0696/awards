@@ -19,7 +19,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      # 8001 sur l'hôte pour éviter conflit avec un autre projet sur 8000
+      - "8001:8000"
     depends_on:
       - postgres_db
     volumes:
@@ -49,6 +50,8 @@ services:
       - .env
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:8000
+      # URL du backend pour le navigateur (depuis l’hôte = localhost:8001)
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8001/api/v1/
     networks: # Ajouté le réseau manquant
       - awards-bridge
 

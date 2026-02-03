@@ -1,4 +1,8 @@
 How to build and run docker containers:
+
+Backend exposé sur le port 8001 (au lieu de 8000) pour éviter les conflits avec un autre projet.
+API backend accessible en local sur http://localhost:8001
+
 1. Build docker images: docker compose -f docker-compose.yml build
 2. Start docker containers: docker compose -f docker-compose.yml up -d
 3. Run web container scripts (not mandatory):

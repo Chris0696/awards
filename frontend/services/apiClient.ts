@@ -5,9 +5,11 @@ export type BackendError = {
 import { clearTokens, getTokens } from "./session";
 
 const isProd = process.env.NODE_ENV === "production";
-const baseURL = isProd
-  ? process.env.NEXT_PUBLIC_PROD_BACKEND_URL
-  : process.env.NEXT_PUBLIC_BACKEND_URL;
+const baseURL =
+  isProd
+    ? process.env.NEXT_PUBLIC_PROD_BACKEND_URL
+    : process.env.NEXT_PUBLIC_BACKEND_URL ||
+      "http://localhost:8001/api/v1/"; /* fallback si backend sur 8001 */
 
 const apiClient = axios.create({
   baseURL,

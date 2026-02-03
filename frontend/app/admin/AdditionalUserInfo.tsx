@@ -9,11 +9,14 @@ export default function AdditionalUserInfo({
   children: React.ReactNode;
 }) {
   const user = useUserSessionStore((state) => state.user);
+  const userId = user?.user_id;
+  const hasValidUserId =
+    userId != null && !Number.isNaN(Number(userId)) && Number(userId) > 0;
 
   const { data } = useQuery({
-    queryKey: ["userInfo"],
-    queryFn: () => getUserInfo(Number(user?.user_id)),
-    enabled: !!user,
+    queryKey: ["userInfo", userId],
+    queryFn: () => getUserInfo(Number(userId)),
+    enabled: !!user && hasValidUserId,
   });
   useEffect(() => {
     if (data) {

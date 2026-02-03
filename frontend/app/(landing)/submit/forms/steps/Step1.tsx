@@ -6,6 +6,7 @@ import PasswordField from "../PasswordField";
 import PhoneNumberField from "../PhoneNumberField";
 import TextField from "../TextField";
 import { useUserSessionStore } from "@/stores/useUserSessionStore";
+import { getUserInfo } from "@/services/userService";
 import { toast } from "sonner";
 
 interface Props {
@@ -54,10 +55,16 @@ export default function Step1({ setStep }: Props) {
         <button
           type="button"
           onClick={async () => {
-            if (user) {
-              return toast.error(
-                "Vous avez déjà un compte! Ajouter un nouveau projet depuis l'espace admin"
-              );
+            if (user?.user_id) {
+              try {
+                await getUserInfo(user.user_id);
+                return toast.error(
+                  "Vous avez déjà un compte! Ajouter un nouveau projet depuis l'espace admin"
+                );
+              } catch {
+                // Token invalide ou compte supprimé en base : on efface la session et on laisse continuer
+                setUserSession(null);
+              }
             }
             const valid = await trigger([
               "full_name",

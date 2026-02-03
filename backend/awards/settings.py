@@ -40,8 +40,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://awardprojectvoting.scarsoft.net',
     'https://projectawards.scarsoft.net',
     'http://localhost:8000',
+    'http://localhost:8001',
     'http://localhost:3000',
     'http://127.0.0.1:8000',
+    'http://127.0.0.1:8001',
     'http://185.98.136.244',
     'http://vps114277.serveur-vps.net',
 ]
