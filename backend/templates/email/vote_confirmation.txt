@@ -1,0 +1,8 @@
+Bonjour {{ voter_name }},
+
+Merci pour votre vote !
+
+Votre vote a bien été enregistré pour le projet « {{ project_title }} » ({{ vote_count }} vote(s)).
+{% if payment_reference %}Référence de paiement : {{ payment_reference }}{% endif %}
+
+— L'équipe Project Awards

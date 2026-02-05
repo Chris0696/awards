@@ -1,0 +1,7 @@
+Bonjour {{ full_name }},
+
+Bonne nouvelle : votre projet « {{ project_title }} » a été validé et est désormais publié sur Project Awards.
+
+Vous pouvez le consulter et le partager depuis votre espace admin.
+
+— L'équipe Project Awards

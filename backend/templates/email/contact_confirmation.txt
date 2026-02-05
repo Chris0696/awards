@@ -1,0 +1,7 @@
+Bonjour {{ full_name }},
+
+Nous avons bien reçu votre message (sujet : {{ subject }}).
+
+Notre équipe vous répondra dans les meilleurs délais.
+
+— L'équipe Project Awards

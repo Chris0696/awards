@@ -562,6 +562,12 @@ class ContactMessageListCreateView(CustomFormatErrorResponseMixin, generics.List
             return [permissions.IsAdminUser()]
         return [permissions.AllowAny()]
 
+    def perform_create(self, serializer):
+        contact_message = serializer.save()
+        from userauths.utils import send_contact_notification_to_admin, send_contact_confirmation_to_sender
+        send_contact_notification_to_admin(contact_message)
+        send_contact_confirmation_to_sender(contact_message)
+
 
 class ContactMessageDetailView(CustomFormatErrorResponseMixin, generics.RetrieveDestroyAPIView):
     """
