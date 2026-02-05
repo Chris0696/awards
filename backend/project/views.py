@@ -225,6 +225,18 @@ class ProjectAdminViewSet(viewsets.ModelViewSet):
         project.validated_at = timezone.now()
         project.save()
         
+        try:
+            from userauths.utils import send_project_validated_email
+            owner = project.owner
+            if owner and owner.user:
+                send_project_validated_email(
+                    owner.user.email,
+                    owner.full_name or owner.user.full_name,
+                    getattr(project, 'project_title', None) or str(project),
+                )
+        except Exception as e:
+            logging.getLogger(__name__).exception("Envoi email projet validé: %s", e)
+        
         return Response({
             'message': 'Projet validé et publié avec succès',
             'project': self.get_serializer(project).data
@@ -244,6 +256,19 @@ class ProjectAdminViewSet(viewsets.ModelViewSet):
         project.platform_status = 'rejete'
         project.admin_comment = comment
         project.save()
+        
+        try:
+            from userauths.utils import send_project_rejected_email
+            owner = project.owner
+            if owner and owner.user:
+                send_project_rejected_email(
+                    owner.user.email,
+                    owner.full_name or owner.user.full_name,
+                    getattr(project, 'project_title', None) or str(project),
+                    comment,
+                )
+        except Exception as e:
+            logging.getLogger(__name__).exception("Envoi email projet rejeté: %s", e)
         
         return Response({
             'message': 'Projet rejeté',
@@ -845,9 +870,20 @@ class VoteAndPaymentCreateAPIView(CustomErrorResponseMixin, generics.CreateAPIVi
             # Message selon le statut du paiement
             if vote.active:
                 message = _('Vote créé et validé avec succès')
+                try:
+                    from userauths.utils import send_vote_confirmation_email
+                    project_title = getattr(vote.project, 'project_title', None) or str(vote.project)
+                    send_vote_confirmation_email(
+                        vote.voter_email,
+                        getattr(vote, 'voter_name', None) or vote.voter_email,
+                        project_title,
+                        getattr(vote, 'vote_count', 1),
+                        getattr(vote, 'payment_reference', None),
+                    )
+                except Exception as e:
+                    logging.getLogger(__name__).exception("Envoi email confirmation vote: %s", e)
             else:
                 message = _('Vote créé, en attente de validation du paiement')
-                
                 
             return Response({
                 'success': True,

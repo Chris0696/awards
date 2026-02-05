@@ -2,7 +2,19 @@ import axios from "axios";
 export type BackendError = {
   error: string[];
 };
-import { clearTokens, getTokens } from "./session";
+import { clearTokens } from "./session";
+
+/** Récupère le token d'accès via l'API route (évite Server Action dont l'ID peut devenir invalide en dev). */
+async function getAccessToken(): Promise<string | null> {
+  try {
+    const res = await fetch("/api/v1/auth/session", { credentials: "include" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.access ?? null;
+  } catch {
+    return null;
+  }
+}
 
 const isProd = process.env.NODE_ENV === "production";
 const baseURL =
@@ -24,8 +36,7 @@ function onRefreshed(token: string) {
 }
 
 apiClient.interceptors.request.use(async (config) => {
-  const tokens = await getTokens();
-  const access = tokens.access;
+  const access = await getAccessToken();
   if (access) {
     config.headers.Authorization = `Bearer ${access}`;
   }

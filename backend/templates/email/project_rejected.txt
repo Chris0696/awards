@@ -1,0 +1,10 @@
+Bonjour {{ full_name }},
+
+Votre projet « {{ project_title }} » a été examiné par notre équipe. Malheureusement, il ne peut pas être publié en l'état.
+
+Commentaire de l'équipe :
+{{ admin_comment }}
+
+Vous pouvez modifier votre projet et le soumettre à nouveau depuis votre espace admin. Pour toute question, n'hésitez pas à nous contacter.
+
+— L'équipe Project Awards

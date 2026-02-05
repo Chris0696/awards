@@ -1,0 +1,13 @@
+Nouveau message reçu via le formulaire de contact Project Awards
+
+De : {{ full_name }}
+Email : {{ email }}
+Téléphone : {{ phone }}
+Sujet : {{ subject }}
+Date : {{ created_at }}
+
+Message :
+{{ message }}
+
+—
+Ce message a été envoyé depuis le formulaire de contact du site.

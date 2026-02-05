@@ -1,0 +1,7 @@
+Bonjour {{ full_name }},
+
+Votre projet « {{ project_title }} » a bien été soumis et enregistré.
+
+Il est en attente de validation par notre équipe. Vous serez notifié par email dès que le projet sera validé ou si des modifications sont demandées.
+
+— L'équipe Project Awards

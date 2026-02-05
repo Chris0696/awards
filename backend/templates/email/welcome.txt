@@ -1,0 +1,9 @@
+Bonjour {{ full_name }},
+
+Bienvenue sur Project Awards !
+
+Votre compte a été créé avec succès. Vous pouvez vous connecter pour soumettre ou gérer vos projets et participer aux votes.
+
+À bientôt sur Project Awards !
+
+— L'équipe Project Awards

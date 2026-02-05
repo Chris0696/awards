@@ -200,6 +200,25 @@ class RegisterSerializer(serializers.ModelSerializer):
             print(f"✅ DEBUG - Projet créé: {project.project_id}")
 
 
+        # Envoi des emails après commit (évite timeout DB si SMTP est lent)
+        user_email = user.email
+        user_full_name = user.full_name or user_email.split("@")[0]
+        project_title = None
+        if project:
+            project_title = getattr(project, "project_title", None) or getattr(project, "title", "Votre projet")
+
+        def _send_registration_emails():
+            try:
+                from userauths.utils import send_welcome_email, send_project_submitted_confirmation
+                send_welcome_email(user_email, user_full_name)
+                if project_title:
+                    send_project_submitted_confirmation(user_email, user_full_name, project_title)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).exception("Envoi email inscription/soumission: %s", e)
+
+        transaction.on_commit(_send_registration_emails)
+
         # Retourner les données
         response_data = {
             'user': {

@@ -62,14 +62,32 @@ else:
     BASE_URL = os.environ.get('BASE_URL', 'https://projectawards.scarsoft.net')
 
 
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND') or 'django.core.mail.backends.console.EmailBackend'
+_raw_from = os.environ.get('DEFAULT_FROM_EMAIL') or 'noreply@projectawards.local'
+# S'assurer que le format "Nom <email>" a bien un > fermant (évite rejets SMTP)
+if _raw_from.count("<") == 1 and not _raw_from.strip().endswith(">"):
+    _raw_from = _raw_from.rstrip() + ">"
+DEFAULT_FROM_EMAIL = _raw_from
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
-EMAIL_PORT = os.environ.get('EMAIL_PORT')
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
+
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587)) if os.environ.get('EMAIL_PORT') else 587
+
+# Port 465 = SSL dès la connexion (EMAIL_USE_SSL). Port 587 = STARTTLS (EMAIL_USE_TLS).
+_email_use_ssl = os.environ.get('EMAIL_USE_SSL', '').lower() in ('true', '1', 'yes')
+EMAIL_USE_SSL = _email_use_ssl
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', '').lower() in ('true', '1', 'yes') if not _email_use_ssl else False
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+# Email de destination pour les notifications admin (ex. formulaire contact)
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL') or os.environ.get('DEFAULT_FROM_EMAIL') or 'contact@projectawards.local'
 
+print("EMAIL_HOST :", EMAIL_HOST)
+print("EMAIL_PORT :", EMAIL_PORT)
+print("EMAIL_USE_SSL :", EMAIL_USE_SSL)
+print("EMAIL_USE_TLS :", EMAIL_USE_TLS)
+print("EMAIL_HOST_USER :", EMAIL_HOST_USER)
+print("EMAIL_HOST_PASSWORD :", EMAIL_HOST_PASSWORD)
+print("ADMIN_EMAIL :", ADMIN_EMAIL)
 
 # ALLOWED_HOSTS configuration
 # if DEBUG:
