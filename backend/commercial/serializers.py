@@ -143,14 +143,25 @@ class AdminCommercialRegisterSerializer(serializers.ModelSerializer):
                 is_active=True
             )
 
-            # Si c'est un commercial, créer l'entrée correspondante dans le modèle Commercial
+            # Si c'est un commercial, créer l'entrée correspondante et envoyer l'email
             if user_type == 'commercial':
-                Commercial.objects.create(
+                commercial = Commercial.objects.create(
                     user=user,
                     full_name=user.username or user.email.split('@')[0],
                     phone=validated_data['phone'],
                     commission_rate=10.00
                 )
+                try:
+                    from userauths.utils import send_commercial_welcome_email
+                    send_commercial_welcome_email(
+                        user.email,
+                        commercial.full_name,
+                        password,
+                        commercial.affiliate_link,
+                    )
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).exception("Envoi email commercial: %s", e)
 
             return user
         except Exception as e:

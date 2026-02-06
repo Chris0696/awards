@@ -15,6 +15,7 @@
 | Inscription : bienvenue + confirmation soumission projet | `api/serializers.py` `RegisterSerializer.create` | `email/welcome.*`, `email/project_submitted.*` |
 | Projet validé / rejeté : email au porteur | `project/views.py` `validate_project`, `reject_project` | `email/project_validated.*`, `email/project_rejected.*` |
 | Vote validé : confirmation au votant | `project/views.py` `VoteAndPaymentCreateAPIView.create` | `email/vote_confirmation.*` |
+| Création commercial (admin) : identifiants + lien d'affiliation | `commercial/serializers.py` `AdminCommercialRegisterSerializer.create` | `email/commercial_welcome.*` |
 
 ## Optionnel `.env`
 

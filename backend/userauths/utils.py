@@ -205,3 +205,23 @@ def send_vote_confirmation_email(voter_email, voter_name, project_title, vote_co
         return False
     subject = f"Confirmation de votre vote - {project_title} - Project Awards"
     return _send_email([voter_email], subject, text_body, html_body)
+
+
+# --- Création commercial (admin) ---
+
+def send_commercial_welcome_email(user_email, full_name, password, affiliate_link):
+    """Email au nouveau commercial : identifiants et lien d'affiliation."""
+    context = {
+        "full_name": full_name or user_email.split("@")[0],
+        "user_email": user_email,
+        "password": password,
+        "affiliate_link": affiliate_link or "",
+    }
+    try:
+        text_body = render_to_string("email/commercial_welcome.txt", context)
+        html_body = render_to_string("email/commercial_welcome.html", context)
+    except Exception as e:
+        logger.exception("Template commercial_welcome: %s", e)
+        return False
+    subject = "Votre compte commercial - Project Awards"
+    return _send_email([user_email], subject, text_body, html_body)

@@ -1,0 +1,16 @@
+Bonjour {{ full_name }},
+
+Votre compte commercial sur Project Awards a été créé par l'équipe.
+
+Identifiants de connexion :
+- Email : {{ user_email }}
+- Mot de passe : {{ password }}
+
+Nous vous recommandons de modifier votre mot de passe après votre première connexion (page Mot de passe oublié si besoin).
+
+Lien d'affiliation (à partager pour inviter des porteurs de projet) :
+{{ affiliate_link }}
+
+Vous pouvez vous connecter sur le site pour accéder à votre espace et suivre vos statistiques.
+
+— L'équipe Project Awards
