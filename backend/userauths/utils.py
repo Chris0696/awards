@@ -223,5 +223,5 @@ def send_commercial_welcome_email(user_email, full_name, password, affiliate_lin
     except Exception as e:
         logger.exception("Template commercial_welcome: %s", e)
         return False
-    subject = "Votre compte commercial - Project Awards"
+    subject = "Votre compte ambassadeur - Project Awards"
     return _send_email([user_email], subject, text_body, html_body)

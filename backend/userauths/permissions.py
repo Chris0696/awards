@@ -27,7 +27,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
 class IsCommercialOrAdmin(permissions.BasePermission):
     """
-    Permission pour les commerciaux et administrateurs
+    Permission pour les ambassadeurs et administrateurs
     """
     def has_permission(self, request, view):
         return (request.user.user_type in ['commercial', 'admin'] or 

@@ -112,7 +112,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             except Commercial.MultipleObjectsReturned:
                 raise serializers.ValidationError({
                     "error": {
-                        "affiliate": [_("Plusieurs commerciaux correspondent à ce lien d'affiliation.")]
+                        "affiliate": [_("Plusieurs ambassadeurs correspondent à ce lien d'affiliation.")]
                     }
                     })
 
@@ -352,7 +352,7 @@ class RegisterOwnerWithPaymentSerializer(serializers.ModelSerializer):
             except Commercial.MultipleObjectsReturned:
                 raise serializers.ValidationError({
                     "error": {
-                        "affiliate": [_("Plusieurs commerciaux correspondent à ce lien d'affiliation.")]
+                        "affiliate": [_("Plusieurs ambassadeurs correspondent à ce lien d'affiliation.")]
                     }
                     })
         

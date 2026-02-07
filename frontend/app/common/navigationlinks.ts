@@ -41,7 +41,7 @@ export const dashboardlinks = [
     canCommercialAccess: false,
   },
   {
-    page: "Commerciaux",
+    page: "Ambassadeurs",
     url: "/admin/membership",
     isRequireAdmin: true,
     canCommercialAccess: false,

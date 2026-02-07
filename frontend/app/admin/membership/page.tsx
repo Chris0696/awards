@@ -53,7 +53,7 @@ export default function page() {
           className="bg-primary py-4 px-4 text-white rounded-lg text-lg flex items-center cursor-pointer hover:bg-white hover:border hover:border-primary hover:text-primary
         "
         >
-          <span>Créer un affilié (Commerciaux)</span> <ChevronRightIcon />
+          <span>Créer un affilié (Ambassadeurs)</span> <ChevronRightIcon />
         </button>
       </div>
       {filteredList?.length > 0 ? (
@@ -69,7 +69,7 @@ export default function page() {
       <AddGdChildModal
         user_type="commercial"
         title="Affiliés"
-        description="Créer un affilié (Commerciaux)"
+        description="Créer un affilié (Ambassadeurs)"
         showModal={showModal}
         setShowModal={setShowModal}
       />

@@ -160,7 +160,7 @@ def send_commercial_welcome_whatsapp(phone, full_name, user_email, password, aff
         print(f"📱 WhatsApp commercial: numéro non normalisable (reçu: {str(phone)[:4]}***)")
         return False
     body = (
-        f"Bonjour {full_name} ! Votre compte commercial Project Awards a été créé. "
+        f"Bonjour {full_name} ! Votre compte ambassadeur Project Awards a été créé. "
         f"Email: {user_email} | Mot de passe: {password}. "
         f"Lien d'affiliation: {affiliate_link or '—'}. "
         "Changez votre mot de passe après la 1ère connexion. - L'équipe Project Awards"

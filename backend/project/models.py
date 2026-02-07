@@ -404,7 +404,7 @@ class Commercial(models.Model):
 
     class Meta:
         verbose_name = _("Commercial")
-        verbose_name_plural = _("Commerciaux")
+        verbose_name_plural = _("Ambassadeurs")
     
 class AffiliateClick(models.Model):
     """

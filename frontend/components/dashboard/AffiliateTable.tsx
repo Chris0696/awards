@@ -142,7 +142,7 @@ export default function AffiliateTable({ affiliates }: Props) {
       <AddGdChildModal
         user_type="commercial"
         title="Affiliés"
-        description="Mettre à jour un affilié (Commerciaux)"
+        description="Mettre à jour un affilié (Ambassadeurs)"
         showModal={showModal}
         setShowModal={setShowModal}
         member={selectedMember}

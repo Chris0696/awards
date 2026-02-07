@@ -419,7 +419,7 @@ class AdminDashboardAPIView(generics.RetrieveAPIView):
         top_categories = list(top_categories_qs.values('category_name', 'project_count', 'slug', 'total_votes'))
 
         
-        # Top commerciaux — somme des vote_count de leurs projets
+        # Top ambassadeurs — somme des vote_count de leurs projets
         # top_commercials_qs = Commercial.objects.annotate(
         #     projects_brought=Count('project'),
         #     total_votes=Sum('project__vote__vote_count', filter=Q(project__vote__active=True))

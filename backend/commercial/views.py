@@ -43,7 +43,7 @@ class CommercialDetailView(generics.RetrieveUpdateAPIView):
 #     def get_queryset(self):
 #         return User.objects.filter(user_type__in=['admin', 'commercial'])
 
-#     # GET: Lister tous les admins et commerciaux
+#     # GET: Lister tous les admins et ambassadeurs
 #     def get(self, request, *args, **kwargs):
 #         queryset = self.get_queryset()
 #         users_data = []
@@ -134,7 +134,7 @@ class CommercialDetailView(generics.RetrieveUpdateAPIView):
 #             errors = [str(detail)]
 #         return errors
 
-#     # GET: Lister tous les admins et commerciaux
+#     # GET: Lister tous les admins et ambassadeurs
 #     def get(self, request, *args, **kwargs):
 #         try:
 #             queryset = self.get_queryset()
@@ -257,7 +257,7 @@ class CommercialDetailView(generics.RetrieveUpdateAPIView):
 
 class AdminCommercialView(CustomErrorResponseMixin, generics.GenericAPIView):
     """
-    Vue pour gérer les Admins et Commerciaux :
+    Vue pour gérer les Admins et Ambassadeurs :
     - GET : Liste complète
     - POST : Création
     - PUT/PATCH : Mise à jour
@@ -537,7 +537,7 @@ class CommercialClickStatsView(generics.RetrieveAPIView):
 #             return AdminUserListSerializer
 
 #     def list(self, request, *args, **kwargs):
-#         """Lister tous les admins et commerciaux"""
+#         """Lister tous les admins et ambassadeurs"""
 #         try:
 #             queryset = self.get_queryset()
 
@@ -666,7 +666,7 @@ class CommercialClickStatsView(generics.RetrieveAPIView):
 #                 }, status=status.HTTP_404_NOT_FOUND)
             
 #             if user.user_type == 'commercial' and hasattr(user, 'commercial'):
-#                 # Pour les commerciaux, synchroniser User et Commercial
+#                 # Pour les ambassadeurs, synchroniser User et Commercial
 #                 commercial = user.commercial
 #                 commercial.is_active = not commercial.is_active
 #                 commercial.save()
@@ -728,7 +728,7 @@ class CommercialClickStatsView(generics.RetrieveAPIView):
 
 #     @action(detail=False, methods=['get'])
 #     def stats(self, request):
-#         """Statistiques des admins et commerciaux"""
+#         """Statistiques des admins et ambassadeurs"""
 #         try:
 #             total_admins = User.objects.filter(user_type='admin').count()
 #             active_admins = User.objects.filter(user_type='admin', is_active=True).count()
