@@ -81,6 +81,16 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 # Email de destination pour les notifications admin (ex. formulaire contact)
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL') or os.environ.get('DEFAULT_FROM_EMAIL') or 'contact@projectawards.local'
 
+# WhatsApp (Twilio) - optionnel, envoi de notifications en parallèle des emails
+_def_wa = (os.environ.get('WHATSAPP_ENABLED') or '').strip().lower()
+WHATSAPP_ENABLED = _def_wa in ('true', '1', 'yes')
+TWILIO_ACCOUNT_SID = (os.environ.get('TWILIO_ACCOUNT_SID') or '').strip()
+TWILIO_AUTH_TOKEN = (os.environ.get('TWILIO_AUTH_TOKEN') or '').strip()
+# Numéro Twilio au format whatsapp:+14155238886 (sandbox) ou votre numéro vérifié
+TWILIO_WHATSAPP_FROM = (os.environ.get('TWILIO_WHATSAPP_FROM') or '').strip()
+# Code pays par défaut si le numéro n'a pas d'indicatif (ex. +229 pour Bénin)
+WHATSAPP_DEFAULT_COUNTRY_CODE = (os.environ.get('WHATSAPP_DEFAULT_COUNTRY_CODE') or '+229').strip()
+
 print("EMAIL_HOST :", EMAIL_HOST)
 print("EMAIL_PORT :", EMAIL_PORT)
 print("EMAIL_USE_SSL :", EMAIL_USE_SSL)

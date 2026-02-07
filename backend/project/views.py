@@ -236,6 +236,18 @@ class ProjectAdminViewSet(viewsets.ModelViewSet):
                 )
         except Exception as e:
             logging.getLogger(__name__).exception("Envoi email projet validé: %s", e)
+        try:
+            from userauths.whatsapp import send_project_validated_whatsapp
+            owner = project.owner
+            if owner and getattr(owner, 'phone', None):
+                send_project_validated_whatsapp(
+                    owner.phone,
+                    owner.full_name or (owner.user.full_name if owner.user else ''),
+                    getattr(project, 'project_title', None) or str(project),
+                    getattr(owner, 'country_code', None),
+                )
+        except Exception as e:
+            logging.getLogger(__name__).exception("Envoi WhatsApp projet validé: %s", e)
         
         return Response({
             'message': 'Projet validé et publié avec succès',
@@ -269,6 +281,19 @@ class ProjectAdminViewSet(viewsets.ModelViewSet):
                 )
         except Exception as e:
             logging.getLogger(__name__).exception("Envoi email projet rejeté: %s", e)
+        try:
+            from userauths.whatsapp import send_project_rejected_whatsapp
+            owner = project.owner
+            if owner and getattr(owner, 'phone', None):
+                send_project_rejected_whatsapp(
+                    owner.phone,
+                    owner.full_name or (owner.user.full_name if owner.user else ''),
+                    getattr(project, 'project_title', None) or str(project),
+                    comment,
+                    getattr(owner, 'country_code', None),
+                )
+        except Exception as e:
+            logging.getLogger(__name__).exception("Envoi WhatsApp projet rejeté: %s", e)
         
         return Response({
             'message': 'Projet rejeté',
@@ -882,6 +907,17 @@ class VoteAndPaymentCreateAPIView(CustomErrorResponseMixin, generics.CreateAPIVi
                     )
                 except Exception as e:
                     logging.getLogger(__name__).exception("Envoi email confirmation vote: %s", e)
+                try:
+                    from userauths.whatsapp import send_vote_confirmation_whatsapp
+                    if getattr(vote, 'phone', None):
+                        send_vote_confirmation_whatsapp(
+                            vote.phone,
+                            getattr(vote, 'voter_name', None) or vote.voter_email,
+                            project_title,
+                            getattr(vote, 'vote_count', 1),
+                        )
+                except Exception as e:
+                    logging.getLogger(__name__).exception("Envoi WhatsApp confirmation vote: %s", e)
             else:
                 message = _('Vote créé, en attente de validation du paiement')
                 

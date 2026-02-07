@@ -567,6 +567,16 @@ class ContactMessageListCreateView(CustomFormatErrorResponseMixin, generics.List
         from userauths.utils import send_contact_notification_to_admin, send_contact_confirmation_to_sender
         send_contact_notification_to_admin(contact_message)
         send_contact_confirmation_to_sender(contact_message)
+        try:
+            from userauths.whatsapp import send_contact_confirmation_whatsapp
+            if contact_message.phone:
+                send_contact_confirmation_whatsapp(
+                    contact_message.phone,
+                    contact_message.full_name,
+                    contact_message.subject,
+                )
+        except Exception as e:
+            logger.exception("Envoi WhatsApp confirmation contact: %s", e)
 
 
 class ContactMessageDetailView(CustomFormatErrorResponseMixin, generics.RetrieveDestroyAPIView):

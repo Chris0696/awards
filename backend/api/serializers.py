@@ -217,7 +217,20 @@ class RegisterSerializer(serializers.ModelSerializer):
                 import logging
                 logging.getLogger(__name__).exception("Envoi email inscription/soumission: %s", e)
 
+        def _send_registration_whatsapp():
+            if not phone:
+                return
+            try:
+                from userauths.whatsapp import send_welcome_whatsapp, send_project_submitted_whatsapp
+                send_welcome_whatsapp(phone, user_full_name, country_code)
+                if project_title:
+                    send_project_submitted_whatsapp(phone, user_full_name, project_title, country_code)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).exception("Envoi WhatsApp inscription/soumission: %s", e)
+
         transaction.on_commit(_send_registration_emails)
+        transaction.on_commit(_send_registration_whatsapp)
 
         # Retourner les données
         response_data = {

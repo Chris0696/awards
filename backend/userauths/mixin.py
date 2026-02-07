@@ -109,7 +109,9 @@ class CustomErrorResponseMixin:
         "This field may not be blank": "Ce champ ne peut pas être vide.",
         "This field is required": "Ce champ est obligatoire.",
         "Enter a valid email address": "Veuillez entrer une adresse e-mail valide.",
-        "password": "Le mot de passe doit contenir au moins 8 caractères, chiffres et lettres compris."
+        "password": "Le mot de passe doit contenir au moins 8 caractères, chiffres et lettres compris.",
+        "user with this email already exists.": "Cet email est déjà utilisé.",
+        "user with this email already exists": "Cet email est déjà utilisé.",
     }
 
     def format_error_response(self, errors):

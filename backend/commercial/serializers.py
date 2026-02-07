@@ -1,11 +1,13 @@
 
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from project.models import AffiliateClick, Commercial
 from django.utils.translation import gettext_lazy as _
 import re
 from userauths.models import User, USER_TYPES
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
+from django.db.utils import IntegrityError
 from django.core.validators import RegexValidator
 
 from django.utils import timezone
@@ -69,6 +71,15 @@ class CommercialSerializer(serializers.ModelSerializer):
 
 
 class AdminCommercialRegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        required=True,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message=_("Cet email est déjà utilisé."),
+            )
+        ],
+    )
     phone = serializers.CharField(max_length=25, required=True)
     user_type = serializers.ChoiceField(choices=USER_TYPES, required=True)
     password = serializers.CharField(
@@ -127,7 +138,13 @@ class AdminCommercialRegisterSerializer(serializers.ModelSerializer):
         if value not in allowed_types:
             raise serializers.ValidationError([_("Le type d'utilisateur doit être 'admin' ou 'commercial'.")])
         return value
-    
+
+    def validate_username(self, value):
+        username = (value or "").strip()
+        if username and User.objects.filter(username=username).exists():
+            raise serializers.ValidationError(_("Ce nom d'utilisateur est déjà utilisé."))
+        return username or (value or "")
+
     def create(self, validated_data):
         try:
             user_type = validated_data.pop('user_type')
@@ -162,11 +179,58 @@ class AdminCommercialRegisterSerializer(serializers.ModelSerializer):
                 except Exception as e:
                     import logging
                     logging.getLogger(__name__).exception("Envoi email commercial: %s", e)
+                try:
+                    import logging as _log
+                    _log_commercial = _log.getLogger(__name__)
+                    from userauths.whatsapp import send_commercial_welcome_whatsapp
+                    phone_raw = validated_data.get('phone')
+                    # Toujours afficher dans le terminal (Docker n'affiche pas toujours logger.info)
+                    print(f"📱 [Commercial] WhatsApp: phone_raw={'***' + str(phone_raw)[-4:] if phone_raw else 'VIDE'}")
+                    if phone_raw:
+                        _log_commercial.info("Tentative envoi WhatsApp commercial pour %s", commercial.full_name)
+                        ok = send_commercial_welcome_whatsapp(
+                            phone_raw,
+                            commercial.full_name,
+                            user.email,
+                            password,
+                            commercial.affiliate_link,
+                        )
+                        if not ok:
+                            print("📱 [Commercial] WhatsApp non envoyé (config, numéro invalide ou erreur Twilio).")
+                            _log_commercial.warning("WhatsApp commercial non envoyé (config désactivée, numéro invalide ou erreur Twilio). Vérifier les logs ci-dessus.")
+                        else:
+                            print("📱 [Commercial] WhatsApp envoyé avec succès.")
+                    else:
+                        print("📱 [Commercial] WhatsApp ignoré: pas de numéro fourni dans la requête.")
+                        _log_commercial.debug("WhatsApp commercial ignoré: pas de numéro fourni.")
+                except Exception as e:
+                    import logging
+                    print(f"📱 [Commercial] Erreur WhatsApp: {e}")
+                    logging.getLogger(__name__).exception("Envoi WhatsApp commercial: %s", e)
 
             return user
-        except Exception as e:
+        except IntegrityError as e:
+            err_msg = str(e).lower()
+            if "username" in err_msg and ("unique" in err_msg or "key" in err_msg):
+                raise serializers.ValidationError([
+                    _("Ce nom d'utilisateur est déjà utilisé. Veuillez en choisir un autre.")
+                ])
+            if "email" in err_msg and ("unique" in err_msg or "key" in err_msg):
+                raise serializers.ValidationError([
+                    _("Cette adresse email est déjà utilisée.")
+                ])
+            if "phone" in err_msg and ("unique" in err_msg or "key" in err_msg):
+                raise serializers.ValidationError([
+                    _("Ce numéro de téléphone est déjà utilisé.")
+                ])
             raise serializers.ValidationError([
-                _("Erreur lors de la création de l'utilisateur: {}").format(str(e))
+                _("Un utilisateur avec ces informations existe déjà. Vérifiez le nom d'utilisateur, l'email ou le téléphone.")
+            ])
+        except serializers.ValidationError:
+            raise
+        except Exception:
+            raise serializers.ValidationError([
+                _("Une erreur est survenue lors de la création du compte. Veuillez réessayer ou contacter l'administrateur.")
             ])
   
 
