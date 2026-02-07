@@ -128,8 +128,10 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
-# Environments
+# Environments & secrets (ne jamais committer)
 .env
+.env.prod
+.env.*.local
 .venv
 env/
 venv/
@@ -200,7 +202,7 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
+# local env files (doublon ci-dessus : .env.prod déjà ignoré)
 .env*.local
 
 # vercel
